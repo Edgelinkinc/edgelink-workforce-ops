@@ -284,6 +284,8 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
     <span class="wkbdg" id="wkb">—</span>
     <label style="margin-left:8px">Store:</label>
     <select id="fSt" onchange="apF()"><option value="">All Stores</option></select>
+    <label>State:</label>
+    <select id="fState" onchange="apF()" style="padding:6px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:13px;background:var(--sf);outline:none"><option value="">All States</option><option value="TN">TN</option><option value="MA">MA</option><option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option></select>
     <label>Coach:</label>
     <select id="fCo" onchange="apF()"><option value="">All Coaches</option></select>
     <div class="lk-sep"></div>
@@ -697,13 +699,14 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
       <div class="srch-bar" style="margin-bottom:12px">
         <input class="srch-inp" type="text" id="assignSearch" placeholder="🔍 Search rep name or NTID…" oninput="renAssign()"/>
         <span class="srch-count" id="assignCountLbl"></span>
+        <select id="assignFilterState" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All States</option><option value="TN">TN</option><option value="MA">MA</option><option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option></select>
         <select id="assignFilterSt" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Stores</option></select>
         <select id="assignFilterCo" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Coaches</option></select>
       </div>
       <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
         <table>
           <thead><tr>
-            <th>Rep Name</th><th>NTID</th>
+            <th>Full Name</th><th>NTID</th><th>State</th><th class="gc">Last Name Override</th>
             <th class="gc">Assign Store</th><th class="gc">Coach (auto)</th>
             <th class="gc">PPD This Week</th><th class="gc">Gross $</th>
             <th class="gn">Status</th>
@@ -883,6 +886,119 @@ const DT={
 const MGR_CATS=[{k:"acts",label:"New Voice Activations"},{k:"hsi",label:"HSI Sales"},{k:"bts",label:"Tablet (BTS) Sales"},{k:"acc",label:"Accessories Target"}];
 const PIN="3833";
 
+// ── BUILT-IN REP ROSTER ──
+// Pre-loaded assignments: NTID → {coach, state, firstName, lastName, fullName}
+const REP_ROSTER = {
+  "CSO68288":{coach:"Mr. Watts",state:"TN",full:"Mariel McAllister",first:"Mariel",last:"McAllister"},
+  "OXY97908":{coach:"Rose Perez",state:"MA",full:"Richard Foster",first:"Richard",last:"Foster"},
+  "NRG89467":{coach:"Rose Perez",state:"RI",full:"Yanna Soriano",first:"Yanna",last:"Soriano"},
+  "JHQ79532":{coach:"TBD",state:"RI",full:"Saimary Hernandez",first:"Saimary",last:"Hernandez"},
+  "UAO36325":{coach:"TBD",state:"CT",full:"Gilberto Alvarez",first:"Gilberto",last:"Alvarez"},
+  "OLP39593":{coach:"Rose Perez",state:"RI",full:"Abigail Baez",first:"Abigail",last:"Baez"},
+  "PNL78523":{coach:"Rose Perez",state:"MA",full:"Amina Fellah",first:"Amina",last:"Fellah"},
+  "RMN54941":{coach:"Rose Perez",state:"MA",full:"Alex Correa",first:"Alex",last:"Correa"},
+  "IJA97207":{coach:"TBD",state:"AR",full:"Karmina Mendoza",first:"Karmina",last:"Mendoza"},
+  "XYL01111":{coach:"Rose Perez",state:"RI",full:"Milton Vega",first:"Milton",last:"Vega"},
+  "ORK31397":{coach:"TBD",state:"AR",full:"Kevin Martinez",first:"Kevin",last:"Martinez"},
+  "LZO62919":{coach:"Cheryl",state:"TN",full:"Charisma Heggie",first:"Charisma",last:"Heggie"},
+  "YGH62173":{coach:"Mr. Watts",state:"TN",full:"Marquesha Jones",first:"Marquesha",last:"Jones"},
+  "EIY40272":{coach:"Rose Perez",state:"RI",full:"Hector Marrero",first:"Hector",last:"Marrero"},
+  "UKU47592":{coach:"Ambulai Sheku",state:"RI",full:"Jaden Thomas",first:"Jaden",last:"Thomas"},
+  "HFO96739":{coach:"Rose Perez",state:"MA",full:"Stephanie Melo",first:"Stephanie",last:"Melo"},
+  "DXP98939":{coach:"TBD",state:"RI",full:"Allia Abodaher",first:"Allia",last:"Abodaher"},
+  "VQZ19656":{coach:"Manny",state:"MA",full:"Angel Rivera",first:"Angel",last:"Rivera"},
+  "USW26794":{coach:"Manny",state:"MA",full:"Justin Moniz",first:"Justin",last:"Moniz"},
+  "CLG74245":{coach:"Manny",state:"MA",full:"Napoleoa DaCruz",first:"Napoleoa",last:"DaCruz"},
+  "IAS17194":{coach:"Rose Perez",state:"RI",full:"Oscar Mendez Muniz",first:"Oscar",last:"Mendez Muniz"},
+  "GCK12676":{coach:"Mr. Watts",state:"TN",full:"Nicki Johnson",first:"Nicki",last:"Johnson"},
+  "YSQ12440":{coach:"Ambulai Sheku",state:"RI",full:"Jason Link Jr",first:"Jason",last:"Link Jr"},
+  "KHP97059":{coach:"Rose Perez",state:"RI",full:"Sabrina Morales",first:"Sabrina",last:"Morales"},
+  "LHX36141":{coach:"Mr. Watts",state:"TN",full:"Franchesca Rader",first:"Franchesca",last:"Rader"},
+  "KLZ94722":{coach:"Ambulai Sheku",state:"RI",full:"Christopher Pierre Paul",first:"Christopher",last:"Pierre Paul"},
+  "JIY63724":{coach:"Rose Perez",state:"RI",full:"Jensy Rodriguez",first:"Jensy",last:"Rodriguez"},
+  "KFE95893":{coach:"Mr. Watts",state:"TN",full:"Jermaine Underwood",first:"Jermaine",last:"Underwood"},
+  "TZO36978":{coach:"Ambulai Sheku",state:"RI",full:"Frank Alberto Merino Ceballos",first:"Frank",last:"Merino Ceballos"},
+  "XOV57998":{coach:"TBD",state:"RI",full:"Jose Monroy",first:"Jose",last:"Monroy"},
+  "VPB31735":{coach:"Manny",state:"MA",full:"Khrystyne Quasney",first:"Khrystyne",last:"Quasney"},
+  "QLO66750":{coach:"Mr. Watts",state:"TN",full:"Mirtha Melendez",first:"Mirtha",last:"Melendez"},
+  "ZYM14820":{coach:"Mr. Watts",state:"TN",full:"April Mayorga",first:"April",last:"Mayorga"},
+  "YFB29407":{coach:"Rose Perez",state:"RI",full:"Keysha Betancourt",first:"Keysha",last:"Betancourt"},
+  "KWP74551":{coach:"TBD",state:"CT",full:"Josh Landry",first:"Josh",last:"Landry"},
+  "IHS87312":{coach:"TBD",state:"CT",full:"Brendaliz Oliver Rodriguez",first:"Brendaliz",last:"Oliver Rodriguez"},
+  "KWV73873":{coach:"Joel Montero",state:"MA",full:"Hector Torres",first:"Hector",last:"Torres"},
+  "QQO06195":{coach:"Ambulai Sheku",state:"RI",full:"Brandon Mitchell",first:"Brandon",last:"Mitchell"},
+  "ZIW70174":{coach:"Joel Montero",state:"MA",full:"Armando Perez",first:"Armando",last:"Perez"},
+  "KAM65097":{coach:"Joel Montero",state:"MA",full:"Alicia Montero",first:"Alicia",last:"Montero"},
+  "ZFZ71226":{coach:"Ambulai Sheku",state:"RI",full:"Vernard Ashe",first:"Vernard",last:"Ashe"},
+  "VIT47142":{coach:"Rose Perez",state:"RI",full:"Juliana Arruda",first:"Juliana",last:"Arruda"},
+  "AQX90020":{coach:"Rose Perez",state:"MA",full:"Mariah Gonzalez",first:"Mariah",last:"Gonzalez"},
+  "QQL00950":{coach:"Joel Montero",state:"MA",full:"Jazmine Heredia",first:"Jazmine",last:"Heredia"},
+  "BWP66480":{coach:"Mr. Watts",state:"TN",full:"Shelena Hamilton",first:"Shelena",last:"Hamilton"},
+  "WQA62252":{coach:"TBD",state:"CT",full:"Alishabeth Gonzalez",first:"Alishabeth",last:"Gonzalez"},
+  "NIV04273":{coach:"Rose Perez",state:"MA",full:"Abel Burgos",first:"Abel",last:"Burgos"},
+  "BEY39099":{coach:"TBD",state:"CT",full:"Nereida Rodriguez",first:"Nereida",last:"Rodriguez"},
+  "NLE91260":{coach:"TBD",state:"CT",full:"Luis Burgos",first:"Luis",last:"Burgos"},
+  "RLR38159":{coach:"Rose Perez",state:"MA",full:"Lucmila Lopes",first:"Lucmila",last:"Lopes"},
+  "MAF14353":{coach:"TBD",state:"RI",full:"Izabella Regino",first:"Izabella",last:"Regino"},
+  "CYW45301":{coach:"TBD",state:"AR",full:"Brenda Serna",first:"Brenda",last:"Serna"},
+  "YGR92575":{coach:"Rose Perez",state:"RI",full:"Cleoty Morales",first:"Cleoty",last:"Morales"},
+  "DCZ70200":{coach:"Joel Montero",state:"MA",full:"Alma Cedeno",first:"Alma",last:"Cedeno"},
+  "PEJ56713":{coach:"Ambulai Sheku",state:"RI",full:"Kadisha Rivera",first:"Kadisha",last:"Rivera"},
+  "CZU10265":{coach:"Joel Montero",state:"MA",full:"Isaiah Caliz",first:"Isaiah",last:"Caliz"},
+  "OLY61789":{coach:"Ambulai Sheku",state:"RI",full:"Oswaldo Aranda",first:"Oswaldo",last:"Aranda"},
+  "MTX98142":{coach:"Ambulai Sheku",state:"RI",full:"Daniel Rosales",first:"Daniel",last:"Rosales"},
+  "IDF00979":{coach:"Joel Montero",state:"MA",full:"Jessica Retamar",first:"Jessica",last:"Retamar"},
+  "OZY90583":{coach:"Rose Perez",state:"RI",full:"Ana Marrero",first:"Ana",last:"Marrero"},
+  "IVS71108":{coach:"Mr. Watts",state:"TN",full:"Melissa Sloane",first:"Melissa",last:"Sloane"},
+  "CLB37831":{coach:"Manny",state:"MA",full:"Derek Tejeda",first:"Derek",last:"Tejeda"},
+  "KOW08275":{coach:"Joel Montero",state:"MA",full:"Carlos Davila",first:"Carlos",last:"Davila"},
+  "BCN44692":{coach:"Mr. Watts",state:"TN",full:"Austin Campbell",first:"Austin",last:"Campbell"},
+  "HHI23969":{coach:"Manny",state:"MA",full:"Lori Ruiz",first:"Lori",last:"Ruiz"},
+  "DDX68207":{coach:"Ambulai Sheku",state:"MA",full:"Maliek Feare",first:"Maliek",last:"Feare"},
+  "PNO47488":{coach:"Joel Montero",state:"MA",full:"Divante Lacy",first:"Divante",last:"Lacy"},
+  "QXM09669":{coach:"TBD",state:"CT",full:"Shanelle Sanchez",first:"Shanelle",last:"Sanchez"},
+  "PHM41466":{coach:"Ambulai Sheku",state:"RI",full:"Handriel Marmol",first:"Handriel",last:"Marmol"},
+  "YBT81977":{coach:"TBD",state:"RI",full:"Isiaish Valenzuela",first:"Isiaish",last:"Valenzuela"},
+  "RHF94107":{coach:"Mr. Watts",state:"TN",full:"Nathan Millsaps",first:"Nathan",last:"Millsaps"},
+  "LPI48610":{coach:"Mr. Watts",state:"TN",full:"CeCe Williamson",first:"CeCe",last:"Williamson"},
+  "NFO89908":{coach:"Cheryl",state:"TN",full:"Melicia Angel",first:"Melicia",last:"Angel"},
+  "RYL10527":{coach:"TBD",state:"CT",full:"Gamaly Gonzalez",first:"Gamaly",last:"Gonzalez"},
+  "MMM94297":{coach:"Mr. Watts",state:"TN",full:"Angela Westfield",first:"Angela",last:"Westfield"},
+  "NIK70124":{coach:"Manny",state:"MA",full:"Djeison Barbosa",first:"Djeison",last:"Barbosa"},
+  "ZHW99574":{coach:"TBD",state:"AR",full:"Jasmine Griffin",first:"Jasmine",last:"Griffin"},
+  "ZPN24125":{coach:"Cheryl",state:"TN",full:"Shanna Speed",first:"Shanna",last:"Speed"},
+  "NAW86731":{coach:"TBD",state:"CT",full:"Rashia Oates",first:"Rashia",last:"Oates"},
+  "BPW93549":{coach:"TBD",state:"CT",full:"James Garcia",first:"James",last:"Garcia"},
+  "IFZ56368":{coach:"Rose Perez",state:"MA",full:"Yarele Soler",first:"Yarele",last:"Soler"},
+  "WXJ72901":{coach:"Cheryl",state:"TN",full:"Samantha Cuevas",first:"Samantha",last:"Cuevas"},
+  "TRR15148":{coach:"Ambulai Sheku",state:"RI",full:"Hasba Hakim",first:"Hasba",last:"Hakim"},
+};
+
+// Apply roster data when CSV uploads — enriches each rep
+function applyRosterToRep(rep){
+  const ri=rep.ri;if(!ri)return;
+  const r=REP_ROSTER[ri];
+  // Apply name overrides (manually set last names)
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  const ov=overrides[ri];
+  if(r){
+    if(r.full)rep.fullName=r.full;
+    if(r.first)rep.firstName=r.first;
+    if(r.last&&!ov)rep.lastName=r.last;
+    if(r.coach&&(!rep.c||rep.c==='TBD'))rep.c=r.coach;
+    if(r.state)rep.state=r.state;
+  }
+  // Override takes priority over roster last name
+  if(ov){rep.lastName=ov;rep.fullName=((rep.firstName||rep.n||'')+' '+ov).trim();}
+}
+function applyRosterToAll(){reps.forEach(applyRosterToRep);saveSession();}
+
+// Get display name — full name if available, else CSV name
+function dispName(r){return r.fullName||r.n||'—';}
+function dispFirst(r){return r.firstName||r.n||'—';}
+function dispLast(r){return r.lastName||'';}
+
+
 let T=lT(),reps=lReps(),CBs=lCBs(),sps=lSp(),wk="",cbST="",wkLocked=false;
 let lbMode="company",sumMode="store",mgrCalcs={},coachCalcs={};
 let _sortKey="",_sortDir=-1,_renTimer=null;
@@ -966,7 +1082,7 @@ function actSp(wd){const d=wd||(wk?new Date(wk+"T12:00:00"):new Date());return s
 function cSp(r){const wd=wk?new Date(wk+"T12:00:00"):new Date();let tot=0,det=[];actSp(wd).forEach(sp=>{if(sp.sc==="store"&&sp.sv&&r.s!==sp.sv)return;if(sp.sc==="coach"&&sp.sv&&r.c!==sp.sv)return;let pay=0;if(sp.ty==="flat_per_rep")pay=sp.a;else if(sp.ty==="flat_per_unit")pay=sp.a;else if(sp.ty==="pct_gross"){const g=cBx(r.ta||0)+cAc(r.ap||0)+cPU(r).t+cMI(r.ml).p;pay=g*sp.a/100;}tot+=pay;det.push({n:sp.nm,p:pay});});return{tot,det};}
 function cRp(r){const bx=cBx(r.ta||0),ac=cAc(r.ap||0),pu=cPU(r),mi=cMI(r.ml),sp=cSp(r);const gr=bx+ac+pu.t+mi.p+sp.tot,arc=arcT(r),cb=cbT(r.n),nt=gr-arc-cb;return{bx,ac,pu,mi,sp,gr,arc,cb,nt};}
 // ── RENDER REPS ──
-function renR(fS,fC,srch){
+function renR(fS,fC,srch,fState){
   if(fS===undefined)fS=document.getElementById("fSt")?.value||"";
   if(fC===undefined)fC=document.getElementById("fCo")?.value||"";
   if(srch===undefined)srch=(document.getElementById("repSearch")?.value||"").toLowerCase().trim();
@@ -974,7 +1090,7 @@ function renR(fS,fC,srch){
   if(!reps.length){emp.style.display="block";wr.style.display="none";upK();return;}
   emp.style.display="none";wr.style.display="block";
   const fil=reps.filter(r=>{
-    if(fS&&r.s!==fS)return false;if(fC&&r.c!==fC)return false;
+    if(fS&&r.s!==fS)return false;if(fC&&r.c!==fC)return false;if(fState&&r.state!==fState)return false;
     if(srch&&!(r.n||"").toLowerCase().includes(srch)&&!(r.s||"").toLowerCase().includes(srch)&&!(r.c||"").toLowerCase().includes(srch)&&!(r.ri||"").toLowerCase().includes(srch))return false;
     return true;
   });
@@ -985,7 +1101,7 @@ function renR(fS,fC,srch){
     const bts=(r.tb||0)+(r.wt||0),al=r.al||[],at=arcT(r),ng=c.nt<0,top=(r.ta||0)>=25;
     tG+=c.gr;tA+=c.arc;tC+=c.cb;tN+=c.nt;tB+=c.bx;tAc+=c.ac;tSp+=c.sp.tot;
     return`<tr class="${ng?"row-neg":top?"row-top":""}">
-      <td><div style="font-weight:700;color:var(--se);font-size:12px">${X(r.n)}</div>${r.ri?`<div style="font-size:9px;color:var(--mu);font-family:monospace">${r.ri}</div>`:""}<div style="font-size:10px;color:var(--mu)">${X(r.s||"—")}</div><div style="font-size:10px;color:var(--mu)">${X(r.c||"—")}</div></td>
+      <td><div style="font-weight:700;color:var(--se);font-size:12px">${X(dispName(r))}</div><div style="font-size:9px;color:var(--mu)">${r.lastName?X(r.lastName):''}</div>${r.ri?`<div style="font-size:9px;color:var(--mu);font-family:monospace">${r.ri}</div>`:""}<div style="font-size:10px;color:var(--mu)">${X(r.state||'')} ${X(r.s||"—")}</div><div style="font-size:10px;color:var(--mu)">${X(r.c||"—")}</div></td>
       <td style="text-align:center;font-weight:700;color:var(--se)">${r.ta||0}</td>
       <td style="text-align:center;color:var(--mu)">${r.na||0}</td><td style="text-align:center;color:var(--mu)">${r.ra||0}</td><td style="text-align:center;color:var(--mu)">${r.up||0}</td>
       <td style="text-align:center;color:var(--mu)">${r.tb||0}</td><td style="text-align:center;color:var(--mu)">${r.wt||0}</td><td style="text-align:center;font-weight:700">${bts}</td>
@@ -1121,7 +1237,7 @@ function g(id){return document.getElementById(id)?.value||"";}
 function uR(i,f,v){reps[i][f]=v;saveSession();clearTimeout(_renTimer);_renTimer=setTimeout(()=>renR(),120);}
 function rmR(i){const n=reps[i].n;reps.splice(i,1);CBs=CBs.filter(c=>c.rp!==n);saveSession();renR();renCBL();}
 function clrAll(){if(!confirm("Clear all rep data and chargebacks? Cannot be undone."))return;reps=[];CBs=[];saveSession();renR();renCBL();}
-function apF(){const fS=document.getElementById("fSt")?.value||"",fC=document.getElementById("fCo")?.value||"",srch=(document.getElementById("repSearch")?.value||"").toLowerCase().trim();renR(fS,fC,srch);}
+function apF(){const fS=document.getElementById("fSt")?.value||"",fC=document.getElementById("fCo")?.value||"",fState=document.getElementById("fState")?.value||"",srch=(document.getElementById("repSearch")?.value||"").toLowerCase().trim();renR(fS,fC,srch,fState);}
 function sortReps(key){if(_sortKey===key)_sortDir*=-1;else{_sortKey=key;_sortDir=-1;}if(key==="gr"||key==="nt"){reps.sort((a,b)=>{const ca=cRp(a),cb=cRp(b);return(ca[key]-cb[key])*_sortDir;});}else{reps.sort((a,b)=>{const av=typeof a[key]==="number"?a[key]:(a[key]||"").toLowerCase();const bv=typeof b[key]==="number"?b[key]:(b[key]||"").toLowerCase();return av<bv?-_sortDir:av>bv?_sortDir:0;});}renR();}
 
 // ── ARCADE ──
@@ -1200,6 +1316,7 @@ function pC(txt,src,fn){
     }
   }
   setDZ(true);saveSession();renR();document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
+  applyRosterToAll();
   st2(fn+" - "+ad+" added, "+up+" updated.","ok");
 }
 function csvSp(l){const r=[];let c="",q=false;for(const ch of l){if(ch==='"'){q=!q;continue;}if(ch===","&&!q){r.push(c);c="";continue;}c+=ch;}r.push(c);return r;}
@@ -1217,7 +1334,7 @@ function loadSmp(){
     {n:"Renee B.",ri:"KAM65097",s:"MA-STATE STREET",c:"Joel Montero",ta:8,na:5,ra:2,up:1,tb:0,wt:0,hs:0,af:0,hr:30,ap:220,mb:5,ml:1,al:[]},
   ];
   CBs=[{id:101,rp:"Tina W.",st:"MA-COGGESHALL",tp:"Deposit Shortage",a:25,by:"HR",rf:"DS-001",nt:"Register short",at:"4/1/2026"},{id:102,rp:"Jess P.",st:"TN-WEST MARKET",tp:"MIM Cancellation",a:20,by:"HR",rf:"MIM-CB-1",nt:"Cancelled",at:"4/2/2026"}];
-  saveSession();renR();renCBL();tst2("Sample data loaded.","ok");
+  applyRosterToAll();saveSession();renR();renCBL();tst2("Sample data loaded.","ok");
 }
 
 // ── EXPORT ──
@@ -1971,6 +2088,7 @@ function renAssign(){
   const srch=(document.getElementById('assignSearch')?.value||'').toLowerCase();
   const fSt=document.getElementById('assignFilterSt')?.value||'';
   const fCo=document.getElementById('assignFilterCo')?.value||'';
+  const fStateA=document.getElementById('assignFilterState')?.value||'';
   const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
   // Build rep list: uploaded reps + any NTIDs in assignments not in reps
   let rows=[...reps];
@@ -1979,15 +2097,21 @@ function renAssign(){
     if(srch&&!(r.n||'').toLowerCase().includes(srch)&&!(r.ri||'').toLowerCase().includes(srch))return false;
     if(fSt&&r.s!==fSt)return false;
     if(fCo&&r.c!==fCo)return false;
+    if(fStateA&&r.state!==fStateA)return false;
     return true;
   });
   if(lbl)lbl.textContent=fil.length+' reps';
   body.innerHTML=fil.map((r,i)=>{
     const c=cRp(r),asgn=assigns[r.ri]||assigns[r.n]||null;
     const assigned=!!r.s;
+    const rInfo=REP_ROSTER[r.ri]||{};
     return`<tr>
-      <td style="font-weight:700;color:var(--se)">${X(r.n)}</td>
+      <td style="font-weight:700;color:var(--se)">${X(dispName(r))}<div style="font-size:10px;color:var(--mu)">${X(r.firstName||r.n||'')}</div></td>
       <td style="font-family:monospace;font-size:11px;color:var(--mu)">${r.ri||'—'}</td>
+      <td style="text-align:center"><span class="bdg bt2">${r.state||rInfo.state||'—'}</span></td>
+      <td class="edit-cell" style="min-width:130px">
+        <input type="text" value="${r.lastName||rInfo.last||''}" placeholder="Last name" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRepLastName('${r.ri||r.n}',this.value,${reps.indexOf(r)}))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+      </td>
       <td class="edit-cell" style="min-width:220px">
         <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>applyAssign('${r.ri||r.n}',this.value,${reps.indexOf(r)}))">
           <option value="">${r.s||'— Unassigned —'}</option>
@@ -2022,6 +2146,20 @@ function bulkAssignAll(){
   if(!confirm('Assign all '+fil.length+' filtered reps to '+store+'?'))return;
   fil.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
   saveSession();renAssign();renR();tst2(fil.length+' reps assigned to '+store,'ok');
+}
+function updRepLastName(key,lastName,repIdx){
+  lastName=lastName.trim();
+  // Save to roster override in localStorage
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  overrides[key]=lastName;
+  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
+  // Update rep in memory
+  if(repIdx>=0&&repIdx<reps.length){
+    reps[repIdx].lastName=lastName;
+    const fn=reps[repIdx].firstName||reps[repIdx].n||'';
+    reps[repIdx].fullName=(fn+' '+lastName).trim();
+  }
+  saveSession();renR();tst2('Last name saved.','ok');
 }
 function expAssignCSV(){
   const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
