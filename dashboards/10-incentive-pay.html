@@ -274,6 +274,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
   <div class="si" data-page="pg-history" onclick="goPage('pg-history',this)"><span class="ic">📋</span>History</div>
   <div class="sg">Navigation</div>
   <div class="si" data-page="pg-assign" onclick="goPage('pg-assign',this)"><span class="ic">🏪</span>Store Assignments</div>
+  <div class="si" data-page="pg-roster" onclick="requirePin(()=>{goPage('pg-roster',this);renRoster();})"><span class="ic">👥</span>Rep Roster</div>
   <div class="si" onclick="location.href='index.html'"><span class="ic">🏠</span>Command Center</div>
 </nav>
 <main class="content">
@@ -332,7 +333,6 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
           <button class="btn bghost sm" onclick="requirePin(()=>document.getElementById('dzM').querySelector('input').click())">⬆ Metro CSV</button>
           <button class="btn bp sm" onclick="printAllStubs()">🖨️ Print All</button>
           <button class="btn bok sm" onclick="doExp()">⬇ Payroll CSV</button>
-          <button class="btn bghost sm" onclick="requirePin(loadSmp)">▶ Sample</button>
         </div>
       </div>
       <div class="card-body">
@@ -353,7 +353,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
           </div>
         </div>
         <div class="spiff-ban" id="spb"><div class="spiff-ban-t">⚡ Active Spiffs This Week — Stack on All Payouts</div><div class="spiff-pills" id="spp"></div></div>
-        <div class="emp" id="re"><div class="emp-ic">📂</div><div class="emp-t">Drop CSV files above to get started</div><div class="emp-s">Upload RTPOS and Metro exports. All calculations are automatic.</div><div style="margin-top:14px"><button class="btn bp" onclick="requirePin(loadSmp)">▶ Load Sample Data</button></div></div>
+        <div class="emp" id="re"><div class="emp-ic">📂</div><div class="emp-t">Drop CSV files above to get started</div><div class="emp-s">Upload RTPOS and Metro exports. All calculations are automatic.</div></div>
         <div id="rw" style="display:none">
           <div class="srch-bar">
             <input class="srch-inp" type="text" id="repSearch" placeholder="🔍 Search rep, store, coach, NTID…" oninput="apF()"/>
@@ -683,7 +683,101 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
   </div>
 
 </main></div>
-<div class="page" id="pg-assign">
+<div class="page" id="pg-roster">
+    <div class="card"><div class="card-hdr card-hdr-dk">
+      <div class="card-title">👥 Rep Roster — Admin Only</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn bghost sm" onclick="expRosterCSV()">⬇ Export CSV</button>
+        <button class="btn bghost sm" onclick="requirePin(addRosterRep)">+ Add Rep</button>
+        <button class="btn bghost sm" onclick="requirePin(saveRosterAll)">💾 Save All</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- SUMMARY STRIP -->
+      <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:14px">
+        <div class="kc"><div class="kl">Total Reps</div><div class="kv" id="rosterTotal">83</div><div class="ks">all coaches</div></div>
+        <div class="kc kcp"><div class="kl">Rose Perez</div><div class="kv" id="rosterRP">—</div><div class="ks">reps</div></div>
+        <div class="kc kcg"><div class="kl">Mr. Watts</div><div class="kv" id="rosterMW">—</div><div class="ks">reps</div></div>
+        <div class="kc kct"><div class="kl">Ambulai Sheku</div><div class="kv" id="rosterAS">—</div><div class="ks">reps</div></div>
+        <div class="kc kca"><div class="kl">Joel Montero</div><div class="kv" id="rosterJM">—</div><div class="ks">reps</div></div>
+        <div class="kc kcw"><div class="kl">Manny</div><div class="kv" id="rosterMN">—</div><div class="ks">reps</div></div>
+        <div class="kc"><div class="kl">Cheryl</div><div class="kv" id="rosterCH">—</div><div class="ks">reps</div></div>
+        <div class="kc kcr"><div class="kl">TBD</div><div class="kv" id="rosterTBD">—</div><div class="ks">unassigned</div></div>
+      </div>
+      <!-- FILTERS -->
+      <div class="srch-bar" style="margin-bottom:12px">
+        <input class="srch-inp" type="text" id="rosterSearch" placeholder="🔍 Search name, NTID, coach, state…" oninput="renRoster()"/>
+        <select id="rosterFState" onchange="renRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+          <option value="">All States</option>
+          <option value="TN">TN</option><option value="MA">MA</option>
+          <option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option>
+        </select>
+        <select id="rosterFCoach" onchange="renRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+          <option value="">All Coaches</option>
+          <option value="Ambulai Sheku">Ambulai Sheku</option>
+          <option value="Cheryl">Cheryl</option>
+          <option value="Joel Montero">Joel Montero</option>
+          <option value="Manny">Manny</option>
+          <option value="Mr. Watts">Mr. Watts</option>
+          <option value="Rose Perez">Rose Perez</option>
+          <option value="TBD">TBD</option>
+        </select>
+        <span class="srch-count" id="rosterCountLbl"></span>
+      </div>
+      <!-- ROSTER TABLE -->
+      <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
+        <table>
+          <thead><tr>
+            <th style="min-width:40px">#</th>
+            <th style="min-width:180px">Full Name</th>
+            <th style="min-width:100px">NTID</th>
+            <th style="min-width:60px">State</th>
+            <th class="gc" style="min-width:160px">Coach</th>
+            <th class="gc" style="min-width:220px">Store Assignment</th>
+            <th class="gc" style="min-width:120px">First Name</th>
+            <th class="gc" style="min-width:120px">Last Name</th>
+            <th class="gn" style="min-width:80px">Actions</th>
+          </tr></thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+      </div>
+      <!-- ADD REP FORM -->
+      <div id="addRosterForm" style="display:none;margin-top:16px;background:#FFF0F7;border:1px solid var(--pr);border-radius:10px;padding:16px">
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--pr);margin-bottom:12px">+ Add New Rep</div>
+        <div class="fg" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:10px">
+          <div class="fi"><label>NTID</label><input type="text" id="newNTID" placeholder="e.g. ABC12345"/></div>
+          <div class="fi"><label>First Name</label><input type="text" id="newFirst" placeholder="First"/></div>
+          <div class="fi"><label>Last Name</label><input type="text" id="newLast" placeholder="Last"/></div>
+          <div class="fi"><label>State</label>
+            <select id="newState">
+              <option value="">Select…</option>
+              <option value="TN">TN</option><option value="MA">MA</option>
+              <option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option>
+            </select>
+          </div>
+          <div class="fi"><label>Coach</label>
+            <select id="newCoach">
+              <option value="TBD">TBD</option>
+              <option value="Ambulai Sheku">Ambulai Sheku</option>
+              <option value="Cheryl">Cheryl</option>
+              <option value="Joel Montero">Joel Montero</option>
+              <option value="Manny">Manny</option>
+              <option value="Mr. Watts">Mr. Watts</option>
+              <option value="Rose Perez">Rose Perez</option>
+            </select>
+          </div>
+          <div class="fi"><label>Store</label><select id="newRosterStore"><option value="">Select Store…</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn bp sm" onclick="requirePin(saveNewRosterRep)">+ Add Rep</button>
+          <button class="btn bo sm" onclick="document.getElementById('addRosterForm').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+
+  <div class="page" id="pg-assign">
     <div class="card"><div class="card-hdr card-hdr-dk">
       <div class="card-title">🏪 Store Assignments</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1036,6 +1130,7 @@ function goPage(id,el){
   else{const si=document.querySelector('[data-page="'+id+'"]');if(si)si.classList.add("active");}
   sessionStorage.setItem("wfo_page",id);
   if(id==="pg-leaderboard")renLB();
+  if(id==="pg-roster")renRoster();
   if(id==="pg-summary")renSum();
   if(id==="pg-managers")renMgrOverview();
   if(id==="pg-coaches")renCoachOv();
@@ -1321,21 +1416,6 @@ function pC(txt,src,fn){
 }
 function csvSp(l){const r=[];let c="",q=false;for(const ch of l){if(ch==='"'){q=!q;continue;}if(ch===","&&!q){r.push(c);c="";continue;}c+=ch;}r.push(c);return r;}
 
-// ── SAMPLE DATA ──
-function loadSmp(){
-  reps=[
-    {n:"Marcus D.",ri:"UAO36325",s:"TN-MORRISTOWN",c:"Mr. Watts",ta:27,na:18,ra:6,up:3,tb:2,wt:1,hs:2,af:3,hr:38,ap:1620,mb:8,ml:3,al:[{id:1,dt:"2026-04-01",ln:2,a:45,nt:"MIM"},{id:2,dt:"2026-04-03",ln:1,a:20,nt:"MIM"}]},
-    {n:"Layla C.",ri:"DXP98939",s:"RI-BROAD ST",c:"Rose Perez",ta:19,na:12,ra:4,up:3,tb:1,wt:0,hs:1,af:2,hr:40,ap:880,mb:7,ml:2,al:[{id:3,dt:"2026-04-02",ln:2,a:45,nt:"MIM"}]},
-    {n:"Devon R.",ri:"NRG89467",s:"MA-HOLYOKE",c:"Joel Montero",ta:14,na:9,ra:3,up:2,tb:0,wt:2,hs:0,af:1,hr:36,ap:520,mb:6,ml:4,al:[]},
-    {n:"Tina W.",ri:"YBT81977",s:"MA-COGGESHALL",c:"Manny",ta:9,na:6,ra:2,up:1,tb:1,wt:0,hs:0,af:0,hr:32,ap:310,mb:4,ml:1,al:[]},
-    {n:"Carlos M.",ri:"KOW08275",s:"RI-COVENTRY",c:"Ambulai Sheku",ta:22,na:14,ra:5,up:3,tb:2,wt:1,hs:3,af:4,hr:40,ap:1100,mb:9,ml:5,al:[{id:4,dt:"2026-04-01",ln:3,a:75,nt:"MIM"}]},
-    {n:"Jess P.",ri:"OLP39593",s:"TN-WEST MARKET",c:"Cheryl",ta:12,na:8,ra:2,up:2,tb:0,wt:0,hs:1,af:1,hr:35,ap:490,mb:3,ml:2,al:[]},
-    {n:"Ahmad T.",ri:"CSO68288",s:"CT-BUCKLAND HILLS MALL",c:"TBD",ta:25,na:16,ra:6,up:3,tb:3,wt:2,hs:2,af:5,hr:40,ap:1800,mb:10,ml:6,al:[{id:5,dt:"2026-04-02",ln:4,a:110,nt:"MIM"}]},
-    {n:"Renee B.",ri:"KAM65097",s:"MA-STATE STREET",c:"Joel Montero",ta:8,na:5,ra:2,up:1,tb:0,wt:0,hs:0,af:0,hr:30,ap:220,mb:5,ml:1,al:[]},
-  ];
-  CBs=[{id:101,rp:"Tina W.",st:"MA-COGGESHALL",tp:"Deposit Shortage",a:25,by:"HR",rf:"DS-001",nt:"Register short",at:"4/1/2026"},{id:102,rp:"Jess P.",st:"TN-WEST MARKET",tp:"MIM Cancellation",a:20,by:"HR",rf:"MIM-CB-1",nt:"Cancelled",at:"4/2/2026"}];
-  applyRosterToAll();saveSession();renR();renCBL();tst2("Sample data loaded.","ok");
-}
 
 // ── EXPORT ──
 function doExp(){
@@ -2459,6 +2539,195 @@ function expCoachSheet(){
   dlC([hd,...rows],'WFO_CoachActuals_'+mn+'.csv');tst2('Exported.','ok');
 }
 function printCoachSheet(){tst2('Use browser print — Ctrl+P','wn');}
+
+// ══════════════════════════════════════════════════════
+// REP ROSTER PAGE — Admin Only
+// ══════════════════════════════════════════════════════
+
+// Get merged roster — REP_ROSTER + any overrides + uploaded rep data
+function getMergedRoster(){
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  // Start from REP_ROSTER as base
+  const merged=Object.entries(REP_ROSTER).map(([ntid,r])=>{
+    const ov=overrides[ntid]||null;
+    const asgn=assigns[ntid]||null;
+    const uploadedRep=reps.find(x=>x.ri===ntid);
+    return{
+      ntid,
+      first:r.first,
+      last:ov||r.last,
+      full:ov?(r.first+' '+ov).trim():r.full,
+      state:r.state,
+      coach:asgn?.c||r.coach,
+      store:asgn?.s||uploadedRep?.s||'',
+      inCSV:!!uploadedRep,
+      ppd:uploadedRep?.ta||0,
+      gross:uploadedRep?cRp(uploadedRep).gr:0,
+      source:'roster'
+    };
+  });
+  // Add any uploaded reps not in REP_ROSTER
+  reps.forEach(r=>{
+    if(!r.ri||REP_ROSTER[r.ri])return;
+    const ov=overrides[r.ri]||overrides[r.n]||null;
+    merged.push({
+      ntid:r.ri||'',
+      first:r.firstName||r.n||'',
+      last:ov||r.lastName||'',
+      full:r.fullName||r.n||'',
+      state:r.state||'',
+      coach:r.c||'TBD',
+      store:r.s||'',
+      inCSV:true,
+      ppd:r.ta||0,
+      gross:cRp(r).gr,
+      source:'csv'
+    });
+  });
+  return merged;
+}
+
+function renRoster(){
+  if(!_pinUnlocked){
+    const body=document.getElementById('rosterBody');
+    if(body)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:8px">🔒</div><div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--se);margin-bottom:6px">Admin Access Required</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">Enter your PIN to view the rep roster</div><button class="btn bp" onclick="requirePin(renRoster)">Enter PIN</button></td></tr>`;
+    return;
+  }
+  const srch=(document.getElementById('rosterSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('rosterFState')?.value||'';
+  const fCoach=document.getElementById('rosterFCoach')?.value||'';
+  const all=getMergedRoster();
+
+  // Update summary counts
+  const coachCounts={};
+  all.forEach(r=>{const c=r.coach||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  upd('rosterTotal',all.length);
+  upd('rosterRP',coachCounts['Rose Perez']||0);
+  upd('rosterMW',coachCounts['Mr. Watts']||0);
+  upd('rosterAS',coachCounts['Ambulai Sheku']||0);
+  upd('rosterJM',coachCounts['Joel Montero']||0);
+  upd('rosterMN',coachCounts['Manny']||0);
+  upd('rosterCH',coachCounts['Cheryl']||0);
+  upd('rosterTBD',coachCounts['TBD']||0);
+
+  const fil=all.filter(r=>{
+    if(fState&&r.state!==fState)return false;
+    if(fCoach&&r.coach!==fCoach)return false;
+    if(srch&&!(r.full||'').toLowerCase().includes(srch)&&!(r.ntid||'').toLowerCase().includes(srch)&&!(r.coach||'').toLowerCase().includes(srch)&&!(r.state||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+
+  const lbl=document.getElementById('rosterCountLbl');
+  if(lbl)lbl.textContent=fil.length+' reps'+(srch||fState||fCoach?' (filtered)':'');
+
+  const body=document.getElementById('rosterBody');if(!body)return;
+  body.innerHTML=fil.map((r,i)=>{
+    const coachColors={'Rose Perez':'bt1','Mr. Watts':'bt3','Ambulai Sheku':'bt2','Joel Montero':'bt4','Manny':'bok2','Cheryl':'btop','TBD':'bno'};
+    const cc=coachColors[r.coach]||'bno';
+    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 10px;color:var(--mu);font-size:11px">${i+1}</td>
+      <td style="padding:7px 10px">
+        <div style="font-weight:700;color:var(--se);font-size:13px">${X(r.full||'—')}</div>
+        ${r.inCSV?`<span class="bdg bok2" style="font-size:8px">✓ In CSV</span>`:`<span class="bdg bno" style="font-size:8px">Not uploaded</span>`}
+      </td>
+      <td style="padding:7px 10px;font-family:monospace;font-size:12px;color:var(--mu)">${X(r.ntid||'—')}</td>
+      <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||'—'}</span></td>
+      <td style="padding:5px 8px">
+        <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterCoach('${r.ntid}',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">
+          ${['Ambulai Sheku','Cheryl','Joel Montero','Manny','Mr. Watts','Rose Perez','TBD'].map(c=>`<option value="${c}"${r.coach===c?' selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:5px 8px">
+        <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterStore('${r.ntid}',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">
+          <option value="">${r.store||'— Unassigned —'}</option>
+          ${SR.map(s=>`<option value="${s.s}"${r.store===s.s?' selected':''}>${s.s}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:5px 8px">
+        <input type="text" value="${X(r.first||'')}" placeholder="First" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterName('${r.ntid}','first',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+      </td>
+      <td style="padding:5px 8px">
+        <input type="text" value="${X(r.last||'')}" placeholder="Last" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterName('${r.ntid}','last',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+      </td>
+      <td style="padding:5px 8px;text-align:center">
+        ${r.ppd>0?`<div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;color:var(--pr)">$${r.gross.toFixed(0)}</div><div style="font-size:9px;color:var(--mu)">${r.ppd} PPD</div>`:'<span style="font-size:10px;color:var(--mu)">No data</span>'}
+      </td>
+    </tr>`;
+  }).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps match filter.</td></tr>`;
+}
+
+function updRosterCoach(ntid,coach){
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  if(!assigns[ntid])assigns[ntid]={};
+  assigns[ntid].c=coach;
+  localStorage.setItem('wfo_assign',JSON.stringify(assigns));
+  // Update in reps array
+  const rep=reps.find(r=>r.ri===ntid);if(rep)rep.c=coach;
+  saveSession();renRoster();renR();tst2('Coach updated.','ok');
+}
+function updRosterStore(ntid,store){
+  const coach=setAssignment(ntid,store);
+  const rep=reps.find(r=>r.ri===ntid);
+  if(rep){rep.s=store;rep.c=coach;}
+  saveSession();renRoster();renR();tst2('Store updated.','ok');
+}
+function updRosterName(ntid,field,val){
+  val=val.trim();
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  if(!overrides[ntid])overrides[ntid]={};
+  if(typeof overrides[ntid]==='string')overrides[ntid]={last:overrides[ntid]};
+  overrides[ntid][field]=val;
+  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
+  // Update rep in memory
+  const rep=reps.find(r=>r.ri===ntid);
+  if(rep){
+    if(field==='first')rep.firstName=val;
+    if(field==='last')rep.lastName=val;
+    rep.fullName=((rep.firstName||rep.n||'')+' '+(rep.lastName||'')).trim();
+  }
+  saveSession();renRoster();renR();tst2('Name updated.','ok');
+}
+function saveRosterAll(){tst2('All roster changes auto-save as you edit.','ok');}
+function addRosterRep(){
+  // Populate store dropdown
+  const s=document.getElementById('newRosterStore');
+  if(s&&s.options.length<=1){SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}
+  document.getElementById('addRosterForm').style.display='block';
+}
+function saveNewRosterRep(){
+  const ntid=document.getElementById('newNTID').value.trim();
+  const first=document.getElementById('newFirst').value.trim();
+  const last=document.getElementById('newLast').value.trim();
+  const state=document.getElementById('newState').value;
+  const coach=document.getElementById('newCoach').value;
+  const store=document.getElementById('newRosterStore').value;
+  if(!ntid){tst2('Enter NTID.','er');return;}
+  if(!first){tst2('Enter first name.','er');return;}
+  // Add to REP_ROSTER dynamically
+  REP_ROSTER[ntid]={coach,state,full:(first+' '+last).trim(),first,last};
+  // Save assignment
+  if(store)setAssignment(ntid,store);
+  // Save name override
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  overrides[ntid]={first,last};
+  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
+  // Clear form
+  ['newNTID','newFirst','newLast'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('newState').value='';
+  document.getElementById('newCoach').value='TBD';
+  document.getElementById('newRosterStore').value='';
+  document.getElementById('addRosterForm').style.display='none';
+  renRoster();tst2('Rep added to roster.','ok');
+}
+function expRosterCSV(){
+  const all=getMergedRoster();
+  const hd=['#','NTID','Full Name','First','Last','State','Coach','Store','In CSV','PPD','Gross $'];
+  const rows=all.map((r,i)=>[i+1,r.ntid,r.full,r.first,r.last,r.state,r.coach,r.store,r.inCSV?'Yes':'No',r.ppd,r.gross.toFixed(2)]);
+  dlC([hd,...rows],'WFO_RepRoster.csv');tst2('Roster exported.','ok');
+}
 
 </script>
 </body>
