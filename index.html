@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workforce Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --surface: #ffffff;
+    --surface2: #faf0f6;
+    --border: #edd5e8;
+    --border2: #d9a8ce;
+    --magenta: #e2007a;
+    --magenta2: #c4006b;
+    --magenta3: #f0339a;
+    --magenta-light: #fce8f3;
+    --magenta-pale: #fdf3fa;
+    --purple: #7b2d8b;
+    --purple2: #6a2478;
+    --purple3: #9b3ab0;
+    --purple-light: #f2e8f6;
+    --purple-pale: #f8f2fb;
+    --text: #1a0a1e;
+    --text2: #5c3a66;
+    --text3: #a07aaa;
+    --accent: var(--magenta);
+    --accent-light: var(--magenta-light);
+    --green: #1a7a4a;
+    --green-bg: #e6f5ed;
+    --yellow: #7a5200;
+    --yellow-bg: #fef8e6;
+    --orange: #c45000;
+    --orange-bg: #fef2e6;
+    --red: #c41a1a;
+    --red-bg: #fef0f0;
+    --blue: #1a4ec4;
+    --blue-bg: #eef3fe;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(226,0,122,0.06), 0 1px 2px rgba(123,45,139,0.04);
+    --shadow-md: 0 4px 16px rgba(226,0,122,0.10), 0 2px 6px rgba(123,45,139,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TOP NAV ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(135deg, #1a0a1e 0%, #3a0a4a 50%, #1a0a2e 100%);
+    border-bottom: 3px solid var(--magenta);
+    padding: 0 28px;
+    display: flex; align-items: center; gap: 0;
+    height: 56px;
+    box-shadow: 0 3px 20px rgba(226,0,122,0.30);
+  }
+  .topbar-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800; font-size: 18px;
+    color: #ffffff;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-right: 36px;
+    white-space: nowrap;
+  }
+  .topbar-brand span { color: var(--magenta3); }
+  .nav-tabs { display: flex; gap: 2px; flex: 1; }
+  .nav-tab {
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none; background: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .nav-tab:hover { color: rgba(255,255,255,0.9); background: rgba(226,0,122,0.15); }
+  .nav-tab.active {
+    color: #ffffff;
+    background: var(--magenta);
+    box-shadow: 0 0 12px rgba(226,0,122,0.4);
+  }
+  .nav-tab .tab-dot {
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 50%; margin-right: 6px; vertical-align: middle;
+    background: currentColor; opacity: 0.8;
+  }
+  .topbar-filters {
+    display: flex; align-items: center; gap: 10px; margin-left: auto;
+  }
+  .filter-select {
+    background: rgba(226,0,122,0.15); border: 1px solid rgba(226,0,122,0.35);
+    color: #ffffff; padding: 6px 10px; border-radius: 6px;
+    font-size: 12px; font-family: 'Barlow', sans-serif; font-weight: 500;
+    cursor: pointer; outline: none; transition: all 0.15s;
+  }
+  .filter-select option { background: #2a0a38; color: #fff; }
+  .filter-select:focus { border-color: var(--magenta3); background: rgba(226,0,122,0.22); }
+  .compare-sep {
+    color: rgba(255,255,255,0.4); font-size: 11px; font-weight:700; padding: 0 2px; user-select:none;
+  }
+  .week-select-a { border-color: rgba(226,0,122,0.6) !important; }
+  .week-select-b { border-color: rgba(123,45,139,0.6) !important; }
+  .compare-badge {
+    background: linear-gradient(135deg,#e2007a,#7b2d8b); color:#fff;
+    font-size:10px; font-weight:700; padding:3px 8px; border-radius:12px;
+    letter-spacing:0.5px; white-space:nowrap;
+  }
+  .cmp-a { color: #e2007a !important; font-weight:700 !important; }
+  .cmp-b { color: #7b2d8b !important; font-weight:700 !important; }
+  .cmp-a-bg { background: rgba(226,0,122,0.08) !important; }
+  .cmp-b-bg { background: rgba(123,45,139,0.08) !important; }
+  .cmp-diff-pos { color: #c41a1a !important; font-weight:700; }
+  .cmp-diff-neg { color: #1a7a4a !important; font-weight:700; }
+  td.compare-diff { font-size:11px; font-family:'DM Mono',monospace; }
+
+  /* ── LAYOUT ── */
+  .page { display: none; padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
+  .page.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+  /* ── KPI STRIP ── */
+  .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  .kpi:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .kpi::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--kpi-color, var(--magenta));
+  }
+  .kpi::after {
+    content: ''; position: absolute; bottom: 0; right: 0;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--kpi-color, var(--magenta));
+    opacity: 0.04; transform: translate(20px, 20px);
+  }
+  .kpi-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .kpi-value { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 5px; font-weight: 500; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-13 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 16px; }
+  .grid-31 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .span-2 { grid-column: span 2; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    padding: 14px 18px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(to right, var(--magenta-pale), var(--purple-pale));
+  }
+  .card-title {
+    font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--purple); letter-spacing: 0.02em; text-transform: uppercase;
+  }
+  .card-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 20px; font-family: 'DM Mono', monospace;
+  }
+  .card-body { padding: 16px 18px; }
+  .chart-wrap { padding: 12px 16px 16px; position: relative; background: #fff; }
+
+  /* ── TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .data-table th {
+    text-align: left; padding: 9px 12px;
+    font-size: 10px; font-weight: 700; color: var(--purple);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 2px solid var(--border);
+    position: sticky; top: 0;
+    background: linear-gradient(to right, var(--magenta-pale), var(--purple-pale));
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  .data-table th:hover { color: var(--magenta); }
+  .data-table td {
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    color: var(--text2); vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--magenta-light); color: var(--text); }
+  .table-scroll { max-height: 340px; overflow-y: auto; }
+  .table-scroll::-webkit-scrollbar { width: 4px; }
+  .table-scroll::-webkit-scrollbar-thumb { background: var(--magenta3); border-radius: 2px; opacity: 0.3; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; font-family: 'DM Mono', monospace;
+    white-space: nowrap; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge-active    { background: var(--green-bg);   color: var(--green); }
+  .badge-critical  { background: var(--red-bg);     color: var(--red); }
+  .badge-below     { background: var(--yellow-bg);  color: var(--yellow); }
+  .badge-sporadic  { background: var(--orange-bg);  color: var(--orange); }
+  .badge-decline   { background: var(--purple-light); color: var(--purple); }
+  .badge-solo      { background: var(--blue-bg);    color: var(--blue); }
+  .badge-missed    { background: var(--red-bg);     color: var(--red); }
+  .badge-ok        { background: var(--green-bg);   color: var(--green); }
+  .badge-ot-crit   { background: var(--red-bg);     color: var(--red); }
+  .badge-ot-high   { background: var(--orange-bg);  color: var(--orange); }
+  .badge-ot-mod    { background: var(--yellow-bg);  color: var(--yellow); }
+  .badge-ot-low    { background: var(--green-bg);   color: var(--green); }
+
+  /* ── TREND ARROW ── */
+  .trend { font-size: 11px; font-weight: 700; }
+  .trend.up   { color: var(--red); }
+  .trend.down { color: var(--green); }
+  .trend.flat { color: var(--text3); }
+
+  /* ── SEARCH ── */
+  .search-wrap { position: relative; }
+  .search-input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 7px 12px 7px 30px;
+    border-radius: 6px; font-size: 13px; font-family: 'Barlow', sans-serif;
+    outline: none; transition: all 0.2s;
+  }
+  .search-input::placeholder { color: var(--text3); }
+  .search-input:focus { border-color: var(--magenta); box-shadow: 0 0 0 3px rgba(226,0,122,0.10); }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 13px; pointer-events: none;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { display: flex; align-items: center; gap: 8px; }
+  .progress-bar { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .progress-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text3); width: 36px; text-align: right; flex-shrink: 0; }
+
+  /* ── COACH TAG ── */
+  .coach-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; font-family: 'DM Mono', monospace;
+    border: 1px solid; white-space: nowrap; text-transform: uppercase;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  /* ── OT BAR ── */
+  .ot-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .ot-row:last-child { border-bottom: none; }
+  .ot-loc { font-size: 12px; font-weight: 600; width: 170px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text2); }
+  .ot-bar-wrap { flex: 1; }
+  .ot-hrs { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); width: 44px; text-align: right; flex-shrink: 0; }
+
+  /* ── LUNCH STATS ── */
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-name { font-size: 12.5px; color: var(--text2); }
+  .stat-val { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600; color: var(--purple); }
+
+  /* ── WEEK TOGGLE ── */
+  .week-toggle { display: flex; gap: 4px; }
+  .wk-btn {
+    font-size: 10px; padding: 4px 10px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text3);
+    cursor: pointer; font-family: 'DM Mono', monospace; font-weight: 600;
+    transition: all 0.15s; text-transform: uppercase;
+  }
+  .wk-btn:hover { border-color: var(--magenta); color: var(--magenta); }
+  .wk-btn.on { background: var(--magenta); border-color: var(--magenta); color: #ffffff; box-shadow: 0 2px 8px rgba(226,0,122,0.3); }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; }
+
+  /* ── DIVIDER ACCENT ── */
+  .page-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .page-header-line {
+    flex: 1; height: 2px;
+    background: linear-gradient(to right, var(--magenta), var(--purple), transparent);
+  }
+
+  /* ── EXECUTIVE SUMMARY ── */
+  .exec-hero {
+    background: linear-gradient(135deg, rgba(226,0,122,0.12), rgba(123,45,139,0.08));
+    border: 1px solid rgba(226,0,122,0.2); border-radius: 14px;
+    padding: 32px 36px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  .exec-hero-left { flex: 1; }
+  .exec-hero-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--magenta); text-transform: uppercase; margin-bottom: 6px; }
+  .exec-hero-hrs { font-size: 64px; font-weight: 800; color: var(--text); line-height: 1; font-family: 'Barlow Condensed', sans-serif; }
+  .exec-hero-sub { font-size: 14px; color: var(--text2); margin-top: 8px; }
+  .exec-hero-wow { font-size: 28px; font-weight: 800; padding: 12px 24px; border-radius: 10px; text-align: center; min-width: 140px; }
+  .exec-scorecard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .exec-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 24px; position: relative; overflow: hidden;
+  }
+  .exec-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent-color, var(--magenta));
+  }
+  .exec-card-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
+  .exec-card-value { font-size: 36px; font-weight: 800; color: var(--accent-color, var(--text)); font-family: 'Barlow Condensed', sans-serif; line-height: 1; }
+  .exec-card-sub { font-size: 12px; color: var(--text3); margin-top: 6px; }
+  .exec-card-flag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; display: inline-block; margin-top: 6px; }
+  .exec-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .exec-alert-list { list-style: none; padding: 0; margin: 0; }
+  .exec-alert-list li {
+    padding: 10px 14px; border-radius: 8px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px; font-size: 13px;
+  }
+  .exec-alert-list li .alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .exec-alert-list li .alert-name { font-weight: 600; flex: 1; }
+  .exec-alert-list li .alert-val { font-family: 'DM Mono', monospace; font-weight: 700; font-size: 12px; }
+
+  /* ── WEEK OVER WEEK ── */
+  .wow-bar-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .wow-loc-name { font-size: 11px; color: var(--text2); width: 160px; flex-shrink: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wow-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .wow-bar-row { display: flex; align-items: center; gap: 6px; }
+  .wow-bar-label { font-size: 10px; width: 26px; color: var(--text3); flex-shrink: 0; }
+  .wow-bar { height: 14px; border-radius: 3px; min-width: 2px; transition: width 0.4s ease; }
+  .wow-bar-val { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text2); width: 46px; flex-shrink: 0; }
+  .wow-diff { font-size: 11px; font-weight: 700; font-family: 'DM Mono', monospace; width: 60px; flex-shrink: 0; }
+  .wow-section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  @media (max-width: 900px) {
+    .exec-scorecard { grid-template-columns: 1fr; }
+    .exec-grid-2 { grid-template-columns: 1fr; }
+    .exec-hero { flex-direction: column; }
+  }
+
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topbar">
+  <div class="topbar-brand">WORKFORCE<span>OPS</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('summary')"    ><span class="tab-dot"></span>Executive Summary</button>
+    <button class="nav-tab"        onclick="showPage('wow')"        ><span class="tab-dot"></span>Week-over-Week</button>
+    <button class="nav-tab"        onclick="showPage('overview')"   ><span class="tab-dot"></span>Overview</button>
+    <button class="nav-tab"        onclick="showPage('locations')"  ><span class="tab-dot"></span>Locations</button>
+    <button class="nav-tab"        onclick="showPage('employees')"  ><span class="tab-dot"></span>Employees</button>
+    <button class="nav-tab"        onclick="showPage('lunch')"      ><span class="tab-dot"></span>Lunch Breaks</button>
+    <button class="nav-tab"        onclick="showPage('overtime')"   ><span class="tab-dot"></span>Overtime</button>
+    <button class="nav-tab"        onclick="showPage('sunday')"     ><span class="tab-dot"></span>Sunday Premium</button>
+  </div>
+  <div class="topbar-filters">
+    <select class="filter-select" id="globalCoach" onchange="applyGlobalFilter()">
+      <option value="">All Coaches</option>
+    </select>
+    <select class="filter-select week-select-a" id="weekA" onchange="applyGlobalFilter()">
+      <option value="">All Weeks</option>
+      <option value="wk1">Wk1: 3/2–3/8</option>
+      <option value="wk2">Wk2: 3/9–3/15</option>
+      <option value="wk3">Wk3: 3/16–3/22</option>
+      <option value="wk4">Wk4: 3/23–3/29</option>
+    </select>
+    <span class="compare-sep" id="compareSep" style="display:none">vs</span>
+    <select class="filter-select week-select-b" id="weekB" onchange="applyGlobalFilter()" style="display:none">
+      <option value="">— pick week —</option>
+      <option value="wk1">Wk1: 3/2–3/8</option>
+      <option value="wk2">Wk2: 3/9–3/15</option>
+      <option value="wk3">Wk3: 3/16–3/22</option>
+      <option value="wk4">Wk4: 3/23–3/29</option>
+    </select>
+    <button class="filter-select" id="compareToggle" onclick="toggleCompareMode()"
+      style="background:rgba(123,45,139,0.2);border-color:rgba(123,45,139,0.5);cursor:pointer">
+      ⇄ Compare
+    </button>
+    <span class="compare-badge" id="compareBadge" style="display:none">COMPARE MODE</span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════ EXECUTIVE SUMMARY ══════════════════════════════════ -->
+<div class="page active" id="page-summary">
+
+  <!-- Hero -->
+  <div class="exec-hero">
+    <div class="exec-hero-left">
+      <div class="exec-hero-title">4-Week Period · 3/2 – 3/29/2026</div>
+      <div class="exec-hero-hrs" id="exec-total-hrs">—</div>
+      <div class="exec-hero-sub" id="exec-hero-sub">Total hours worked · <span id="exec-loc-count">—</span> locations · <span id="exec-emp-count">—</span> employees</div>
+    </div>
+    <div class="exec-hero-wow" id="exec-wow-badge">—</div>
+  </div>
+
+  <!-- Scorecard -->
+  <div class="exec-scorecard">
+    <div class="exec-card" style="--accent-color:#e2007a">
+      <div class="exec-card-label">Wk4 Hours</div>
+      <div class="exec-card-value" id="exec-wk4-hrs">—</div>
+      <div class="exec-card-sub">Week of 3/23–3/29</div>
+    </div>
+    <div class="exec-card" style="--accent-color:#c41a1a">
+      <div class="exec-card-label">Overtime Hours (4 Wks)</div>
+      <div class="exec-card-value" id="exec-ot-hrs">—</div>
+      <div class="exec-card-sub" id="exec-ot-sub">—</div>
+    </div>
+    <div class="exec-card" style="--accent-color:#7b2d8b">
+      <div class="exec-card-label">Compliance Risk</div>
+      <div class="exec-card-value" id="exec-lunch-val">—</div>
+      <div class="exec-card-sub">Non-solo missed lunch breaks</div>
+      <span class="exec-card-flag" style="background:rgba(196,0,27,0.12);color:#c41a1a">Labor Law Exposure</span>
+    </div>
+    <div class="exec-card" style="--accent-color:#1a7a4a">
+      <div class="exec-card-label">Active Employees</div>
+      <div class="exec-card-value" id="exec-active">—</div>
+      <div class="exec-card-sub" id="exec-active-sub">—</div>
+    </div>
+    <div class="exec-card" style="--accent-color:#c45000">
+      <div class="exec-card-label">Flagged Employees</div>
+      <div class="exec-card-value" id="exec-flagged">—</div>
+      <div class="exec-card-sub">Below threshold / sporadic / critical</div>
+    </div>
+    <div class="exec-card" style="--accent-color:#7b2d8b">
+      <div class="exec-card-label">Sunday Premium Cost</div>
+      <div class="exec-card-value" id="exec-sun-cost">—</div>
+      <div class="exec-card-sub">RI locations · 4-week est. at $15/hr</div>
+    </div>
+  </div>
+
+  <!-- Alerts + Coach breakdown -->
+  <div class="exec-grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">⚠ Locations Needing Attention</span><span style="font-size:11px;color:var(--text3)">Wk3 → Wk4</span></div>
+      <ul class="exec-alert-list" id="exec-alert-locs"></ul>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">⚠ Employees Needing Attention</span><span style="font-size:11px;color:var(--text3)">Flagged status</span></div>
+      <ul class="exec-alert-list" id="exec-alert-emps"></ul>
+    </div>
+  </div>
+
+  <!-- Coach summary -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header"><span class="card-title">Hours by Coach — Wk4 vs Wk3</span></div>
+    <div class="chart-wrap" style="height:200px"><canvas id="chartExecCoach"></canvas></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════ WEEK-OVER-WEEK ══════════════════════════════════ -->
+<div class="page" id="page-wow">
+  <div class="card-header" style="margin-bottom:20px">
+    <span class="card-title" style="font-size:18px">Week-over-Week Hours by Location</span>
+    <span style="font-size:12px;color:var(--text3)">Wk3 (3/16–3/22) vs Wk4 (3/23–3/29) · sorted by change</span>
+  </div>
+  <div class="grid-2" style="gap:24px;align-items:start">
+    <div>
+      <div class="wow-section-title" id="wow-rising-title">▲ Rising Hours</div>
+      <div id="wow-rising"></div>
+    </div>
+    <div>
+      <div class="wow-section-title" id="wow-falling-title">▼ Falling Hours</div>
+      <div id="wow-falling"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:24px">
+    <div class="card-header"><span class="card-title">All Locations — Wk3 vs Wk4 Side-by-Side</span></div>
+    <div class="chart-wrap" style="height:340px"><canvas id="chartWow"></canvas></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ OVERVIEW ══════════════════════════════════════════ -->
+<div class="page" id="page-overview">
+  <div class="kpi-strip" id="kpi-strip"></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Hours by Location — 4-Week Trend</span>
+        <div class="week-toggle">
+          <button class="wk-btn on" id="ovWk1" onclick="toggleOverviewWeek('wk1')">Wk1</button>
+          <button class="wk-btn on" id="ovWk2" onclick="toggleOverviewWeek('wk2')">Wk2</button>
+          <button class="wk-btn on" id="ovWk3" onclick="toggleOverviewWeek('wk3')">Wk3</button>
+          <button class="wk-btn on" id="ovWk4" onclick="toggleOverviewWeek('wk4')">Wk4</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chartLocBar" height="220"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Hours by Coach</span></div>
+      <div class="chart-wrap"><canvas id="chartCoachDonut" height="220"></canvas></div>
+    </div>
+  </div>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Employee Status Mix</span></div>
+      <div class="chart-wrap"><canvas id="chartStatusPie" height="200"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Weekly Total Hours Trend</span></div>
+      <div class="chart-wrap"><canvas id="chartTotalLine" height="200"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Top OT Locations</span></div>
+      <div class="card-body" id="ov-ot-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ LOCATIONS ══════════════════════════════════════════ -->
+<div class="page" id="page-locations">
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <span class="card-title">All Locations — Week Over Week Hours</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" style="width:200px" id="locSearch" placeholder="Search location…" oninput="renderLocTable()"></div>
+        <select class="filter-select" id="locCoachFilter" onchange="renderLocTable()"><option value="">All Coaches</option></select>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="loc-table">
+        <thead><tr>
+          <th onclick="sortLocTable('location')">Location ↕</th>
+          <th onclick="sortLocTable('coach')">Coach ↕</th>
+          <th onclick="sortLocTable('wk1')">Wk1 ↕</th>
+          <th onclick="sortLocTable('wk2')">Wk2 ↕</th>
+          <th onclick="sortLocTable('wk3')">Wk3 ↕</th>
+          <th onclick="sortLocTable('wk4')">Wk4 ↕</th>
+          <th>Trend</th>
+          <th onclick="sortLocTable('avg')">Avg/Wk ↕</th>
+          <th onclick="sortLocTable('total')">Total ↕</th>
+        </tr></thead>
+        <tbody id="loc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Location Hours Comparison</span></div>
+    <div class="chart-wrap" style="height:320px"><canvas id="chartLocCompare"></canvas></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ EMPLOYEES ══════════════════════════════════════════ -->
+<div class="page" id="page-employees">
+  <div class="kpi-strip" id="emp-kpi-strip"></div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <span class="card-title">Employee Performance</span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" style="width:180px" id="empSearch" placeholder="Search name…" oninput="renderEmpTable()"></div>
+        <select class="filter-select" id="empStatusFilter" onchange="renderEmpTable()">
+          <option value="">All Statuses</option>
+          <option value="Active">Active</option>
+          <option value="Below Threshold">Below Threshold</option>
+          <option value="Critical">Critical</option>
+          <option value="Sporadic">Sporadic</option>
+          <option value="Sharp Decline">Sharp Decline</option>
+        </select>
+        <select class="filter-select" id="empCoachFilter" onchange="renderEmpTable()"><option value="">All Coaches</option></select>
+      </div>
+    </div>
+    <div class="table-scroll" style="max-height:420px">
+      <table class="data-table">
+        <thead><tr>
+          <th onclick="sortEmpTable('full_name')">Employee ↕</th>
+          <th onclick="sortEmpTable('location')">Location ↕</th>
+          <th onclick="sortEmpTable('coach')">Coach ↕</th>
+          <th onclick="sortEmpTable('wk1')">Wk1 ↕</th>
+          <th onclick="sortEmpTable('wk2')">Wk2 ↕</th>
+          <th onclick="sortEmpTable('wk3')">Wk3 ↕</th>
+          <th onclick="sortEmpTable('wk4')">Wk4 ↕</th>
+          <th>Trend</th>
+          <th onclick="sortEmpTable('avg')">Avg/Wk ↕</th>
+          <th onclick="sortEmpTable('weeks_active')">Wks Active ↕</th>
+          <th onclick="sortEmpTable('status')">Status ↕</th>
+        </tr></thead>
+        <tbody id="emp-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ LUNCH ══════════════════════════════════════════ -->
+<div class="page" id="page-lunch">
+  <div class="kpi-strip" id="lunch-kpi-strip"></div>
+  <div class="grid-31">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Missed Lunch Break Detail</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" style="width:160px" id="lunchSearch" placeholder="Search…" oninput="renderLunchTable()"></div>
+          <select class="filter-select" id="lunchCoachFilter" onchange="renderLunchTable()"><option value="">All Coaches</option></select>
+          <select class="filter-select" id="lunchSoloFilter" onchange="renderLunchTable()">
+            <option value="">All</option>
+            <option value="solo">Solo Only</option>
+            <option value="nonSolo">Non-Solo Only</option>
+          </select>
+          <select class="filter-select" id="lunchWeekFilter" onchange="renderLunchTable()">
+            <option value="">All Weeks</option>
+            <option value="Wk1: 3/2–3/8">Wk1</option>
+            <option value="Wk2: 3/9–3/15">Wk2</option>
+            <option value="Wk3: 3/16–3/22">Wk3</option>
+            <option value="Wk4: 3/23–3/29">Wk4</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-scroll" style="max-height:400px">
+        <table class="data-table">
+          <thead><tr>
+            <th>Employee</th>
+            <th>Location</th>
+            <th>Coach</th>
+            <th>Date</th>
+            <th>Hrs</th>
+            <th>Shift</th>
+            <th>Break (min)</th>
+            <th>Req'd</th>
+            <th>Alone?</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody id="lunch-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><span class="card-title">Misses by Location</span></div>
+        <div class="chart-wrap"><canvas id="chartLunchLoc" height="200"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Solo vs Non-Solo Misses</span></div>
+        <div class="chart-wrap"><canvas id="chartLunchSolo" height="140"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ OVERTIME ══════════════════════════════════════════ -->
+<div class="page" id="page-overtime">
+  <div class="kpi-strip" id="ot-kpi-strip"></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">OT Hours by Location</span></div>
+      <div class="chart-wrap"><canvas id="chartOtBar" height="240"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">OT Employees Detail</span>
+        <select class="filter-select" id="otCoachFilter" onchange="renderOtTable()"><option value="">All Coaches</option></select>
+      </div>
+      <div class="table-scroll" style="max-height:300px">
+        <table class="data-table">
+          <thead><tr>
+            <th>Employee</th><th>Location</th><th>Coach</th>
+            <th>Week</th><th>Total Hrs</th><th>OT Hrs</th><th>Severity</th>
+          </tr></thead>
+          <tbody id="ot-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-header"><span class="card-title">OT Location Summary Table</span></div>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr>
+          <th>Location</th><th>Coach</th>
+          <th>OT Wk1</th><th>OT Wk2</th><th>OT Wk3</th><th>OT Wk4</th>
+          <th>Total OT</th><th>Trend</th>
+        </tr></thead>
+        <tbody id="ot-loc-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ SUNDAY PREMIUM ══════════════════════════════ -->
+<div class="page" id="page-sunday">
+  <div class="kpi-strip" id="sun-kpi-strip"></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Sunday Hours by RI Location</span>
+        <span style="font-size:11px;color:var(--text3)">Time &amp; a Half — RI Only</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartSunBar" height="240"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">RI Location Sunday Summary</span></div>
+      <div class="table-scroll" style="max-height:320px">
+        <table class="data-table">
+          <thead><tr>
+            <th>Location</th><th>Coach</th>
+            <th>Sun Hrs Wk1</th><th>Sun Hrs Wk2</th><th>Sun Hrs Wk3</th><th>Sun Hrs Wk4</th>
+            <th>Total Sun Hrs</th><th>Premium Hrs (×0.5)</th>
+          </tr></thead>
+          <tbody id="sun-loc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <span class="card-title">Employee Sunday Hours Detail</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" style="width:180px" id="sunSearch" placeholder="Search name…" oninput="renderSunTable()"></div>
+        <select class="filter-select" id="sunCoachFilter" onchange="renderSunTable()"><option value="">All Coaches</option></select>
+      </div>
+    </div>
+    <div class="table-scroll" style="max-height:380px">
+      <table class="data-table">
+        <thead><tr>
+          <th>Employee</th><th>Location(s)</th><th>Coach</th>
+          <th>Sun Hrs Wk1</th><th>Sun Hrs Wk2</th><th>Sun Hrs Wk3</th><th>Sun Hrs Wk4</th>
+          <th>Total Sun Hrs</th><th>Premium Hrs (×0.5)</th><th>Est. Premium Cost*</th>
+        </tr></thead>
+        <tbody id="sun-emp-tbody"></tbody>
+      </table>
+    </div>
+    <div style="padding:10px 18px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)">
+      * Premium Cost is calculated as <strong>Premium Hours × assumed $15/hr base</strong> — update the rate in the filter bar if needed.
+      &nbsp;&nbsp;
+      <label style="font-weight:600;color:var(--text2)">Base Rate $</label>
+      <input type="number" id="baseRate" value="15" min="1" max="100" step="0.5"
+        style="width:64px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:var(--surface2);color:var(--text)"
+        oninput="renderSunTable()">
+      &nbsp;/hr
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const RAW = {"locations":[{"location": "MA-CAPE CODE MALL", "coach": "AMBULAI SHEKU", "wk1": 81.24, "wk2": 73.23, "wk3": 74.09, "wk4": 74.28, "total": 302.84, "avg": 75.71}, {"location": "RI-BROADWAY", "coach": "AMBULAI SHEKU", "wk1": 47.4, "wk2": 50.71, "wk3": 49.7, "wk4": 51.77, "total": 199.58, "avg": 49.9}, {"location": "RI-COVENTRY", "coach": "AMBULAI SHEKU", "wk1": 40.5, "wk2": 36.4, "wk3": 47.48, "wk4": 39.17, "total": 163.55, "avg": 40.89}, {"location": "RI-DOUGLAS", "coach": "AMBULAI SHEKU", "wk1": 47.38, "wk2": 34.07, "wk3": 45.61, "wk4": 49.14, "total": 176.2, "avg": 44.05}, {"location": "RI-RESERVOIR AVE", "coach": "AMBULAI SHEKU", "wk1": 80.88, "wk2": 83.36, "wk3": 68.43, "wk4": 60.87, "total": 293.54, "avg": 73.39}, {"location": "TN-WEST MARKET", "coach": "CHERYL", "wk1": 93.38, "wk2": 88.69, "wk3": 96.79, "wk4": 96.56, "total": 375.42, "avg": 93.86}, {"location": "MA-EXCHANGE ST.", "coach": "JOEL MONTERO", "wk1": 61.48, "wk2": 61.3, "wk3": 58.38, "wk4": 66.82, "total": 247.98, "avg": 62.0}, {"location": "MA-HOLYOKE", "coach": "JOEL MONTERO", "wk1": 119.62, "wk2": 119.09, "wk3": 120.15, "wk4": 121.05, "total": 479.91, "avg": 119.98}, {"location": "MA-LOCUST STREET", "coach": "JOEL MONTERO", "wk1": 62.61, "wk2": 58.48, "wk3": 57.75, "wk4": 57.1, "total": 235.94, "avg": 58.98}, {"location": "MA-STATE STREET", "coach": "JOEL MONTERO", "wk1": 77.99, "wk2": 76.98, "wk3": 74.7, "wk4": 76.5, "total": 306.17, "avg": 76.54}, {"location": "MA-COGGESHALL", "coach": "MANNY", "wk1": 74.99, "wk2": 75.72, "wk3": 71.73, "wk4": 57.95, "total": 280.39, "avg": 70.1}, {"location": "MA-FALLRIVER", "coach": "MANNY", "wk1": 86.56, "wk2": 67.92, "wk3": 81.25, "wk4": 86.51, "total": 322.24, "avg": 80.56}, {"location": "MA-ROCKDALE", "coach": "MANNY", "wk1": 83.87, "wk2": 88.12, "wk3": 88.71, "wk4": 77.4, "total": 338.1, "avg": 84.52}, {"location": "CT-BUCKLAND HILLS MALL", "coach": "MIKE COBBS", "wk1": 83.98, "wk2": 88.15, "wk3": 84.81, "wk4": 81.87, "total": 338.81, "avg": 84.7}, {"location": "CT-NEW LONDON", "coach": "MIKE COBBS", "wk1": 127.01, "wk2": 109.22, "wk3": 120.06, "wk4": 98.01, "total": 454.3, "avg": 113.58}, {"location": "CT-NORWICH", "coach": "MIKE COBBS", "wk1": 69.03, "wk2": 53.48, "wk3": 74.68, "wk4": 69.91, "total": 267.1, "avg": 66.78}, {"location": "RI-BALD HILL", "coach": "MIKE COBBS", "wk1": 66.48, "wk2": 53.79, "wk3": 70.89, "wk4": 65.28, "total": 256.44, "avg": 64.11}, {"location": "RI-EAST PROVIDENCE", "coach": "MIKE COBBS", "wk1": 93.76, "wk2": 100.99, "wk3": 104.83, "wk4": 101.24, "total": 400.82, "avg": 100.2}, {"location": "TN-KEITH ST", "coach": "MR. WATTS", "wk1": 78.52, "wk2": 85.28, "wk3": 101.49, "wk4": 92.55, "total": 357.84, "avg": 89.46}, {"location": "TN-MAGNOLIA", "coach": "MR. WATTS", "wk1": 76.2, "wk2": 78.32, "wk3": 76.82, "wk4": 84.78, "total": 316.12, "avg": 79.03}, {"location": "TN-MORRISTOWN", "coach": "MR. WATTS", "wk1": 32.07, "wk2": 49.58, "wk3": 52.02, "wk4": 55.87, "total": 189.54, "avg": 47.38}, {"location": "TN-NORTH BROARDWAY", "coach": "MR. WATTS", "wk1": 87.75, "wk2": 80.51, "wk3": 103.23, "wk4": 119.23, "total": 390.72, "avg": 97.68}, {"location": "TN-SHALLOWFORD RD", "coach": "MR. WATTS", "wk1": 96.9, "wk2": 104.61, "wk3": 99.45, "wk4": 111.64, "total": 412.6, "avg": 103.15}, {"location": "TN-WESTERN AVE", "coach": "MR. WATTS", "wk1": 62.86, "wk2": 63.66, "wk3": 76.76, "wk4": 81.26, "total": 284.54, "avg": 71.14}, {"location": "MA- SOUTH SHORE MALL", "coach": "ROSE PEREZ", "wk1": 90.36, "wk2": 105.9, "wk3": 110.72, "wk4": 111.82, "total": 418.8, "avg": 104.7}, {"location": "MA-KELLEY SQUARE", "coach": "ROSE PEREZ", "wk1": 121.72, "wk2": 97.8, "wk3": 125.97, "wk4": 125.31, "total": 470.8, "avg": 117.7}, {"location": "MA-WESTERN AVE", "coach": "ROSE PEREZ", "wk1": 69.64, "wk2": 63.33, "wk3": 63.92, "wk4": 69.65, "total": 266.54, "avg": 66.64}, {"location": "RI-751BROAD", "coach": "ROSE PEREZ", "wk1": 55.48, "wk2": 68.6, "wk3": 83.93, "wk4": 66.61, "total": 274.62, "avg": 68.66}, {"location": "RI-BROAD ST", "coach": "ROSE PEREZ", "wk1": 83.01, "wk2": 48.03, "wk3": 68.05, "wk4": 59.21, "total": 258.3, "avg": 64.58}, {"location": "RI-HARTFORD AVE", "coach": "ROSE PEREZ", "wk1": 99.8, "wk2": 104.84, "wk3": 95.37, "wk4": 97.91, "total": 397.92, "avg": 99.48}, {"location": "RI-NEWPORT AVE", "coach": "ROSE PEREZ", "wk1": 62.26, "wk2": 66.17, "wk3": 68.73, "wk4": 96.07, "total": 293.23, "avg": 73.31}, {"location": "RI-PROVIDENCE PLACE MALL", "coach": "ROSE PEREZ", "wk1": 87.6, "wk2": 86.85, "wk3": 92.62, "wk4": 87.44, "total": 354.51, "avg": 88.63}, {"location": "AR-COLONEL GLENN", "coach": "TBD", "wk1": 50.77, "wk2": 54.58, "wk3": 40.44, "wk4": 43.97, "total": 189.76, "avg": 47.44}, {"location": "AR-RADIO GEYER", "coach": "TBD", "wk1": 92.88, "wk2": 85.22, "wk3": 89.61, "wk4": 112.28, "total": 379.99, "avg": 95.0}]};
+
+RAW.employees=[{"n":"Mirtha Melendez","l":["TN-KEITH ST","TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w1":0.0,"w2":34.32,"w3":37.61,"w4":36.03,"a":26.99,"wa":3,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Charisma Heggie","l":["TN-WEST MARKET"],"c":["CHERYL"],"w1":39.81,"w2":36.08,"w3":36.57,"w4":33.06,"a":36.38,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Yanna Soriano","l":["RI-HARTFORD AVE"],"c":["ROSE PEREZ"],"w1":30.42,"w2":39.6,"w3":35.6,"w4":38.9,"a":36.13,"wa":4,"st":"Active","sw1":6.5,"sw2":0.0,"sw3":6.45,"sw4":6.32,"st2":19.27,"sp":9.64},{"n":"Abigail Baez","l":["RI-PROVIDENCE PLACE MALL"],"c":["ROSE PEREZ"],"w1":28.27,"w2":23.22,"w3":29.83,"w4":29.41,"a":27.68,"wa":4,"st":"Active","sw1":7.9,"sw2":7.18,"sw3":7.67,"sw4":7.47,"st2":30.22,"sp":15.11},{"n":"Ana Marrero","l":["RI-BROAD ST","RI-NEWPORT AVE"],"c":["ROSE PEREZ"],"w1":47.37,"w2":22.94,"w3":47.5,"w4":46.41,"a":41.06,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Alex Correa","l":["MA-KELLEY SQUARE"],"c":["ROSE PEREZ"],"w1":38.54,"w2":34.21,"w3":39.9,"w4":35.68,"a":37.08,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Khrystyne Quasney","l":["MA-COGGESHALL","MA-FALLRIVER","MA-ROCKDALE"],"c":["MANNY"],"w1":36.38,"w2":36.46,"w3":38.08,"w4":41.16,"a":38.02,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Angel Rivera","l":["MA-COGGESHALL","MA-FALLRIVER","MA-ROCKDALE","RI-EAST PROVIDENCE"],"c":["MANNY","MIKE COBBS"],"w1":38.73,"w2":31.27,"w3":35.3,"w4":28.13,"a":33.36,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Keysha Betancourt","l":["RI-751BROAD","RI-HARTFORD AVE","RI-NEWPORT AVE"],"c":["ROSE PEREZ"],"w1":39.83,"w2":33.67,"w3":28.22,"w4":35.51,"a":34.31,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":3.87,"st2":3.87,"sp":1.94},{"n":"Shanna Speed","l":["TN-WEST MARKET"],"c":["CHERYL"],"w1":12.98,"w2":12.13,"w3":10.37,"w4":13.3,"a":12.2,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Cleoty Morales","l":["RI-NEWPORT AVE"],"c":["ROSE PEREZ"],"w1":30.09,"w2":31.33,"w3":31.38,"w4":27.05,"a":29.96,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Austin Campbell","l":["TN-MORRISTOWN"],"c":["MR. WATTS"],"w1":32.07,"w2":37.48,"w3":40.89,"w4":8.85,"a":29.82,"wa":4,"st":"Sharp Decline","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Rashia Oates","l":["CT-NEW LONDON","CT-NORWICH"],"c":["MIKE COBBS"],"w1":39.81,"w2":8.53,"w3":26.87,"w4":28.0,"a":25.8,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Christopher Pierre Paul","l":["RI-COVENTRY"],"c":["AMBULAI SHEKU"],"w1":40.5,"w2":25.19,"w3":41.41,"w4":32.5,"a":34.9,"wa":4,"st":"Active","sw1":6.33,"sw2":5.6,"sw3":5.87,"sw4":5.88,"st2":23.68,"sp":11.84},{"n":"Luis Burgos","l":["CT-NEW LONDON","CT-NORWICH"],"c":["MIKE COBBS"],"w1":39.5,"w2":39.9,"w3":34.53,"w4":17.97,"a":32.98,"wa":4,"st":"Sharp Decline","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Jasmine Griffin","l":["AR-COLONEL GLENN","AR-RADIO GEYER"],"c":["TBD"],"w1":23.01,"w2":16.59,"w3":1.2,"w4":30.69,"a":17.87,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Djeison Barbosa","l":["MA-COGGESHALL","MA-ROCKDALE"],"c":["MANNY"],"w1":25.63,"w2":21.56,"w3":24.74,"w4":16.72,"a":22.16,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Richard Foster","l":["MA-KELLEY SQUARE"],"c":["ROSE PEREZ"],"w1":39.58,"w2":41.22,"w3":35.86,"w4":36.75,"a":38.35,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Alishabeth Gonzalez","l":["CT-BUCKLAND HILLS MALL"],"c":["MIKE COBBS"],"w1":21.07,"w2":28.66,"w3":16.88,"w4":21.99,"a":22.15,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Jason Link Jr","l":["MA-CAPE CODE MALL","RI-BROADWAY","RI-COVENTRY","RI-DOUGLAS","RI-PROVIDENCE PLACE MALL"],"c":["AMBULAI SHEKU","ROSE PEREZ"],"w1":21.03,"w2":37.65,"w3":31.9,"w4":27.84,"a":29.6,"wa":4,"st":"Active","sw1":3.87,"sw2":0.0,"sw3":5.17,"sw4":0.0,"st2":9.04,"sp":4.52},{"n":"Lucmila Lopes","l":["MA- SOUTH SHORE MALL"],"c":["ROSE PEREZ"],"w1":43.09,"w2":37.11,"w3":35.05,"w4":39.19,"a":38.61,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Melissa Sloane","l":["TN-MAGNOLIA","TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w1":26.57,"w2":31.2,"w3":34.53,"w4":43.31,"a":33.9,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Cece Williamson","l":["TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w1":22.91,"w2":21.3,"w3":24.58,"w4":21.84,"a":22.66,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Shelena Hamilton","l":["TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w1":56.88,"w2":58.86,"w3":63.58,"w4":57.51,"a":59.21,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Alma Cedeno","l":["MA-STATE STREET"],"c":["JOEL MONTERO"],"w1":27.47,"w2":29.08,"w3":26.46,"w4":25.85,"a":27.22,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Oscar Mendez Muniz","l":["RI-HARTFORD AVE"],"c":["ROSE PEREZ"],"w1":39.34,"w2":34.43,"w3":26.77,"w4":31.13,"a":32.92,"wa":4,"st":"Active","sw1":0.0,"sw2":6.63,"sw3":6.68,"sw4":0.0,"st2":13.31,"sp":6.66},{"n":"Jensy Rodriguez","l":["RI-751BROAD","RI-PROVIDENCE PLACE MALL","RI-RESERVOIR AVE"],"c":["AMBULAI SHEKU","ROSE PEREZ"],"w1":35.23,"w2":36.26,"w3":37.27,"w4":33.01,"a":35.44,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Brendaliz Oliver Rodriguez","l":["CT-NORWICH"],"c":["MIKE COBBS"],"w1":27.47,"w2":13.58,"w3":33.2,"w4":20.93,"a":23.8,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Handriel Marmol","l":["RI-BALD HILL","RI-BROADWAY","RI-COVENTRY","RI-DOUGLAS","RI-RESERVOIR AVE"],"c":["AMBULAI SHEKU","MIKE COBBS"],"w1":22.07,"w2":38.42,"w3":41.06,"w4":42.38,"a":35.98,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Mariah Gonzalez","l":["MA-KELLEY SQUARE"],"c":["ROSE PEREZ"],"w1":10.62,"w2":22.37,"w3":15.47,"w4":18.42,"a":16.72,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Isaiah Caliz","l":["MA-EXCHANGE ST.","MA-LOCUST STREET"],"c":["JOEL MONTERO"],"w1":38.83,"w2":31.54,"w3":41.27,"w4":26.43,"a":34.52,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Angela Westfield","l":["TN-KEITH ST"],"c":["MR. WATTS"],"w1":39.6,"w2":24.84,"w3":29.39,"w4":31.36,"a":31.3,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Jermaine Underwood","l":["TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w1":29.57,"w2":36.4,"w3":34.08,"w4":28.82,"a":32.22,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Armando Perez","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w1":40.78,"w2":41.83,"w3":37.0,"w4":37.98,"a":39.4,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Kadisha Rivera","l":["RI-DOUGLAS","RI-PROVIDENCE PLACE MALL"],"c":["AMBULAI SHEKU","ROSE PEREZ"],"w1":38.45,"w2":26.12,"w3":30.44,"w4":28.08,"a":30.77,"wa":4,"st":"Active","sw1":0.0,"sw2":6.05,"sw3":6.98,"sw4":6.12,"st2":19.15,"sp":9.57},{"n":"Samantha Cuevas","l":["TN-WEST MARKET"],"c":["CHERYL"],"w1":14.06,"w2":13.6,"w3":23.23,"w4":22.49,"a":18.34,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Jose Monroy","l":["RI-EAST PROVIDENCE"],"c":["MIKE COBBS"],"w1":21.13,"w2":26.37,"w3":27.08,"w4":25.43,"a":25.0,"wa":4,"st":"Active","sw1":6.63,"sw2":5.7,"sw3":5.8,"sw4":0.0,"st2":18.13,"sp":9.06},{"n":"Isiaish Valenzuela","l":["RI-EAST PROVIDENCE"],"c":["MIKE COBBS"],"w1":36.18,"w2":29.35,"w3":28.11,"w4":32.5,"a":31.54,"wa":4,"st":"Active","sw1":0.0,"sw2":0.58,"sw3":0.0,"sw4":6.52,"st2":7.1,"sp":3.55},{"n":"Jaden Thomas","l":["RI-RESERVOIR AVE"],"c":["AMBULAI SHEKU"],"w1":21.65,"w2":30.28,"w3":18.61,"w4":5.98,"a":19.13,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Milton Vega","l":["RI-HARTFORD AVE"],"c":["ROSE PEREZ"],"w1":28.42,"w2":30.81,"w3":33.0,"w4":27.88,"a":30.03,"wa":4,"st":"Active","sw1":6.15,"sw2":6.37,"sw3":0.0,"sw4":2.18,"st2":14.7,"sp":7.35},{"n":"Yarele Soler","l":["MA- SOUTH SHORE MALL"],"c":["ROSE PEREZ"],"w1":13.84,"w2":26.1,"w3":31.55,"w4":31.68,"a":25.79,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"James Garcia","l":["CT-NEW LONDON"],"c":["MIKE COBBS"],"w1":15.04,"w2":18.32,"w3":17.26,"w4":10.47,"a":15.27,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Shanelle Sanchez","l":["CT-NEW LONDON"],"c":["MIKE COBBS"],"w1":24.86,"w2":23.8,"w3":19.9,"w4":26.22,"a":23.7,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"April Mayorga","l":["TN-NORTH BROARDWAY","TN-WESTERN AVE"],"c":["MR. WATTS"],"w1":31.23,"w2":41.51,"w3":25.98,"w4":49.75,"a":37.12,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Melicia Angel","l":["TN-WEST MARKET"],"c":["CHERYL"],"w1":26.53,"w2":26.88,"w3":26.62,"w4":27.71,"a":26.94,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Delbert Phillips","l":["TN-WESTERN AVE"],"c":["MR. WATTS"],"w1":0.0,"w2":0.0,"w3":11.5,"w4":22.38,"a":8.47,"wa":2,"st":"Critical","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Christopher Marion","l":["TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w1":0.0,"w2":0.0,"w3":0.0,"w4":21.62,"a":5.4,"wa":1,"st":"Sporadic","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Ashton Diamond","l":["TN-MORRISTOWN"],"c":["MR. WATTS"],"w1":0.0,"w2":0.0,"w3":0.0,"w4":24.97,"a":6.24,"wa":1,"st":"Sporadic","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Divante Lacy","l":["MA-STATE STREET"],"c":["JOEL MONTERO"],"w1":20.61,"w2":18.18,"w3":18.48,"w4":19.29,"a":19.14,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Napoleoa Dacruz","l":["MA-COGGESHALL"],"c":["MANNY"],"w1":43.02,"w2":48.48,"w3":42.66,"w4":41.31,"a":43.87,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Daniel Rosales","l":["RI-RESERVOIR AVE"],"c":["AMBULAI SHEKU"],"w1":34.73,"w2":34.23,"w3":35.93,"w4":35.98,"a":35.22,"wa":4,"st":"Active","sw1":6.5,"sw2":7.07,"sw3":5.8,"sw4":6.0,"st2":25.37,"sp":12.68},{"n":"Josh Landry","l":["CT-NEW LONDON","CT-NORWICH"],"c":["MIKE COBBS"],"w1":7.15,"w2":14.17,"w3":24.57,"w4":30.86,"a":19.19,"wa":4,"st":"Below Threshold","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Nereida Rodriguez","l":["CT-BUCKLAND HILLS MALL"],"c":["MIKE COBBS"],"w1":37.39,"w2":36.35,"w3":34.47,"w4":35.86,"a":36.02,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Gilberto Alvarez","l":["CT-NEW LONDON","CT-NORWICH"],"c":["MIKE COBBS"],"w1":42.21,"w2":44.4,"w3":38.41,"w4":33.47,"a":39.62,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Lori Ruiz","l":["MA-COGGESHALL","MA-ROCKDALE"],"c":["MANNY"],"w1":33.86,"w2":27.49,"w3":33.77,"w4":27.18,"a":30.58,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Frank Alberto Merino Ceballos","l":["RI-BROADWAY"],"c":["AMBULAI SHEKU"],"w1":33.52,"w2":34.42,"w3":32.03,"w4":32.76,"a":33.18,"wa":4,"st":"Active","sw1":6.08,"sw2":5.55,"sw3":5.75,"sw4":6.15,"st2":23.53,"sp":11.76},{"n":"Sabrina Morales","l":["RI-BROAD ST"],"c":["ROSE PEREZ"],"w1":25.42,"w2":22.61,"w3":20.55,"w4":23.75,"a":23.08,"wa":4,"st":"Active","sw1":6.9,"sw2":6.05,"sw3":5.2,"sw4":5.8,"st2":23.95,"sp":11.98},{"n":"Marquesha Jones","l":["TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w1":44.42,"w2":46.91,"w3":40.79,"w4":51.46,"a":45.9,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Nicki Johnson","l":["TN-WESTERN AVE"],"c":["MR. WATTS"],"w1":45.85,"w2":43.66,"w3":46.98,"w4":46.17,"a":45.66,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Hector Torres","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w1":43.26,"w2":40.9,"w3":40.39,"w4":39.0,"a":40.89,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Karmina Mendoza","l":["AR-RADIO GEYER"],"c":["TBD"],"w1":43.17,"w2":43.42,"w3":42.74,"w4":44.15,"a":43.37,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Jessica Retamar","l":["MA-STATE STREET"],"c":["JOEL MONTERO"],"w1":29.91,"w2":29.72,"w3":29.76,"w4":31.36,"a":30.19,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Alicia Montero","l":["MA-LOCUST STREET"],"c":["JOEL MONTERO"],"w1":38.29,"w2":41.71,"w3":40.05,"w4":41.69,"a":40.44,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Justin Moniz","l":["MA-FALLRIVER"],"c":["MANNY"],"w1":33.82,"w2":29.59,"w3":34.27,"w4":35.71,"a":33.35,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Brenda Serna","l":["AR-COLONEL GLENN","AR-RADIO GEYER"],"c":["TBD"],"w1":37.87,"w2":41.03,"w3":41.69,"w4":43.37,"a":40.99,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Maliek Feare","l":["MA-CAPE CODE MALL"],"c":["AMBULAI SHEKU"],"w1":25.39,"w2":20.0,"w3":19.62,"w4":21.19,"a":21.55,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Brandon Mitchell","l":["RI-NEWPORT AVE","RI-PROVIDENCE PLACE MALL"],"c":["ROSE PEREZ"],"w1":40.15,"w2":26.34,"w3":32.94,"w4":39.6,"a":34.76,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Nathan Millsaps","l":["TN-KEITH ST"],"c":["MR. WATTS"],"w1":38.92,"w2":26.12,"w3":34.49,"w4":31.16,"a":32.67,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Hasba Hakim","l":["RI-BROADWAY","RI-COVENTRY","RI-DOUGLAS","RI-RESERVOIR AVE"],"c":["AMBULAI SHEKU"],"w1":6.68,"w2":0.0,"w3":19.96,"w4":14.39,"a":10.26,"wa":3,"st":"Below Threshold","sw1":6.33,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":6.33,"sp":3.16},{"n":"Juliana Arruda","l":["MA-COGGESHALL","MA-KELLEY SQUARE","RI-BROAD ST","RI-EAST PROVIDENCE","RI-NEWPORT AVE","RI-PROVIDENCE PLACE MALL"],"c":["MANNY","MIKE COBBS","ROSE PEREZ"],"w1":36.71,"w2":20.65,"w3":44.27,"w4":39.38,"a":35.25,"wa":4,"st":"Active","sw1":2.1,"sw2":0.0,"sw3":1.37,"sw4":5.43,"st2":8.9,"sp":4.45},{"n":"Kevin Martinez","l":["AR-COLONEL GLENN","AR-RADIO GEYER"],"c":["TBD"],"w1":39.6,"w2":38.76,"w3":44.42,"w4":38.04,"a":40.2,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Carlos Davila","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w1":35.58,"w2":36.36,"w3":42.76,"w4":44.07,"a":39.69,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Izabella Regino","l":["RI-BALD HILL"],"c":["MIKE COBBS"],"w1":27.98,"w2":23.42,"w3":26.5,"w4":29.87,"a":26.94,"wa":4,"st":"Active","sw1":5.67,"sw2":6.07,"sw3":5.95,"sw4":6.52,"st2":24.21,"sp":12.1},{"n":"Oswaldo Aranda","l":["RI-BROAD ST","RI-DOUGLAS","RI-NEWPORT AVE","RI-PROVIDENCE PLACE MALL"],"c":["AMBULAI SHEKU","ROSE PEREZ"],"w1":35.42,"w2":32.75,"w3":33.77,"w4":32.91,"a":33.71,"wa":4,"st":"Active","sw1":6.42,"sw2":6.48,"sw3":6.25,"sw4":5.27,"st2":24.42,"sp":12.21},{"n":"Derek Tejeda","l":["MA-ROCKDALE"],"c":["MANNY"],"w1":33.98,"w2":36.91,"w3":32.87,"w4":33.5,"a":34.32,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Jazmine Heredia","l":["MA-EXCHANGE ST."],"c":["JOEL MONTERO"],"w1":46.97,"w2":46.53,"w3":34.81,"w4":55.8,"a":46.03,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Gamaly Gonzalez","l":["CT-BUCKLAND HILLS MALL"],"c":["MIKE COBBS"],"w1":25.52,"w2":23.14,"w3":33.46,"w4":24.02,"a":26.54,"wa":4,"st":"Active","sw1":0.0,"sw2":0.0,"sw3":0.0,"sw4":0.0,"st2":0.0,"sp":0.0},{"n":"Saimary Hernandez","l":["RI-EAST PROVIDENCE","RI-NEWPORT AVE"],"c":["MIKE COBBS","ROSE PEREZ"],"w1":32.72,"w2":45.42,"w3":41.14,"w4":35.76,"a":38.76,"wa":4,"st":"Active","sw1":0.0,"sw2":1.77,"sw3":0.0,"sw4":0.0,"st2":1.77,"sp":0.88},{"n":"Allia Abodaher","l":["RI-BALD HILL"],"c":["MIKE COBBS"],"w1":33.53,"w2":25.19,"w3":38.04,"w4":31.14,"a":31.98,"wa":4,"st":"Active","sw1":6.97,"sw2":6.75,"sw3":6.08,"sw4":6.21,"st2":26.01,"sp":13.0},{"n":"Hector Marrero","l":["RI-751BROAD"],"c":["ROSE PEREZ"],"w1":17.27,"w2":8.24,"w3":25.42,"w4":16.15,"a":16.77,"wa":4,"st":"Below Threshold","sw1":6.07,"sw2":6.33,"sw3":5.55,"sw4":6.18,"st2":24.13,"sp":12.06}];
+
+RAW.ML_WEEKS=["Wk1: 3/2\u20133/8","Wk2: 3/9\u20133/15","Wk3: 3/16\u20133/22","Wk4: 3/23\u20133/29"];
+RAW.missed_lunch=[["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/23",3,6.8,0,34.0,30,0],["Mirtha Melendez","TN-SHALLOWFORD RD","MR. WATTS","3/24",3,6.0,0,0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/25",3,9.0,1,0,60,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/26",3,7.0,0,34.0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/27",3,7.2,0,25.0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/10/2026",1,7.8,0,30.0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/11/2026",1,7.2,0,30.0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/12/2026",1,8.0,1,30.0,60,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/13/2026",1,6.6,0,0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/16/2026",2,8.8,1,0,60,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/17/2026",2,7.5,0,31.0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/18/2026",2,7.5,0,29.0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/19/2026",2,7.2,0,29.0,30,0],["Mirtha Melendez","TN-KEITH ST","MR. WATTS","3/20/2026",2,6.5,0,30.0,30,0],["Charisma Heggie","TN-WEST MARKET","CHERYL","3/29",3,6.2,0,0,30,1],["Charisma Heggie","TN-WEST MARKET","CHERYL","3/12/2026",1,8.2,1,25.0,60,0],["Charisma Heggie","TN-WEST MARKET","CHERYL","3/2/2026",0,7.4,0,25.0,30,0],["Charisma Heggie","TN-WEST MARKET","CHERYL","3/6/2026",0,8.6,1,0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/24",3,8.4,1,30.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/27",3,9.1,1,30.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/28",3,8.4,1,31.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/29",3,6.3,0,0,30,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/10/2026",1,9.7,1,30.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/11/2026",1,8.3,1,31.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/12/2026",1,9.3,1,30.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/13/2026",1,7.8,0,31.0,30,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/18/2026",2,9.1,1,35.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/20/2026",2,9.0,1,29.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/21/2026",2,8.8,1,31.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/22/2026",2,6.5,0,0,30,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/3/2026",0,8.4,1,37.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/4/2026",0,8.9,1,31.0,60,0],["Yanna Soriano","RI-HARTFORD AVE","ROSE PEREZ","3/8/2026",0,6.5,0,0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/25",3,9.4,1,0,60,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/27",3,8.1,1,0,60,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/28",3,7.6,0,0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/29",3,7.5,0,0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/11/2026",1,6.9,0,22.0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/13/2026",1,9.5,1,11.0,60,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/14/2026",1,6.9,0,24.0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/15/2026",1,7.2,0,0,30,1],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/16/2026",2,7.2,0,0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/18/2026",2,7.7,0,0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/20/2026",2,7.3,0,35.0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/21/2026",2,7.7,0,15.0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/22/2026",2,7.7,0,0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/4/2026",0,7.7,0,27.0,30,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/6/2026",0,8.2,1,0,60,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/7/2026",0,8.4,1,0,60,0],["Abigail Baez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/8/2026",0,7.9,0,0,30,0],["Ana Marrero","RI-NEWPORT AVE","ROSE PEREZ","3/26",3,10.9,1,0,60,0],["Ana Marrero","RI-BROAD ST","ROSE PEREZ","3/28",3,7.6,0,0,30,0],["Ana Marrero","RI-BROAD ST","ROSE PEREZ","3/10/2026",1,6.2,0,0,30,1],["Ana Marrero","RI-BROAD ST","ROSE PEREZ","3/2/2026",0,10.2,1,0,60,1],["Ana Marrero","RI-BROAD ST","ROSE PEREZ","3/20/2026",2,10.3,1,0,60,1],["Ana Marrero","RI-BROAD ST","ROSE PEREZ","3/21/2026",2,9.4,1,0,60,1],["Ana Marrero","RI-BROAD ST","ROSE PEREZ","3/5/2026",0,9.6,1,0,60,1],["Ana Marrero","RI-BROAD ST","ROSE PEREZ","3/7/2026",0,9.6,1,22.0,60,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/23",3,9.0,1,31.0,60,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/25",3,8.6,1,34.0,60,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/12/2026",1,8.8,1,48.0,60,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/16/2026",2,6.5,0,33.0,30,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/20/2026",2,7.4,0,33.0,30,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/21/2026",2,7.1,0,49.0,30,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/3/2026",0,9.1,1,47.0,60,0],["Alex Correa","MA-KELLEY SQUARE","ROSE PEREZ","3/5/2026",0,9.4,1,49.0,60,0],["Khrystyne Quasney","MA-FALLRIVER","MANNY","3/26",3,8.5,1,41.0,60,0],["Khrystyne Quasney","MA-FALLRIVER","MANNY","3/10/2026",1,8.5,1,47.0,60,1],["Khrystyne Quasney","MA-FALLRIVER","MANNY","3/12/2026",1,8.1,1,47.0,60,0],["Khrystyne Quasney","MA-FALLRIVER","MANNY","3/5/2026",0,8.8,1,25.0,60,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/23",3,7.1,0,0,30,0],["Angel Rivera","RI-EAST PROVIDENCE","MIKE COBBS","3/26",3,7.5,0,0,30,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/27",3,6.9,0,0,30,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/28",3,6.5,0,0,30,0],["Angel Rivera","MA-COGGESHALL","MANNY","3/11/2026",1,8.3,1,0,60,0],["Angel Rivera","MA-ROCKDALE","MANNY","3/12/2026",1,7.4,0,0,30,0],["Angel Rivera","MA-COGGESHALL","MANNY","3/13/2026",1,8.2,1,0,60,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/18/2026",2,7.3,0,0,30,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/19/2026",2,7.9,0,0,30,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/2/2026",0,7.3,0,0,30,0],["Angel Rivera","MA-COGGESHALL","MANNY","3/20/2026",2,7.1,0,0,30,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/21/2026",2,7.3,0,0,30,0],["Angel Rivera","MA-COGGESHALL","MANNY","3/4/2026",0,8.9,1,0,60,1],["Angel Rivera","MA-FALLRIVER","MANNY","3/5/2026",0,7.4,0,0,30,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/6/2026",0,7.6,0,0,30,0],["Angel Rivera","MA-COGGESHALL","MANNY","3/7/2026",0,7.6,0,0,30,0],["Angel Rivera","MA-FALLRIVER","MANNY","3/9/2026",1,7.5,0,0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/23",3,6.1,0,0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/26",3,7.4,0,32.0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/11/2026",1,6.1,0,0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/12/2026",1,7.1,0,44.0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/13/2026",1,8.7,1,0,60,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/19/2026",2,6.9,0,35.0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/2/2026",0,6.7,0,39.0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/20/2026",2,6.3,0,48.0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/5/2026",0,8.6,1,44.0,60,1],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/6/2026",0,7.4,0,0,30,0],["Keysha Betancourt","RI-751BROAD","ROSE PEREZ","3/9/2026",1,6.7,0,0,30,0],["Shanna Speed","TN-WEST MARKET","CHERYL","3/23",3,8.5,1,0,60,0],["Cleoty Morales","RI-NEWPORT AVE","ROSE PEREZ","3/24",3,6.6,0,0,30,0],["Cleoty Morales","RI-NEWPORT AVE","ROSE PEREZ","3/26",3,6.6,0,0,30,0],["Cleoty Morales","RI-NEWPORT AVE","ROSE PEREZ","3/16/2026",2,6.5,0,0,30,1],["Cleoty Morales","RI-NEWPORT AVE","ROSE PEREZ","3/9/2026",1,6.3,0,0,30,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/23",3,8.8,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/10/2026",1,8.7,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/13/2026",1,9.0,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/14/2026",1,8.7,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/16/2026",2,7.7,0,0,30,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/17/2026",2,8.7,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/2/2026",0,8.7,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/20/2026",2,9.7,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/21/2026",2,9.1,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/5/2026",0,9.1,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/6/2026",0,8.8,1,0,60,1],["Austin Campbell","TN-MORRISTOWN","MR. WATTS","3/9/2026",1,7.9,0,0,30,1],["Rashia Oates","CT-NEW LONDON","MIKE COBBS","3/25",3,7.5,0,0,30,0],["Rashia Oates","CT-NORWICH","MIKE COBBS","3/26",3,7.5,0,0,30,0],["Rashia Oates","CT-NORWICH","MIKE COBBS","3/28",3,6.8,0,30.0,30,0],["Rashia Oates","CT-NEW LONDON","MIKE COBBS","3/17/2026",2,6.8,0,35.0,30,0],["Rashia Oates","CT-NEW LONDON","MIKE COBBS","3/20/2026",2,6.1,0,0,30,0],["Rashia Oates","CT-NEW LONDON","MIKE COBBS","3/4/2026",0,7.2,0,33.0,30,0],["Rashia Oates","CT-NEW LONDON","MIKE COBBS","3/6/2026",0,6.7,0,0,30,0],["Rashia Oates","CT-NEW LONDON","MIKE COBBS","3/7/2026",0,8.5,1,41.0,60,0],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/24",3,7.9,0,38.0,30,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/26",3,8.0,1,20.0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/28",3,8.7,1,29.0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/10/2026",1,7.8,0,36.0,30,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/17/2026",2,8.2,1,49.0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/18/2026",2,8.8,1,0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/19/2026",2,8.3,1,38.0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/21/2026",2,8.4,1,29.0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/4/2026",0,8.0,1,24.0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/5/2026",0,7.9,0,41.0,30,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/6/2026",0,8.2,1,34.0,60,1],["Christopher Pierre Paul","RI-COVENTRY","AMBULAI SHEKU","3/8/2026",0,6.3,0,0,30,1],["Luis Burgos","CT-NORWICH","MIKE COBBS","3/24",3,6.5,0,36.0,30,0],["Luis Burgos","CT-NORWICH","MIKE COBBS","3/13/2026",1,6.5,0,31.0,30,0],["Luis Burgos","CT-NORWICH","MIKE COBBS","3/19/2026",2,6.5,0,30.0,30,0],["Luis Burgos","CT-NORWICH","MIKE COBBS","3/20/2026",2,6.5,0,30.0,30,0],["Luis Burgos","CT-NORWICH","MIKE COBBS","3/21/2026",2,7.4,0,30.0,30,1],["Luis Burgos","CT-NORWICH","MIKE COBBS","3/5/2026",0,7.0,0,41.0,30,0],["Luis Burgos","CT-NORWICH","MIKE COBBS","3/6/2026",0,6.0,0,32.0,30,0],["Luis Burgos","CT-NEW LONDON","MIKE COBBS","3/7/2026",0,6.8,0,30.0,30,0],["Jasmine Griffin","AR-RADIO GEYER","TBD","3/23",3,8.3,1,0,60,0],["Jasmine Griffin","AR-RADIO GEYER","TBD","3/26",3,6.9,0,0,30,0],["Jasmine Griffin","AR-RADIO GEYER","TBD","3/29",3,6.3,0,0,30,0],["Jasmine Griffin","AR-COLONEL GLENN","TBD","3/15/2026",1,6.2,0,0,30,1],["Jasmine Griffin","AR-RADIO GEYER","TBD","3/2/2026",0,7.1,0,19.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/23",3,6.6,0,20.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/24",3,7.3,0,14.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/26",3,7.9,0,19.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/27",3,7.9,0,8.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/29",3,7.0,0,4.0,30,1],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/13/2026",1,7.4,0,14.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/14/2026",1,8.5,1,23.0,60,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/16/2026",2,8.5,1,22.0,60,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/17/2026",2,9.2,1,11.0,60,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/21/2026",2,7.8,0,17.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/3/2026",0,9.1,1,39.0,60,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/4/2026",0,7.3,0,0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/7/2026",0,9.3,1,37.0,60,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/8/2026",0,7.4,0,15.0,30,0],["Richard Foster","MA-KELLEY SQUARE","ROSE PEREZ","3/9/2026",1,9.0,1,15.0,60,0],["Alishabeth Gonzalez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/11/2026",1,6.5,0,0,30,0],["Alishabeth Gonzalez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/14/2026",1,6.0,0,0,30,0],["Alishabeth Gonzalez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/21/2026",2,7.6,0,0,30,0],["Alishabeth Gonzalez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/5/2026",0,6.5,0,0,30,0],["Jason Link Jr","RI-COVENTRY","AMBULAI SHEKU","3/23",3,6.7,0,31.0,30,1],["Jason Link Jr","MA-CAPE CODE MALL","AMBULAI SHEKU","3/25",3,6.6,0,0,30,1],["Jason Link Jr","RI-DOUGLAS","AMBULAI SHEKU","3/27",3,7.2,0,46.0,30,1],["Jason Link Jr","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/28",3,7.3,0,0,30,0],["Jason Link Jr","RI-DOUGLAS","AMBULAI SHEKU","3/10/2026",1,8.0,0,2.0,30,1],["Jason Link Jr","MA-CAPE CODE MALL","AMBULAI SHEKU","3/11/2026",1,8.8,1,0,60,1],["Jason Link Jr","MA-CAPE CODE MALL","AMBULAI SHEKU","3/18/2026",2,8.3,1,39.0,60,1],["Jason Link Jr","RI-BROADWAY","AMBULAI SHEKU","3/2/2026",0,7.2,0,0,30,1],["Jason Link Jr","RI-DOUGLAS","AMBULAI SHEKU","3/20/2026",2,7.5,0,0,30,1],["Jason Link Jr","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/21/2026",2,7.4,0,39.0,30,0],["Jason Link Jr","MA-CAPE CODE MALL","AMBULAI SHEKU","3/4/2026",0,6.6,0,0,30,0],["Jason Link Jr","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/7/2026",0,7.2,0,16.0,30,0],["Jason Link Jr","RI-BROADWAY","AMBULAI SHEKU","3/9/2026",1,6.8,0,0,30,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/23",3,10.2,1,0,60,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/24",3,9.9,1,0,60,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/27",3,11.2,1,0,60,0],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/29",3,7.8,0,0,30,0],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/10/2026",1,9.3,1,0,60,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/11/2026",1,9.9,1,0,60,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/15/2026",1,7.4,0,0,30,0],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/16/2026",2,10.0,1,0,60,0],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/18/2026",2,10.4,1,0,60,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/19/2026",2,7.4,0,38.0,30,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/2/2026",0,9.9,1,0,60,0],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/22/2026",2,7.2,0,0,30,0],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/3/2026",0,8.6,1,0,60,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/4/2026",0,10.0,1,0,60,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/5/2026",0,7.5,0,0,30,0],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/8/2026",0,7.0,0,0,30,1],["Lucmila Lopes","MA- SOUTH SHORE MALL","ROSE PEREZ","3/9/2026",1,10.5,1,0,60,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/24",3,9.3,1,38.0,60,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/25",3,8.4,1,31.0,60,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/26",3,10.2,1,11.0,60,1],["Melissa Sloane",["TN-MAGNOLIA","TN-NORTH BROARDWAY"],"MR. WATTS","3/27",3,8.8,1,31.0,60,0],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/29",3,6.6,0,0,30,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/12/2026",1,9.5,1,33.0,60,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/13/2026",1,6.5,0,30.0,30,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/15/2026",1,6.2,0,0,30,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/17/2026",2,9.3,1,16.0,60,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/18/2026",2,9.4,1,0,60,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/20/2026",2,6.1,0,27.0,30,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/22/2026",2,6.5,0,0,30,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/7/2026",0,9.8,1,0,60,1],["Melissa Sloane","TN-MAGNOLIA","MR. WATTS","3/8/2026",0,8.1,1,0,60,1],["Cece Williamson","TN-SHALLOWFORD RD","MR. WATTS","3/27",3,6.8,0,39.0,30,0],["Cece Williamson","TN-SHALLOWFORD RD","MR. WATTS","3/29",3,6.5,0,0,30,0],["Cece Williamson","TN-SHALLOWFORD RD","MR. WATTS","3/13/2026",1,6.8,0,29.0,30,0],["Cece Williamson","TN-SHALLOWFORD RD","MR. WATTS","3/21/2026",2,6.5,0,0,30,0],["Cece Williamson","TN-SHALLOWFORD RD","MR. WATTS","3/22/2026",2,6.9,0,0,30,1],["Cece Williamson","TN-SHALLOWFORD RD","MR. WATTS","3/8/2026",0,6.3,0,32.0,30,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/24",3,10.1,1,0,60,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/25",3,10.1,1,0,60,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/26",3,10.2,1,0,60,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/27",3,10.1,1,0,60,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/28",3,10.0,1,0,60,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/29",3,7.1,0,0,30,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/10/2026",1,10.3,1,2.0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/11/2026",1,9.7,1,9.0,60,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/12/2026",1,10.6,1,0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/13/2026",1,10.9,1,0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/14/2026",1,10.8,1,13.0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/15/2026",1,6.6,0,0,30,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/16/2026",2,6.7,0,0,30,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/17/2026",2,10.3,1,0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/18/2026",2,9.7,1,19.0,60,0],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/19/2026",2,10.0,1,1.0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/20/2026",2,9.9,1,0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/21/2026",2,9.9,1,9.0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/22/2026",2,7.0,0,0,30,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/3/2026",0,10.6,1,0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/4/2026",0,9.9,1,0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/5/2026",0,9.6,1,12.0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/6/2026",0,9.8,1,0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/7/2026",0,10.2,1,24.0,60,1],["Shelena Hamilton","TN-NORTH BROARDWAY","MR. WATTS","3/8/2026",0,6.7,0,0,30,0],["Alma Cedeno","MA-STATE STREET","JOEL MONTERO","3/10/2026",1,6.5,0,0,30,0],["Alma Cedeno","MA-STATE STREET","JOEL MONTERO","3/14/2026",1,6.2,0,0,30,0],["Alma Cedeno","MA-STATE STREET","JOEL MONTERO","3/15/2026",1,6.7,0,0,30,1],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/24",3,9.5,1,30.0,60,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/25",3,8.2,1,26.0,60,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/27",3,8.2,1,31.0,60,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/11/2026",1,8.5,1,25.0,60,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/13/2026",1,7.4,0,31.0,30,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/14/2026",1,9.5,1,30.0,60,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/15/2026",1,6.6,0,0,30,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/16/2026",2,7.8,0,31.0,30,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/19/2026",2,6.1,0,34.0,30,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/2/2026",0,9.2,1,37.0,60,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/20/2026",2,7.5,0,0,30,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/22/2026",2,6.7,0,0,30,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/5/2026",0,9.7,1,38.0,60,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/6/2026",0,6.8,0,34.0,30,0],["Oscar Mendez Muniz","RI-HARTFORD AVE","ROSE PEREZ","3/7/2026",0,7.8,0,43.0,30,0],["Jensy Rodriguez","RI-751BROAD","ROSE PEREZ","3/24",3,9.7,1,0,60,1],["Jensy Rodriguez","RI-751BROAD","ROSE PEREZ","3/27",3,8.0,1,24.0,60,0],["Jensy Rodriguez","RI-RESERVOIR AVE","AMBULAI SHEKU","3/28",3,9.5,1,0,60,1],["Jensy Rodriguez","RI-751BROAD","ROSE PEREZ","3/10/2026",1,9.7,1,0,60,1],["Jensy Rodriguez","RI-751BROAD","ROSE PEREZ","3/12/2026",1,6.0,0,0,30,0],["Jensy Rodriguez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/16/2026",2,7.0,0,0,30,0],["Jensy Rodriguez","RI-751BROAD","ROSE PEREZ","3/17/2026",2,9.6,1,0,60,0],["Jensy Rodriguez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/2/2026",0,7.1,0,0,30,0],["Jensy Rodriguez","RI-751BROAD","ROSE PEREZ","3/21/2026",2,9.1,1,0,60,0],["Jensy Rodriguez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/5/2026",0,6.3,0,0,30,0],["Jensy Rodriguez","RI-RESERVOIR AVE","AMBULAI SHEKU","3/6/2026",0,6.5,0,44.0,30,0],["Jensy Rodriguez","RI-RESERVOIR AVE","AMBULAI SHEKU","3/7/2026",0,9.8,1,0,60,1],["Jensy Rodriguez","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/9/2026",1,9.6,1,0,60,1],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/23",3,7.1,0,0,30,0],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/27",3,7.1,0,25.0,30,1],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/29",3,6.7,0,0,30,1],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/16/2026",2,8.1,1,0,60,1],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/18/2026",2,7.4,0,0,30,0],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/19/2026",2,7.4,0,0,30,0],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/2/2026",0,7.8,0,0,30,0],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/4/2026",0,7.0,0,37.0,30,0],["Brendaliz Oliver Rodriguez","CT-NORWICH","MIKE COBBS","3/9/2026",1,9.0,1,36.0,60,1],["Handriel Marmol","RI-BROADWAY","AMBULAI SHEKU","3/23",3,8.9,1,47.0,60,1],["Handriel Marmol","RI-BROADWAY","AMBULAI SHEKU","3/24",3,10.1,1,0,60,1],["Handriel Marmol","RI-RESERVOIR AVE","AMBULAI SHEKU","3/26",3,9.4,1,0,60,1],["Handriel Marmol","RI-DOUGLAS","AMBULAI SHEKU","3/28",3,9.7,1,15.0,60,1],["Handriel Marmol","RI-BROADWAY","AMBULAI SHEKU","3/10/2026",1,9.5,1,32.0,60,1],["Handriel Marmol","RI-RESERVOIR AVE","AMBULAI SHEKU","3/12/2026",1,9.3,1,46.0,60,1],["Handriel Marmol","RI-RESERVOIR AVE","AMBULAI SHEKU","3/14/2026",1,9.5,1,27.0,60,0],["Handriel Marmol","RI-BROADWAY","AMBULAI SHEKU","3/17/2026",2,9.4,1,30.0,60,1],["Handriel Marmol","RI-BALD HILL","MIKE COBBS","3/20/2026",2,6.3,0,0,30,0],["Mariah Gonzalez","MA-KELLEY SQUARE","ROSE PEREZ","3/24",3,6.3,0,27.0,30,0],["Mariah Gonzalez","MA-KELLEY SQUARE","ROSE PEREZ","3/26",3,7.9,0,25.0,30,0],["Mariah Gonzalez","MA-KELLEY SQUARE","ROSE PEREZ","3/11/2026",1,6.1,0,15.0,30,0],["Mariah Gonzalez","MA-KELLEY SQUARE","ROSE PEREZ","3/19/2026",2,6.6,0,25.0,30,0],["Mariah Gonzalez","MA-KELLEY SQUARE","ROSE PEREZ","3/4/2026",0,6.5,0,16.0,30,0],["Mariah Gonzalez","MA-KELLEY SQUARE","ROSE PEREZ","3/9/2026",1,6.4,0,12.0,30,0],["Isaiah Caliz","MA-LOCUST STREET","JOEL MONTERO","3/23",3,7.7,0,23.0,30,1],["Isaiah Caliz","MA-EXCHANGE ST.","JOEL MONTERO","3/27",3,6.2,0,0,30,0],["Isaiah Caliz","MA-LOCUST STREET","JOEL MONTERO","3/10/2026",1,8.1,1,45.0,60,1],["Isaiah Caliz","MA-LOCUST STREET","JOEL MONTERO","3/11/2026",1,8.7,1,0,60,1],["Isaiah Caliz","MA-EXCHANGE ST.","JOEL MONTERO","3/16/2026",2,9.1,1,0,60,1],["Isaiah Caliz","MA-LOCUST STREET","JOEL MONTERO","3/18/2026",2,9.5,1,0,60,1],["Isaiah Caliz","MA-LOCUST STREET","JOEL MONTERO","3/2/2026",0,8.5,1,0,60,1],["Isaiah Caliz","MA-EXCHANGE ST.","JOEL MONTERO","3/21/2026",2,8.3,1,0,60,1],["Isaiah Caliz","MA-EXCHANGE ST.","JOEL MONTERO","3/22/2026",2,6.1,0,0,30,1],["Isaiah Caliz","MA-LOCUST STREET","JOEL MONTERO","3/6/2026",0,8.2,1,49.0,60,1],["Isaiah Caliz","MA-LOCUST STREET","JOEL MONTERO","3/7/2026",0,7.6,0,0,30,0],["Isaiah Caliz","MA-EXCHANGE ST.","JOEL MONTERO","3/8/2026",0,6.2,0,0,30,1],["Isaiah Caliz","MA-EXCHANGE ST.","JOEL MONTERO","3/9/2026",1,8.8,1,0,60,1],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/25",3,9.3,1,0,60,0],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/11/2026",1,7.5,0,35.0,30,0],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/16/2026",2,8.2,1,0,60,0],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/19/2026",2,8.8,1,27.0,60,0],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/2/2026",0,6.9,0,30.0,30,0],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/3/2026",0,6.8,0,29.0,30,0],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/4/2026",0,10.1,1,0,60,1],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/5/2026",0,9.6,1,0,60,1],["Angela Westfield","TN-KEITH ST","MR. WATTS","3/6/2026",0,6.2,0,36.0,30,0],["Jermaine Underwood","TN-SHALLOWFORD RD","MR. WATTS","3/11/2026",1,8.2,1,0,60,0],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/23",3,7.9,0,37.0,30,0],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/28",3,6.1,0,0,30,0],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/29",3,6.7,0,30.0,30,0],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/12/2026",1,7.4,0,32.0,30,0],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/15/2026",1,6.6,0,36.0,30,1],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/21/2026",2,6.3,0,0,30,0],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/22/2026",2,6.5,0,36.0,30,0],["Armando Perez","MA-HOLYOKE","JOEL MONTERO","3/8/2026",0,6.5,0,34.0,30,0],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/23",3,7.6,0,17.0,30,1],["Kadisha Rivera","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/24",3,6.3,0,0,30,0],["Kadisha Rivera","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/26",3,6.8,0,0,30,0],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/29",3,6.1,0,0,30,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/11/2026",1,8.1,1,4.0,60,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/13/2026",1,7.9,0,10.0,30,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/14/2026",1,8.2,1,46.0,60,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/15/2026",1,6.0,0,0,30,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/16/2026",2,7.9,0,0,30,1],["Kadisha Rivera","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/17/2026",2,7.0,0,30.0,30,1],["Kadisha Rivera","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/19/2026",2,7.1,0,7.0,30,0],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/2/2026",0,7.8,0,19.0,30,1],["Kadisha Rivera","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/20/2026",2,8.5,1,22.0,60,0],["Kadisha Rivera","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/22/2026",2,7.0,0,0,30,0],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/3/2026",0,7.8,0,15.0,30,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/4/2026",0,7.3,0,28.0,30,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/5/2026",0,8.1,1,0,60,1],["Kadisha Rivera","RI-DOUGLAS","AMBULAI SHEKU","3/6/2026",0,7.5,0,0,30,1],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/23",3,6.9,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/24",3,6.8,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/26",3,6.5,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/10/2026",1,6.8,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/11/2026",1,7.5,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/16/2026",2,6.8,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/17/2026",2,6.8,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/18/2026",2,6.8,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/19/2026",2,6.7,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/2/2026",0,7.5,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/5/2026",0,6.7,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/6/2026",0,6.9,0,0,30,0],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/8/2026",0,6.6,0,0,30,1],["Jose Monroy","RI-EAST PROVIDENCE","MIKE COBBS","3/9/2026",1,6.7,0,0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/23",3,8.3,1,36.0,60,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/26",3,8.8,1,46.0,60,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/27",3,7.9,0,22.0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/28",3,7.5,0,42.0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/29",3,6.5,0,0,30,1],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/13/2026",1,7.3,0,30.0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/14/2026",1,7.0,0,29.0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/16/2026",2,6.2,0,0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/20/2026",2,8.3,1,19.0,60,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/3/2026",0,8.8,1,0,60,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/4/2026",0,8.6,1,0,60,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/5/2026",0,6.0,0,0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/7/2026",0,6.8,0,1.0,30,0],["Isiaish Valenzuela","RI-EAST PROVIDENCE","MIKE COBBS","3/9/2026",1,9.8,1,12.0,60,0],["Jaden Thomas","RI-RESERVOIR AVE","AMBULAI SHEKU","3/11/2026",1,6.0,0,0,30,0],["Jaden Thomas","RI-RESERVOIR AVE","AMBULAI SHEKU","3/13/2026",1,6.1,0,0,30,0],["Jaden Thomas","RI-RESERVOIR AVE","AMBULAI SHEKU","3/14/2026",1,6.1,0,0,30,0],["Jaden Thomas","RI-RESERVOIR AVE","AMBULAI SHEKU","3/16/2026",2,7.0,0,0,30,0],["Jaden Thomas","RI-RESERVOIR AVE","AMBULAI SHEKU","3/4/2026",0,6.0,0,0,30,0],["Jaden Thomas","RI-RESERVOIR AVE","AMBULAI SHEKU","3/9/2026",1,6.0,0,0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/25",3,7.6,0,30.0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/26",3,6.0,0,0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/28",3,6.0,0,0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/10/2026",1,7.3,0,31.0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/12/2026",1,7.9,0,29.0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/14/2026",1,7.5,0,0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/15/2026",1,6.4,0,0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/19/2026",2,7.0,0,0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/2/2026",0,7.9,0,30.0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/21/2026",2,6.7,0,31.0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/4/2026",0,7.5,0,30.0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/5/2026",0,7.1,0,31.0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/8/2026",0,6.2,0,0,30,0],["Milton Vega","RI-HARTFORD AVE","ROSE PEREZ","3/9/2026",1,8.2,1,31.0,60,0],["Yarele Soler","MA- SOUTH SHORE MALL","ROSE PEREZ","3/25",3,6.2,0,0,30,1],["Yarele Soler","MA- SOUTH SHORE MALL","ROSE PEREZ","3/26",3,6.5,0,0,30,1],["Yarele Soler","MA- SOUTH SHORE MALL","ROSE PEREZ","3/12/2026",1,6.1,0,0,30,1],["Yarele Soler","MA- SOUTH SHORE MALL","ROSE PEREZ","3/17/2026",2,7.0,0,0,30,1],["Yarele Soler","MA- SOUTH SHORE MALL","ROSE PEREZ","3/2/2026",0,6.3,0,0,30,0],["Yarele Soler","MA- SOUTH SHORE MALL","ROSE PEREZ","3/21/2026",2,8.1,1,49.0,60,1],["James Garcia","CT-NEW LONDON","MIKE COBBS","3/16/2026",2,7.5,0,0,30,0],["James Garcia","CT-NEW LONDON","MIKE COBBS","3/2/2026",0,7.8,0,31.0,30,0],["James Garcia","CT-NEW LONDON","MIKE COBBS","3/9/2026",1,7.8,0,0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/23",3,8.6,1,0,60,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/26",3,8.1,1,1.0,60,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/11/2026",1,6.6,0,0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/16/2026",2,7.2,0,29.0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/17/2026",2,6.5,0,34.0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/19/2026",2,6.2,0,0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/2/2026",0,6.1,0,0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/4/2026",0,6.1,0,0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/5/2026",0,6.6,0,0,30,0],["Shanelle Sanchez","CT-NEW LONDON","MIKE COBBS","3/6/2026",0,6.1,0,0,30,0],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/23",3,7.8,0,2.0,30,1],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/24",3,8.3,1,1.0,60,0],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/25",3,8.6,1,0,60,0],["April Mayorga","TN-WESTERN AVE","MR. WATTS","3/26",3,9.5,1,0,60,0],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/28",3,8.0,0,1.0,30,0],["April Mayorga",["TN-NORTH BROARDWAY","TN-WESTERN AVE"],"MR. WATTS","3/29",3,7.6,0,2.0,30,0],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/11/2026",1,6.6,0,0,30,0],["April Mayorga","TN-WESTERN AVE","MR. WATTS","3/12/2026",1,9.9,1,0,60,1],["April Mayorga","TN-WESTERN AVE","MR. WATTS","3/14/2026",1,10.1,1,0,60,1],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/15/2026",1,6.6,0,1.0,30,0],["April Mayorga","TN-WESTERN AVE","MR. WATTS","3/19/2026",2,10.3,1,1.0,60,1],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/2/2026",0,8.6,1,0,60,1],["April Mayorga","TN-WESTERN AVE","MR. WATTS","3/22/2026",2,8.0,0,1.0,30,0],["April Mayorga","TN-WESTERN AVE","MR. WATTS","3/4/2026",0,8.1,1,1.0,60,0],["April Mayorga","TN-WESTERN AVE","MR. WATTS","3/5/2026",0,8.9,1,1.0,60,1],["April Mayorga","TN-NORTH BROARDWAY","MR. WATTS","3/9/2026",1,8.3,1,15.0,60,1],["Melicia Angel","TN-WEST MARKET","CHERYL","3/24",3,8.9,1,30.0,60,0],["Melicia Angel","TN-WEST MARKET","CHERYL","3/12/2026",1,6.1,0,0,30,0],["Melicia Angel","TN-WEST MARKET","CHERYL","3/15/2026",1,7.1,0,0,30,1],["Melicia Angel","TN-WEST MARKET","CHERYL","3/22/2026",2,6.5,0,0,30,1],["Melicia Angel","TN-WEST MARKET","CHERYL","3/8/2026",0,6.9,0,0,30,1],["Delbert Phillips","TN-WESTERN AVE","MR. WATTS","3/22/2026",2,6.5,0,0,30,0],["Christopher Marion","TN-NORTH BROARDWAY","MR. WATTS","3/25",3,7.3,0,15.0,30,0],["Christopher Marion","TN-NORTH BROARDWAY","MR. WATTS","3/26",3,6.9,0,0,30,0],["Christopher Marion","TN-NORTH BROARDWAY","MR. WATTS","3/27",3,7.5,0,31.0,30,0],["Ashton Diamond","TN-MORRISTOWN","MR. WATTS","3/25",3,9.4,1,0,60,1],["Ashton Diamond","TN-MORRISTOWN","MR. WATTS","3/26",3,8.0,1,0,60,1],["Ashton Diamond","TN-MORRISTOWN","MR. WATTS","3/27",3,7.5,0,0,30,1],["Divante Lacy","MA-STATE STREET","JOEL MONTERO","3/28",3,8.8,1,38.0,60,0],["Divante Lacy","MA-STATE STREET","JOEL MONTERO","3/7/2026",0,6.1,0,30.0,30,0],["Napoleoa Dacruz","MA-COGGESHALL","MANNY","3/12/2026",1,8.6,1,48.0,60,1],["Napoleoa Dacruz","MA-COGGESHALL","MANNY","3/14/2026",1,9.3,1,0,60,1],["Napoleoa Dacruz","MA-COGGESHALL","MANNY","3/20/2026",2,8.5,1,40.0,60,0],["Napoleoa Dacruz","MA-COGGESHALL","MANNY","3/21/2026",2,9.1,1,0,60,1],["Napoleoa Dacruz","MA-COGGESHALL","MANNY","3/6/2026",0,7.8,0,41.0,30,0],["Napoleoa Dacruz","MA-COGGESHALL","MANNY","3/7/2026",0,9.3,1,0,60,0],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/23",3,9.6,1,0,60,1],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/27",3,9.5,1,0,60,1],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/29",3,6.0,0,30.0,30,1],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/10/2026",1,9.5,1,0,60,0],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/11/2026",1,8.3,1,40.0,60,0],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/13/2026",1,8.0,1,38.0,60,0],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/15/2026",1,7.1,0,0,30,1],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/16/2026",2,10.1,1,0,60,0],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/4/2026",0,8.9,1,47.0,60,0],["Daniel Rosales","RI-RESERVOIR AVE","AMBULAI SHEKU","3/8/2026",0,6.5,0,0,30,1],["Josh Landry","CT-NORWICH","MIKE COBBS","3/24",3,7.2,0,0,30,0],["Josh Landry","CT-NEW LONDON","MIKE COBBS","3/25",3,6.8,0,0,30,0],["Josh Landry","CT-NEW LONDON","MIKE COBBS","3/27",3,7.4,0,0,30,0],["Josh Landry","CT-NEW LONDON","MIKE COBBS","3/12/2026",1,8.8,1,0,60,0],["Josh Landry","CT-NEW LONDON","MIKE COBBS","3/19/2026",2,7.6,0,0,30,0],["Josh Landry","CT-NEW LONDON","MIKE COBBS","3/2/2026",0,7.2,0,0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/23",3,7.0,0,25.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/24",3,7.3,0,16.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/25",3,7.0,0,30.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/27",3,7.8,0,30.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/28",3,6.8,0,0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/10/2026",1,6.9,0,31.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/11/2026",1,7.5,0,7.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/12/2026",1,7.0,0,30.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/17/2026",2,6.6,0,32.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/18/2026",2,6.7,0,30.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/19/2026",2,7.2,0,32.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/2/2026",0,7.3,0,22.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/20/2026",2,7.8,0,31.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/3/2026",0,7.3,0,29.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/4/2026",0,7.8,0,17.0,30,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/6/2026",0,8.5,1,31.0,60,0],["Nereida Rodriguez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/7/2026",0,6.5,0,43.0,30,0],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/23",3,10.0,1,0,60,0],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/25",3,6.6,0,44.0,30,0],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/27",3,6.1,0,46.0,30,0],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/11/2026",1,10.0,1,0,60,0],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/15/2026",1,7.0,0,0,30,1],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/18/2026",2,6.2,0,0,30,0],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/20/2026",2,7.3,0,0,30,0],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/21/2026",2,9.9,1,0,60,1],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/22/2026",2,6.4,0,38.0,30,1],["Gilberto Alvarez","CT-NORWICH","MIKE COBBS","3/7/2026",0,8.8,1,29.0,60,1],["Gilberto Alvarez","CT-NEW LONDON","MIKE COBBS","3/8/2026",0,7.0,0,32.0,30,1],["Lori Ruiz","MA-ROCKDALE","MANNY","3/23",3,6.3,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/24",3,7.3,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/26",3,6.1,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/27",3,7.5,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/10/2026",1,6.2,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/16/2026",2,6.8,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/17/2026",2,6.3,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/2/2026",0,7.2,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/20/2026",2,8.6,1,30.0,60,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/3/2026",0,7.4,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/5/2026",0,6.6,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/6/2026",0,6.8,0,0,30,0],["Lori Ruiz","MA-ROCKDALE","MANNY","3/9/2026",1,6.7,0,0,30,0],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/25",3,8.7,1,17.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/26",3,8.3,1,42.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/27",3,7.8,0,37.0,30,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/28",3,7.9,0,45.0,30,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/29",3,6.2,0,0,30,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/11/2026",1,8.5,1,23.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/12/2026",1,8.5,1,26.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/13/2026",1,8.8,1,30.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/14/2026",1,8.6,1,25.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/19/2026",2,8.6,1,22.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/20/2026",2,8.6,1,26.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/21/2026",2,7.4,0,46.0,30,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/4/2026",0,8.4,1,45.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/5/2026",0,8.2,1,42.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/6/2026",0,8.4,1,27.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/7/2026",0,8.5,1,18.0,60,1],["Frank Alberto Merino Ceballos","RI-BROADWAY","AMBULAI SHEKU","3/8/2026",0,6.1,0,26.0,30,1],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/25",3,9.2,1,0,60,0],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/11/2026",1,10.9,1,0,60,0],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/14/2026",1,6.2,0,0,30,1],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/15/2026",1,6.0,0,0,30,1],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/17/2026",2,7.0,0,0,30,0],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/18/2026",2,6.2,0,43.0,30,0],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/19/2026",2,7.4,0,0,30,0],["Sabrina Morales","RI-BROAD ST","ROSE PEREZ","3/8/2026",0,6.9,0,0,30,1],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/24",3,8.8,1,0,60,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/27",3,8.8,1,30.0,60,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/28",3,8.3,1,18.0,60,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/10/2026",1,7.0,0,0,30,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/14/2026",1,8.1,1,29.0,60,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/16/2026",2,7.8,0,0,30,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/17/2026",2,6.3,0,45.0,30,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/18/2026",2,7.3,0,45.0,30,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/3/2026",0,7.0,0,20.0,30,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/6/2026",0,10.0,1,21.0,60,0],["Marquesha Jones","TN-SHALLOWFORD RD","MR. WATTS","3/9/2026",1,9.4,1,32.0,60,0],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/23",3,9.2,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/24",3,9.4,1,0,60,0],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/25",3,9.1,1,0,60,0],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/27",3,9.3,1,0,60,0],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/28",3,9.2,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/10/2026",1,9.3,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/11/2026",1,9.3,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/13/2026",1,9.5,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/15/2026",1,6.2,0,0,30,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/16/2026",2,9.2,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/17/2026",2,9.4,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/18/2026",2,9.2,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/2/2026",0,9.2,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/20/2026",2,10.0,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/21/2026",2,9.2,1,0,60,0],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/3/2026",0,9.4,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/6/2026",0,9.3,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/7/2026",0,9.2,1,0,60,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/8/2026",0,6.3,0,0,30,1],["Nicki Johnson","TN-WESTERN AVE","MR. WATTS","3/9/2026",1,9.4,1,0,60,1],["Hector Torres","MA-HOLYOKE","JOEL MONTERO","3/29",3,6.8,0,30.0,30,0],["Hector Torres","MA-HOLYOKE","JOEL MONTERO","3/21/2026",2,6.6,0,0,30,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/24",3,8.8,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/25",3,9.8,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/26",3,9.4,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/27",3,9.5,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/29",3,6.7,0,0,30,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/11/2026",1,8.3,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/12/2026",1,9.4,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/13/2026",1,9.8,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/14/2026",1,9.6,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/15/2026",1,6.4,0,0,30,1],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/18/2026",2,9.6,1,0,60,1],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/19/2026",2,9.5,1,0,60,1],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/20/2026",2,8.6,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/21/2026",2,9.7,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/4/2026",0,8.8,1,48.0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/5/2026",0,9.1,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/6/2026",0,9.4,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/7/2026",0,9.0,1,0,60,0],["Karmina Mendoza","AR-RADIO GEYER","TBD","3/8/2026",0,6.8,0,0,30,1],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/23",3,6.8,0,11.0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/24",3,6.3,0,29.0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/25",3,6.4,0,33.0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/26",3,7.3,0,29.0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/12/2026",1,7.2,0,33.0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/16/2026",2,6.5,0,39.0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/18/2026",2,6.8,0,28.0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/5/2026",0,7.0,0,0,30,0],["Jessica Retamar","MA-STATE STREET","JOEL MONTERO","3/9/2026",1,6.3,0,30.0,30,0],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/25",3,8.8,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/26",3,9.0,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/27",3,10.0,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/28",3,9.1,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/12/2026",1,9.3,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/13/2026",1,9.4,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/14/2026",1,9.1,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/16/2026",2,8.8,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/17/2026",2,8.9,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/20/2026",2,8.7,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/21/2026",2,8.8,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/3/2026",0,7.8,0,0,30,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/4/2026",0,8.4,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/5/2026",0,9.6,1,0,60,1],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/7/2026",0,7.2,0,0,30,0],["Alicia Montero","MA-LOCUST STREET","JOEL MONTERO","3/9/2026",1,8.9,1,0,60,1],["Justin Moniz","MA-FALLRIVER","MANNY","3/26",3,6.3,0,3.0,30,0],["Justin Moniz","MA-FALLRIVER","MANNY","3/27",3,8.5,1,45.0,60,0],["Justin Moniz","MA-FALLRIVER","MANNY","3/11/2026",1,7.8,0,30.0,30,1],["Justin Moniz","MA-FALLRIVER","MANNY","3/14/2026",1,8.2,1,33.0,60,1],["Justin Moniz","MA-FALLRIVER","MANNY","3/18/2026",2,8.1,1,49.0,60,0],["Justin Moniz","MA-FALLRIVER","MANNY","3/20/2026",2,8.2,1,49.0,60,1],["Justin Moniz","MA-FALLRIVER","MANNY","3/21/2026",2,8.2,1,35.0,60,0],["Justin Moniz","MA-FALLRIVER","MANNY","3/6/2026",0,8.4,1,33.0,60,0],["Justin Moniz","MA-FALLRIVER","MANNY","3/7/2026",0,8.5,1,33.0,60,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/14/2026",1,8.9,1,37.0,60,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/17/2026",2,7.9,0,41.0,30,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/18/2026",2,8.5,1,30.0,60,0],["Brenda Serna","AR-COLONEL GLENN","TBD","3/20/2026",2,8.2,1,49.0,60,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/3/2026",0,8.6,1,40.0,60,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/4/2026",0,8.3,1,32.0,60,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/6/2026",0,7.7,0,47.0,30,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/7/2026",0,7.8,0,43.0,30,1],["Brenda Serna","AR-COLONEL GLENN","TBD","3/9/2026",1,8.3,1,47.0,60,1],["Brandon Mitchell","RI-NEWPORT AVE","ROSE PEREZ","3/23",3,7.0,0,0,30,0],["Brandon Mitchell","RI-NEWPORT AVE","ROSE PEREZ","3/24",3,8.6,1,0,60,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/25",3,6.5,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/26",3,6.8,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/27",3,7.1,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/11/2026",1,8.9,1,0,60,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/12/2026",1,6.0,0,0,30,0],["Brandon Mitchell","RI-NEWPORT AVE","ROSE PEREZ","3/17/2026",2,7.0,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/18/2026",2,7.4,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/19/2026",2,6.8,0,0,30,0],["Brandon Mitchell","RI-NEWPORT AVE","ROSE PEREZ","3/2/2026",0,6.0,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/20/2026",2,6.8,0,0,30,0],["Brandon Mitchell","RI-NEWPORT AVE","ROSE PEREZ","3/3/2026",0,6.7,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/4/2026",0,6.3,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/5/2026",0,7.6,0,0,30,0],["Brandon Mitchell","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/6/2026",0,8.9,1,0,60,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/24",3,6.2,0,0,30,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/27",3,6.2,0,0,30,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/29",3,6.2,0,0,30,1],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/10/2026",1,6.4,0,0,30,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/15/2026",1,6.1,0,0,30,1],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/17/2026",2,6.3,0,0,30,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/18/2026",2,6.3,0,0,30,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/20/2026",2,7.2,0,0,30,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/22/2026",2,6.2,0,0,30,1],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/6/2026",0,7.2,0,0,30,0],["Nathan Millsaps","TN-KEITH ST","MR. WATTS","3/8/2026",0,6.2,0,0,30,1],["Hasba Hakim","RI-DOUGLAS","AMBULAI SHEKU","3/24",3,6.4,0,43.0,30,1],["Hasba Hakim","RI-COVENTRY","AMBULAI SHEKU","3/16/2026",2,6.1,0,33.0,30,1],["Hasba Hakim","RI-RESERVOIR AVE","AMBULAI SHEKU","3/18/2026",2,6.1,0,29.0,30,1],["Hasba Hakim","RI-BROADWAY","AMBULAI SHEKU","3/3/2026",0,6.7,0,0,30,1],["Hasba Hakim","RI-DOUGLAS","AMBULAI SHEKU","3/8/2026",0,6.3,0,0,30,1],["Juliana Arruda",["MA-KELLEY SQUARE","RI-NEWPORT AVE"],"ROSE PEREZ","3/23",3,6.1,0,31.0,30,0],["Juliana Arruda",["MA-KELLEY SQUARE","RI-NEWPORT AVE"],"ROSE PEREZ","3/24",3,8.1,1,38.0,60,0],["Juliana Arruda",["MA-KELLEY SQUARE","RI-NEWPORT AVE"],"ROSE PEREZ","3/25",3,8.0,1,0,60,0],["Juliana Arruda",["MA-COGGESHALL","RI-NEWPORT AVE"],["MANNY","ROSE PEREZ"],"3/27",3,8.6,1,3.0,60,0],["Juliana Arruda",["MA-KELLEY SQUARE","RI-NEWPORT AVE"],"ROSE PEREZ","3/28",3,8.6,1,6.0,60,0],["Juliana Arruda","RI-PROVIDENCE PLACE MALL","ROSE PEREZ","3/10/2026",1,6.7,0,27.0,30,0],["Juliana Arruda",["MA-KELLEY SQUARE","RI-EAST PROVIDENCE"],["MIKE COBBS","ROSE PEREZ"],"3/17/2026",2,8.4,1,26.0,60,0],["Juliana Arruda",["MA-KELLEY SQUARE","RI-EAST PROVIDENCE"],["MIKE COBBS","ROSE PEREZ"],"3/18/2026",2,8.5,1,30.0,60,0],["Juliana Arruda",["MA-KELLEY SQUARE","RI-EAST PROVIDENCE"],["MIKE COBBS","ROSE PEREZ"],"3/19/2026",2,8.4,1,32.0,60,0],["Juliana Arruda",["MA-KELLEY SQUARE","RI-NEWPORT AVE"],"ROSE PEREZ","3/20/2026",2,9.1,1,10.0,60,0],["Juliana Arruda","MA-KELLEY SQUARE","ROSE PEREZ","3/4/2026",0,8.6,1,0,60,0],["Juliana Arruda","MA-KELLEY SQUARE","ROSE PEREZ","3/5/2026",0,8.3,1,0,60,0],["Juliana Arruda","MA-KELLEY SQUARE","ROSE PEREZ","3/6/2026",0,7.5,0,0,30,0],["Kevin Martinez","AR-RADIO GEYER","TBD","3/24",3,6.8,0,0,30,0],["Kevin Martinez","AR-COLONEL GLENN","TBD","3/26",3,8.2,1,0,60,0],["Kevin Martinez","AR-RADIO GEYER","TBD","3/28",3,9.4,1,0,60,0],["Kevin Martinez","AR-RADIO GEYER","TBD","3/14/2026",1,9.4,1,0,60,0],["Kevin Martinez","AR-RADIO GEYER","TBD","3/16/2026",2,8.4,1,0,60,0],["Kevin Martinez","AR-RADIO GEYER","TBD","3/17/2026",2,6.8,0,0,30,0],["Kevin Martinez","AR-RADIO GEYER","TBD","3/2/2026",0,7.7,0,0,30,0],["Kevin Martinez","AR-RADIO GEYER","TBD","3/3/2026",0,9.3,1,0,60,1],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/24",3,8.7,1,39.0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/25",3,8.3,1,41.0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/28",3,10.3,1,25.0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/12/2026",1,9.5,1,36.0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/16/2026",2,8.1,1,44.0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/17/2026",2,9.1,1,28.0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/21/2026",2,10.4,1,42.0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/22/2026",2,7.0,0,15.0,30,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/3/2026",0,8.3,1,0,60,0],["Carlos Davila","MA-HOLYOKE","JOEL MONTERO","3/8/2026",0,7.2,0,6.0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/23",3,8.0,1,31.0,60,1],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/24",3,7.7,0,42.0,30,1],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/25",3,7.6,0,0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/28",3,6.5,0,0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/29",3,6.5,0,0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/10/2026",1,7.7,0,44.0,30,1],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/14/2026",1,8.5,1,0,60,1],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/15/2026",1,6.1,0,0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/16/2026",2,7.5,0,49.0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/17/2026",2,8.0,0,35.0,30,1],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/18/2026",2,6.5,0,0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/2/2026",0,6.9,0,0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/4/2026",0,7.6,0,41.0,30,0],["Izabella Regino","RI-BALD HILL","MIKE COBBS","3/6/2026",0,6.0,0,0,30,0],["Oswaldo Aranda","RI-DOUGLAS","AMBULAI SHEKU","3/25",3,10.3,1,0,60,1],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/26",3,6.8,0,0,30,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/28",3,9.6,1,0,60,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/12/2026",1,9.6,1,0,60,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/13/2026",1,9.6,1,0,60,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/14/2026",1,9.7,1,0,60,1],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/15/2026",1,6.5,0,0,30,1],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/19/2026",2,10.5,1,0,60,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/20/2026",2,9.6,1,0,60,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/21/2026",2,9.3,1,12.0,60,1],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/22/2026",2,6.2,0,0,30,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/5/2026",0,9.8,1,0,60,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/6/2026",0,9.7,1,0,60,0],["Oswaldo Aranda","RI-BROAD ST","ROSE PEREZ","3/7/2026",0,10.2,1,0,60,0],["Oswaldo Aranda","RI-NEWPORT AVE","ROSE PEREZ","3/8/2026",0,6.4,0,0,30,0],["Derek Tejeda","MA-ROCKDALE","MANNY","3/13/2026",1,6.9,0,31.0,30,0],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/23",3,9.6,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/24",3,8.9,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/25",3,9.4,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/26",3,9.2,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/27",3,9.5,1,0,60,0],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/28",3,9.1,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/10/2026",1,9.2,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/11/2026",1,9.1,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/12/2026",1,9.6,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/13/2026",1,9.0,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/14/2026",1,9.6,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/18/2026",2,9.1,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/19/2026",2,8.7,1,36.0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/2/2026",0,9.6,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/20/2026",2,9.1,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/4/2026",0,8.7,1,31.0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/5/2026",0,9.9,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/6/2026",0,9.1,1,0,60,1],["Jazmine Heredia","MA-EXCHANGE ST.","JOEL MONTERO","3/7/2026",0,9.7,1,0,60,1],["Gamaly Gonzalez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/16/2026",2,6.5,0,31.0,30,0],["Gamaly Gonzalez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/5/2026",0,6.4,0,32.0,30,0],["Gamaly Gonzalez","CT-BUCKLAND HILLS MALL","MIKE COBBS","3/9/2026",1,7.5,0,30.0,30,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/25",3,8.4,1,0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/27",3,9.4,1,16.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/11/2026",1,8.7,1,0,60,0],["Saimary Hernandez",["RI-EAST PROVIDENCE","RI-NEWPORT AVE"],["MIKE COBBS","ROSE PEREZ"],"3/12/2026",1,9.4,1,2.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/13/2026",1,9.8,1,21.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/14/2026",1,9.7,1,19.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/17/2026",2,6.7,0,0,30,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/19/2026",2,7.1,0,0,30,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/20/2026",2,9.4,1,29.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/21/2026",2,9.0,1,49.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/3/2026",0,9.4,1,12.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/4/2026",0,9.4,1,14.0,60,0],["Saimary Hernandez","RI-EAST PROVIDENCE","MIKE COBBS","3/7/2026",0,9.3,1,23.0,60,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/25",3,7.8,0,37.0,30,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/26",3,8.3,1,40.0,60,1],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/27",3,6.2,0,0,30,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/28",3,8.8,1,0,60,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/11/2026",1,8.2,1,30.0,60,1],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/12/2026",1,9.0,1,0,60,1],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/13/2026",1,8.0,0,0,30,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/15/2026",1,6.8,0,0,30,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/18/2026",2,7.4,0,17.0,30,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/19/2026",2,8.9,1,0,60,1],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/2/2026",0,8.5,1,0,60,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/20/2026",2,8.0,1,0,60,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/21/2026",2,8.3,1,8.0,60,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/22/2026",2,6.1,0,0,30,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/5/2026",0,8.3,1,0,60,1],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/6/2026",0,8.2,1,0,60,0],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/7/2026",0,8.6,1,0,60,1],["Allia Abodaher","RI-BALD HILL","MIKE COBBS","3/8/2026",0,7.0,0,0,30,0],["Hector Marrero","RI-751BROAD","ROSE PEREZ","3/29",3,6.2,0,0,30,1],["Hector Marrero","RI-751BROAD","ROSE PEREZ","3/15/2026",1,6.3,0,0,30,1],["Hector Marrero","RI-751BROAD","ROSE PEREZ","3/20/2026",2,6.0,0,0,30,0],["Hector Marrero","RI-751BROAD","ROSE PEREZ","3/21/2026",2,6.1,0,0,30,0],["Hector Marrero","RI-751BROAD","ROSE PEREZ","3/8/2026",0,6.1,0,0,30,1]].map(function(r){return{n:r[0],l:r[1],c:r[2],d:r[3],w:RAW.ML_WEEKS[r[4]],h:r[5],s:r[6],g:r[7],r:r[8],x:r[9]};});
+
+RAW.loc_ot = [{"location": "TN-NORTH BROARDWAY", "coach": "MR. WATTS", "wk1": 16.88, "wk2": 20.37, "wk3": 23.58, "wk4": 27.26, "total_ot": 88.09}, {"location": "MA-EXCHANGE ST.", "coach": "JOEL MONTERO", "wk1": 6.97, "wk2": 6.53, "wk3": 0.0, "wk4": 15.8, "total_ot": 29.3}, {"location": "TN-SHALLOWFORD RD", "coach": "MR. WATTS", "wk1": 4.42, "wk2": 6.91, "wk3": 0.79, "wk4": 11.46, "total_ot": 23.58}, {"location": "TN-WESTERN AVE", "coach": "MR. WATTS", "wk1": 5.85, "wk2": 3.66, "wk3": 6.98, "wk4": 6.17, "total_ot": 22.66}, {"location": "RI-BROAD ST", "coach": "ROSE PEREZ", "wk1": 7.37, "wk2": 0.0, "wk3": 7.5, "wk4": 6.41, "total_ot": 21.28}, {"location": "AR-RADIO GEYER", "coach": "TBD", "wk1": 3.17, "wk2": 3.42, "wk3": 7.16, "wk4": 4.15, "total_ot": 17.9}, {"location": "MA-COGGESHALL", "coach": "MANNY", "wk1": 3.02, "wk2": 8.48, "wk3": 2.66, "wk4": 1.31, "total_ot": 15.47}, {"location": "MA-HOLYOKE", "coach": "JOEL MONTERO", "wk1": 4.04, "wk2": 2.73, "wk3": 3.15, "wk4": 4.07, "total_ot": 13.99}, {"location": "CT-NEW LONDON", "coach": "MIKE COBBS", "wk1": 2.21, "wk2": 4.4, "wk3": 0.0, "wk4": 0.0, "total_ot": 6.61}, {"location": "RI-EAST PROVIDENCE", "coach": "MIKE COBBS", "wk1": 0.0, "wk2": 5.42, "wk3": 1.14, "wk4": 0.0, "total_ot": 6.56}, {"location": "AR-COLONEL GLENN", "coach": "TBD", "wk1": 0.0, "wk2": 1.03, "wk3": 1.69, "wk4": 3.37, "total_ot": 6.09}, {"location": "MA-KELLEY SQUARE", "coach": "ROSE PEREZ", "wk1": 0.0, "wk2": 1.22, "wk3": 4.27, "wk4": 0.0, "total_ot": 5.49}, {"location": "MA-LOCUST STREET", "coach": "JOEL MONTERO", "wk1": 0.0, "wk2": 1.71, "wk3": 1.32, "wk4": 1.69, "total_ot": 4.72}, {"location": "RI-BROADWAY", "coach": "AMBULAI SHEKU", "wk1": 0.0, "wk2": 0.0, "wk3": 1.06, "wk4": 2.38, "total_ot": 3.44}, {"location": "TN-MAGNOLIA", "coach": "MR. WATTS", "wk1": 0.0, "wk2": 0.0, "wk3": 0.0, "wk4": 3.31, "total_ot": 3.31}, {"location": "MA- SOUTH SHORE MALL", "coach": "ROSE PEREZ", "wk1": 3.09, "wk2": 0.0, "wk3": 0.0, "wk4": 0.0, "total_ot": 3.09}, {"location": "RI-COVENTRY", "coach": "AMBULAI SHEKU", "wk1": 0.5, "wk2": 0.0, "wk3": 1.41, "wk4": 0.0, "total_ot": 1.91}, {"location": "MA-FALLRIVER", "coach": "MANNY", "wk1": 0.0, "wk2": 0.0, "wk3": 0.0, "wk4": 1.16, "total_ot": 1.16}, {"location": "TN-MORRISTOWN", "coach": "MR. WATTS", "wk1": 0.0, "wk2": 0.0, "wk3": 0.89, "wk4": 0.0, "total_ot": 0.89}, {"location": "RI-PROVIDENCE PLACE MALL", "coach": "ROSE PEREZ", "wk1": 0.15, "wk2": 0.0, "wk3": 0.0, "wk4": 0.0, "total_ot": 0.15}];
+
+RAW.emp_ot=[{"n":"Shelena Hamilton","l":["TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w":"Wk3: 3/16\u20133/22","h":63.58,"o":23.58},{"n":"Shelena Hamilton","l":["TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w":"Wk2: 3/9\u20133/15","h":58.86,"o":18.86},{"n":"Shelena Hamilton","l":["TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w":"Wk4: 3/23\u20133/29","h":57.51,"o":17.51},{"n":"Shelena Hamilton","l":["TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w":"Wk1: 3/2\u20133/8","h":56.88,"o":16.88},{"n":"Jazmine Heredia","l":["MA-EXCHANGE ST."],"c":["JOEL MONTERO"],"w":"Wk4: 3/23\u20133/29","h":55.8,"o":15.8},{"n":"Marquesha Jones","l":["TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w":"Wk4: 3/23\u20133/29","h":51.46,"o":11.46},{"n":"April Mayorga","l":["TN-NORTH BROARDWAY","TN-WESTERN AVE"],"c":["MR. WATTS"],"w":"Wk4: 3/23\u20133/29","h":49.75,"o":9.75},{"n":"Napoleoa Dacruz","l":["MA-COGGESHALL"],"c":["MANNY"],"w":"Wk2: 3/9\u20133/15","h":48.48,"o":8.48},{"n":"Ana Marrero","l":["RI-BROAD ST","RI-NEWPORT AVE"],"c":["ROSE PEREZ"],"w":"Wk3: 3/16\u20133/22","h":47.5,"o":7.5},{"n":"Ana Marrero","l":["RI-BROAD ST","RI-NEWPORT AVE"],"c":["ROSE PEREZ"],"w":"Wk1: 3/2\u20133/8","h":47.37,"o":7.37},{"n":"Nicki Johnson","l":["TN-WESTERN AVE"],"c":["MR. WATTS"],"w":"Wk3: 3/16\u20133/22","h":46.98,"o":6.98},{"n":"Jazmine Heredia","l":["MA-EXCHANGE ST."],"c":["JOEL MONTERO"],"w":"Wk1: 3/2\u20133/8","h":46.97,"o":6.97},{"n":"Marquesha Jones","l":["TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w":"Wk2: 3/9\u20133/15","h":46.91,"o":6.91},{"n":"Jazmine Heredia","l":["MA-EXCHANGE ST."],"c":["JOEL MONTERO"],"w":"Wk2: 3/9\u20133/15","h":46.53,"o":6.53},{"n":"Ana Marrero","l":["RI-BROAD ST","RI-NEWPORT AVE"],"c":["ROSE PEREZ"],"w":"Wk4: 3/23\u20133/29","h":46.41,"o":6.41},{"n":"Nicki Johnson","l":["TN-WESTERN AVE"],"c":["MR. WATTS"],"w":"Wk4: 3/23\u20133/29","h":46.17,"o":6.17},{"n":"Nicki Johnson","l":["TN-WESTERN AVE"],"c":["MR. WATTS"],"w":"Wk1: 3/2\u20133/8","h":45.85,"o":5.85},{"n":"Saimary Hernandez","l":["RI-EAST PROVIDENCE","RI-NEWPORT AVE"],"c":["MIKE COBBS","ROSE PEREZ"],"w":"Wk2: 3/9\u20133/15","h":45.42,"o":5.42},{"n":"Marquesha Jones","l":["TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w":"Wk1: 3/2\u20133/8","h":44.42,"o":4.42},{"n":"Kevin Martinez","l":["AR-COLONEL GLENN","AR-RADIO GEYER"],"c":["TBD"],"w":"Wk3: 3/16\u20133/22","h":44.42,"o":4.42},{"n":"Gilberto Alvarez","l":["CT-NEW LONDON","CT-NORWICH"],"c":["MIKE COBBS"],"w":"Wk2: 3/9\u20133/15","h":44.4,"o":4.4},{"n":"Juliana Arruda","l":["MA-COGGESHALL","MA-KELLEY SQUARE","RI-BROAD ST","RI-EAST PROVIDENCE","RI-NEWPORT AVE","RI-PROVIDENCE PLACE MALL"],"c":["MANNY","MIKE COBBS","ROSE PEREZ"],"w":"Wk3: 3/16\u20133/22","h":44.27,"o":4.27},{"n":"Karmina Mendoza","l":["AR-RADIO GEYER"],"c":["TBD"],"w":"Wk4: 3/23\u20133/29","h":44.15,"o":4.15},{"n":"Carlos Davila","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w":"Wk4: 3/23\u20133/29","h":44.07,"o":4.07},{"n":"Nicki Johnson","l":["TN-WESTERN AVE"],"c":["MR. WATTS"],"w":"Wk2: 3/9\u20133/15","h":43.66,"o":3.66},{"n":"Karmina Mendoza","l":["AR-RADIO GEYER"],"c":["TBD"],"w":"Wk2: 3/9\u20133/15","h":43.42,"o":3.42},{"n":"Brenda Serna","l":["AR-COLONEL GLENN","AR-RADIO GEYER"],"c":["TBD"],"w":"Wk4: 3/23\u20133/29","h":43.37,"o":3.37},{"n":"Melissa Sloane","l":["TN-MAGNOLIA","TN-NORTH BROARDWAY"],"c":["MR. WATTS"],"w":"Wk4: 3/23\u20133/29","h":43.31,"o":3.31},{"n":"Hector Torres","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w":"Wk1: 3/2\u20133/8","h":43.26,"o":3.26},{"n":"Karmina Mendoza","l":["AR-RADIO GEYER"],"c":["TBD"],"w":"Wk1: 3/2\u20133/8","h":43.17,"o":3.17},{"n":"Lucmila Lopes","l":["MA- SOUTH SHORE MALL"],"c":["ROSE PEREZ"],"w":"Wk1: 3/2\u20133/8","h":43.09,"o":3.09},{"n":"Napoleoa Dacruz","l":["MA-COGGESHALL"],"c":["MANNY"],"w":"Wk1: 3/2\u20133/8","h":43.02,"o":3.02},{"n":"Carlos Davila","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w":"Wk3: 3/16\u20133/22","h":42.76,"o":2.76},{"n":"Karmina Mendoza","l":["AR-RADIO GEYER"],"c":["TBD"],"w":"Wk3: 3/16\u20133/22","h":42.74,"o":2.74},{"n":"Napoleoa Dacruz","l":["MA-COGGESHALL"],"c":["MANNY"],"w":"Wk3: 3/16\u20133/22","h":42.66,"o":2.66},{"n":"Handriel Marmol","l":["RI-BALD HILL","RI-BROADWAY","RI-COVENTRY","RI-DOUGLAS","RI-RESERVOIR AVE"],"c":["AMBULAI SHEKU","MIKE COBBS"],"w":"Wk4: 3/23\u20133/29","h":42.38,"o":2.38},{"n":"Gilberto Alvarez","l":["CT-NEW LONDON","CT-NORWICH"],"c":["MIKE COBBS"],"w":"Wk1: 3/2\u20133/8","h":42.21,"o":2.21},{"n":"Armando Perez","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w":"Wk2: 3/9\u20133/15","h":41.83,"o":1.83},{"n":"Alicia Montero","l":["MA-LOCUST STREET"],"c":["JOEL MONTERO"],"w":"Wk2: 3/9\u20133/15","h":41.71,"o":1.71},{"n":"Alicia Montero","l":["MA-LOCUST STREET"],"c":["JOEL MONTERO"],"w":"Wk4: 3/23\u20133/29","h":41.69,"o":1.69},{"n":"Brenda Serna","l":["AR-COLONEL GLENN","AR-RADIO GEYER"],"c":["TBD"],"w":"Wk3: 3/16\u20133/22","h":41.69,"o":1.69},{"n":"April Mayorga","l":["TN-NORTH BROARDWAY","TN-WESTERN AVE"],"c":["MR. WATTS"],"w":"Wk2: 3/9\u20133/15","h":41.51,"o":1.51},{"n":"Christopher Pierre Paul","l":["RI-COVENTRY"],"c":["AMBULAI SHEKU"],"w":"Wk3: 3/16\u20133/22","h":41.41,"o":1.41},{"n":"Napoleoa Dacruz","l":["MA-COGGESHALL"],"c":["MANNY"],"w":"Wk4: 3/23\u20133/29","h":41.31,"o":1.31},{"n":"Isaiah Caliz","l":["MA-EXCHANGE ST.","MA-LOCUST STREET"],"c":["JOEL MONTERO"],"w":"Wk3: 3/16\u20133/22","h":41.27,"o":1.27},{"n":"Richard Foster","l":["MA-KELLEY SQUARE"],"c":["ROSE PEREZ"],"w":"Wk2: 3/9\u20133/15","h":41.22,"o":1.22},{"n":"Khrystyne Quasney","l":["MA-COGGESHALL","MA-FALLRIVER","MA-ROCKDALE"],"c":["MANNY"],"w":"Wk4: 3/23\u20133/29","h":41.16,"o":1.16},{"n":"Saimary Hernandez","l":["RI-EAST PROVIDENCE","RI-NEWPORT AVE"],"c":["MIKE COBBS","ROSE PEREZ"],"w":"Wk3: 3/16\u20133/22","h":41.14,"o":1.14},{"n":"Handriel Marmol","l":["RI-BALD HILL","RI-BROADWAY","RI-COVENTRY","RI-DOUGLAS","RI-RESERVOIR AVE"],"c":["AMBULAI SHEKU","MIKE COBBS"],"w":"Wk3: 3/16\u20133/22","h":41.06,"o":1.06},{"n":"Brenda Serna","l":["AR-COLONEL GLENN","AR-RADIO GEYER"],"c":["TBD"],"w":"Wk2: 3/9\u20133/15","h":41.03,"o":1.03},{"n":"Hector Torres","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w":"Wk2: 3/9\u20133/15","h":40.9,"o":0.9},{"n":"Austin Campbell","l":["TN-MORRISTOWN"],"c":["MR. WATTS"],"w":"Wk3: 3/16\u20133/22","h":40.89,"o":0.89},{"n":"Marquesha Jones","l":["TN-SHALLOWFORD RD"],"c":["MR. WATTS"],"w":"Wk3: 3/16\u20133/22","h":40.79,"o":0.79},{"n":"Armando Perez","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w":"Wk1: 3/2\u20133/8","h":40.78,"o":0.78},{"n":"Christopher Pierre Paul","l":["RI-COVENTRY"],"c":["AMBULAI SHEKU"],"w":"Wk1: 3/2\u20133/8","h":40.5,"o":0.5},{"n":"Hector Torres","l":["MA-HOLYOKE"],"c":["JOEL MONTERO"],"w":"Wk3: 3/16\u20133/22","h":40.39,"o":0.39},{"n":"Brandon Mitchell","l":["RI-NEWPORT AVE","RI-PROVIDENCE PLACE MALL"],"c":["ROSE PEREZ"],"w":"Wk1: 3/2\u20133/8","h":40.15,"o":0.15},{"n":"Alicia Montero","l":["MA-LOCUST STREET"],"c":["JOEL MONTERO"],"w":"Wk3: 3/16\u20133/22","h":40.05,"o":0.05}];
+RAW.loc_sun = [{"location": "RI-HARTFORD AVE", "coach": "ROSE PEREZ", "sun_wk1": 12.65, "sun_wk2": 13.0, "sun_wk3": 13.13, "sun_wk4": 12.37, "total_sun": 51.15, "total_premium": 25.58}, {"location": "RI-BALD HILL", "coach": "MIKE COBBS", "sun_wk1": 12.64, "sun_wk2": 12.82, "sun_wk3": 12.03, "sun_wk4": 12.73, "total_sun": 50.22, "total_premium": 25.11}, {"location": "RI-PROVIDENCE PLACE MALL", "coach": "ROSE PEREZ", "sun_wk1": 11.77, "sun_wk2": 7.18, "sun_wk3": 14.65, "sun_wk4": 12.9, "total_sun": 46.5, "total_premium": 23.25}, {"location": "RI-NEWPORT AVE", "coach": "ROSE PEREZ", "sun_wk1": 8.52, "sun_wk2": 6.48, "sun_wk3": 7.62, "sun_wk4": 5.27, "total_sun": 27.89, "total_premium": 13.94}, {"location": "RI-EAST PROVIDENCE", "coach": "MIKE COBBS", "sun_wk1": 6.63, "sun_wk2": 8.05, "sun_wk3": 5.8, "sun_wk4": 6.52, "total_sun": 27.0, "total_premium": 13.5}, {"location": "RI-RESERVOIR AVE", "coach": "AMBULAI SHEKU", "sun_wk1": 6.5, "sun_wk2": 7.07, "sun_wk3": 5.8, "sun_wk4": 6.0, "total_sun": 25.37, "total_premium": 12.68}, {"location": "RI-751BROAD", "coach": "ROSE PEREZ", "sun_wk1": 6.07, "sun_wk2": 6.33, "sun_wk3": 5.55, "sun_wk4": 6.18, "total_sun": 24.13, "total_premium": 12.06}, {"location": "RI-BROAD ST", "coach": "ROSE PEREZ", "sun_wk1": 6.9, "sun_wk2": 6.05, "sun_wk3": 5.2, "sun_wk4": 5.8, "total_sun": 23.95, "total_premium": 11.98}, {"location": "RI-COVENTRY", "coach": "AMBULAI SHEKU", "sun_wk1": 6.33, "sun_wk2": 5.6, "sun_wk3": 5.87, "sun_wk4": 5.88, "total_sun": 23.68, "total_premium": 11.84}, {"location": "RI-DOUGLAS", "coach": "AMBULAI SHEKU", "sun_wk1": 6.33, "sun_wk2": 6.05, "sun_wk3": 5.17, "sun_wk4": 6.12, "total_sun": 23.67, "total_premium": 11.84}, {"location": "RI-BROADWAY", "coach": "AMBULAI SHEKU", "sun_wk1": 6.08, "sun_wk2": 5.55, "sun_wk3": 5.75, "sun_wk4": 6.15, "total_sun": 23.53, "total_premium": 11.76}];
+
+// ══════════════════════════════════════
+// COACH COLORS
+// ══════════════════════════════════════
+const COACHES = ['AMBULAI SHEKU','CHERYL','JOEL MONTERO','MANNY','MIKE COBBS','MR. WATTS','ROSE PEREZ','TBD'];
+const COACH_COLORS = ['#e2007a','#7b2d8b','#c4006b','#9b3ab0','#f0339a','#6a2478','#b5006a','#a07aaa'];
+const coachColor = c => COACH_COLORS[COACHES.indexOf(c)] || '#94a3b8';
+
+function coachTag(coach) {
+  const col = coachColor(coach);
+  return `<span class="coach-tag" style="color:${col};border-color:${col}30;background:${col}12">${coach}</span>`;
+}
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+let activeWeeks = {wk1:true,wk2:true,wk3:true,wk4:true};
+let locSortCol='total', locSortDir=-1;
+let empSortCol='avg', empSortDir=-1;
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  // Match nav tabs by explicit id map
+  const tabMap = {summary:'Executive',wow:'Week',overview:'Overview',locations:'Locations',employees:'Employees',lunch:'Lunch',overtime:'Overtime',sunday:'Sunday'};
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    if(t.textContent.trim().toLowerCase().startsWith((tabMap[id]||'').toLowerCase().slice(0,5))) t.classList.add('active');
+  });
+  if(id==='summary')    { renderExecSummary(); }
+  if(id==='wow')        { renderWow(); }
+  if(id==='overview')   initOverview();
+  if(id==='locations')  { initLocFilters(); renderLocTable(); renderLocCompare(); }
+  if(id==='employees')  { initEmpFilters(); renderEmpTable(); renderEmpKpis(); }
+  if(id==='lunch')      { initLunchFilters(); renderLunchTable(); renderLunchCharts(); renderLunchKpis(); }
+  if(id==='overtime')   { initOtFilters(); renderOtTable(); renderOtLocTable(); renderOtBar(); renderOtKpis(); }
+  if(id==='sunday')     { initSunFilters(); renderSunKpis(); renderSunLocTable(); renderSunBar(); renderSunTable(); }
+}
+
+// ── COMPARE MODE ──────────────────────────────────────────────────────────────
+let compareMode = false;
+
+function toggleCompareMode() {
+  compareMode = !compareMode;
+  document.getElementById('compareSep').style.display   = compareMode ? '' : 'none';
+  document.getElementById('weekB').style.display        = compareMode ? '' : 'none';
+  document.getElementById('compareBadge').style.display = compareMode ? '' : 'none';
+  document.getElementById('compareToggle').style.background =
+    compareMode ? 'rgba(226,0,122,0.3)' : 'rgba(123,45,139,0.2)';
+  if(!compareMode) document.getElementById('weekB').value = '';
+  applyGlobalFilter();
+}
+
+function getWeeks() {
+  const wA = document.getElementById('weekA')?.value || '';
+  const wB = compareMode ? (document.getElementById('weekB')?.value || '') : '';
+  return { wA, wB, comparing: compareMode && wA && wB };
+}
+
+function getWeekLabel(wk) {
+  return {wk1:'Wk1: 3/2–3/8', wk2:'Wk2: 3/9–3/15', wk3:'Wk3: 3/16–3/22', wk4:'Wk4: 3/23–3/29'}[wk] || wk;
+}
+
+function applyGlobalFilter() {
+  const page = document.querySelector('.page.active')?.id.replace('page-','');
+  if(!page) return;
+  // Re-render only — don't reinit (would reset dropdowns/state)
+  if(page==='summary')   renderExecSummary();
+  if(page==='wow')       renderWow();
+  if(page==='overview')  { const locs=getFilteredLocations(); renderKpis(locs); renderLocBar(locs); renderTotalLine(locs); renderCoachDonut(locs); renderStatusPie(); renderOvOtList(); }
+  if(page==='locations') { renderLocTable(); renderLocCompare(); }
+  if(page==='employees') { renderEmpTable(); renderEmpKpis(); }
+  if(page==='lunch')     { renderLunchTable(); renderLunchCharts(); renderLunchKpis(); }
+  if(page==='overtime')  { renderOtTable(); renderOtLocTable(); renderOtBar(); renderOtKpis(); }
+  if(page==='sunday')    { renderSunKpis(); renderSunLocTable(); renderSunBar(); renderSunTable(); }
+}
+
+function getFilteredLocations() {
+  const coach = document.getElementById('globalCoach').value;
+  const {wA} = getWeeks();
+  let locs = RAW.locations.filter(l => (!coach || l.coach===coach));
+  if(wA) locs = [...locs].sort((a,b) => b[wA]-a[wA]);
+  return locs;
+}
+
+// ══════════════════════════════════════
+// INIT COACH DROPDOWNS
+// ══════════════════════════════════════
+function populateCoachDropdown(id, includeAll=true) {
+  const sel = document.getElementById(id); if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = includeAll ? '<option value="">All Coaches</option>' : '';
+  COACHES.forEach(c => { sel.innerHTML += `<option value="${c}">${c}</option>`; });
+  sel.value = cur;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Populate all coach dropdowns
+  populateCoachDropdown('globalCoach');
+  populateCoachDropdown('locCoachFilter');
+  populateCoachDropdown('empCoachFilter');
+  populateCoachDropdown('lunchCoachFilter');
+  populateCoachDropdown('otCoachFilter');
+  // Start on executive summary
+  setTimeout(()=>{ showPage('summary'); }, 50);
+});
+
+// ══════════════════════════════════════
+// CHARTS REGISTRY
+// ══════════════════════════════════════
+const charts = {};
+function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+const CHART_DEFAULTS = {
+  color: '#5c3a66',
+  plugins: { legend: { labels: { color:'#5c3a66', font:{family:'DM Mono',size:11}, boxWidth:10, padding:12 } } },
+  scales: {
+    x: { ticks:{ color:'#a07aaa', font:{family:'DM Mono',size:10} }, grid:{ color:'rgba(226,0,122,0.06)' }, border:{color:'#edd5e8'} },
+    y: { ticks:{ color:'#a07aaa', font:{family:'DM Mono',size:10} }, grid:{ color:'rgba(226,0,122,0.06)' }, border:{color:'#edd5e8'} }
+  }
+};
+
+// ══════════════════════════════════════
+// OVERVIEW
+// ══════════════════════════════════════
+function initOverview() {
+  const locs = getFilteredLocations();
+  renderKpis(locs);
+  renderLocBar(locs);
+  renderCoachDonut(locs);
+  renderStatusPie();
+  renderTotalLine(locs);
+  renderOvOtList();
+}
+
+function renderKpis(locs) {
+  const totalHrs = locs.reduce((s,l)=>s+l.total,0);
+  const wk1 = locs.reduce((s,l)=>s+l.wk1,0);
+  const wk2 = locs.reduce((s,l)=>s+l.wk2,0);
+  const wk3 = locs.reduce((s,l)=>s+l.wk3,0);
+  const wk4 = locs.reduce((s,l)=>s+l.wk4,0);
+  const wow = ((wk4-wk3)/Math.max(wk3,1)*100).toFixed(1);
+  const totalOt = RAW.loc_ot.reduce((s,l)=>s+l.total_ot,0);
+  const nonSoloMissed = RAW.missed_lunch.filter(m=>!m.x===1).length;
+  const grouped = getGroupedEmployees();
+
+  const kpis = [
+    {label:'Total Hours (4 Wks)', val: totalHrs.toFixed(0), sub: `${locs.length} locations`, color: '#e2007a'},
+    {label:'Wk4 Hours', val: wk4.toFixed(0), sub: `WoW: ${wow>0?'+':''}${wow}%`, color: wow>=0?'#c41a1a':'#1a7a4a'},
+    {label:'Active Employees', val: grouped.filter(e=>e.st==='Active').length, sub: `of ${grouped.length} total`, color: '#1a7a4a'},
+    {label:'Flagged Employees', val: grouped.filter(e=>e.st!=='Active').length, sub: 'need attention', color: '#7a5200'},
+    {label:'OT Hours (4 Wks)', val: totalOt.toFixed(1), sub: `${RAW.emp_ot.length} instances`, color: '#c41a1a'},
+    {label:'Missed Lunches', val: RAW.missed_lunch.length, sub: `${nonSoloMissed} non-solo`, color: '#7b2d8b'},
+  ];
+  document.getElementById('kpi-strip').innerHTML = kpis.map(k=>`
+    <div class="kpi" style="--kpi-color:${k.color}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value" style="color:${k.color}">${k.val}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+}
+
+function renderLocBar(locs) {
+  destroyChart('locBar');
+  const {wA, wB, comparing} = getWeeks();
+  const labels = locs.map(l=>l.location.replace(/^(MA|RI|TN|CT|AR)-/,''));
+  const allDefs = [{k:'wk1',label:'Wk1 3/2',color:'#e2007a'},{k:'wk2',label:'Wk2 3/9',color:'#7b2d8b'},{k:'wk3',label:'Wk3 3/16',color:'#f0339a'},{k:'wk4',label:'Wk4 3/23',color:'#c4006b'}];
+  let datasets = [];
+  if(comparing) {
+    datasets = [
+      {label:`${getWeekLabel(wA)} (A)`, data:locs.map(l=>l[wA]), backgroundColor:'#e2007a99', borderColor:'#e2007a', borderWidth:1, borderRadius:2},
+      {label:`${getWeekLabel(wB)} (B)`, data:locs.map(l=>l[wB]), backgroundColor:'#7b2d8b99', borderColor:'#7b2d8b', borderWidth:1, borderRadius:2},
+    ];
+  } else {
+    const wkDefs = wA ? allDefs.filter(w=>w.k===wA) : allDefs;
+    wkDefs.forEach(w=>{ if(wA || activeWeeks[w.k]) datasets.push({label:w.label, data:locs.map(l=>l[w.k]), backgroundColor:w.color+'99', borderColor:w.color, borderWidth:1, borderRadius:2}); });
+  }
+  const ctx = document.getElementById('chartLocBar').getContext('2d');
+  charts['locBar'] = new Chart(ctx, { type:'bar', data:{ labels, datasets },
+    options:{ ...CHART_DEFAULTS, responsive:true, maintainAspectRatio:false,
+      plugins:{ ...CHART_DEFAULTS.plugins, tooltip:{ callbacks:{ label: ctx=>`${ctx.dataset.label}: ${ctx.raw.toFixed(1)}h` } } },
+      scales:{ x:{ ...CHART_DEFAULTS.scales.x, ticks:{ ...CHART_DEFAULTS.scales.x.ticks, maxRotation:45, font:{size:9} } }, y:{ ...CHART_DEFAULTS.scales.y } }
+    }});
+}
+
+function toggleOverviewWeek(wk) {
+  activeWeeks[wk] = !activeWeeks[wk];
+  document.getElementById('ovWk'+wk.slice(2)).classList.toggle('on', activeWeeks[wk]);
+  renderLocBar(getFilteredLocations());
+}
+
+function renderCoachDonut(locs) {
+  destroyChart('coachDonut');
+  const byCoach = {};
+  locs.forEach(l=>{ byCoach[l.coach]=(byCoach[l.coach]||0)+l.total; });
+  const ctx = document.getElementById('chartCoachDonut').getContext('2d');
+  charts['coachDonut'] = new Chart(ctx, { type:'doughnut',
+    data:{ labels:Object.keys(byCoach), datasets:[{ data:Object.values(byCoach),
+      backgroundColor:Object.keys(byCoach).map(c=>coachColor(c)+'cc'),
+      borderColor:Object.keys(byCoach).map(c=>coachColor(c)),
+      borderWidth:1, hoverOffset:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%',
+      plugins:{ legend:{ position:'right', labels:{ color:'#8892b0', font:{family:'DM Mono',size:10}, boxWidth:10, padding:8 } },
+        tooltip:{ callbacks:{ label: ctx=>`${ctx.label}: ${ctx.raw.toFixed(0)}h` } } }
+    }});
+}
+
+function renderStatusPie() {
+  destroyChart('statusPie');
+  const counts = {};
+  getGroupedEmployees().forEach(e=>{ counts[e.st]=(counts[e.st]||0)+1; });
+  const colorMap = { 'Active':'#1a7a4a','Below Threshold':'#7a5200','Critical':'#c41a1a','Sporadic':'#c45000','Sharp Decline':'#7b2d8b','Low Hours + Sporadic':'#c45000' };
+  const ctx = document.getElementById('chartStatusPie').getContext('2d');
+  charts['statusPie'] = new Chart(ctx, { type:'doughnut',
+    data:{ labels:Object.keys(counts), datasets:[{ data:Object.values(counts),
+      backgroundColor:Object.keys(counts).map(s=>(colorMap[s]||'#64748b')+'bb'),
+      borderColor:Object.keys(counts).map(s=>colorMap[s]||'#64748b'), borderWidth:1, hoverOffset:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{ legend:{ position:'bottom', labels:{ color:'#8892b0', font:{family:'DM Mono',size:9}, boxWidth:8, padding:6 } },
+        tooltip:{ callbacks:{ label: ctx=>`${ctx.label}: ${ctx.raw}` } } }
+    }});
+}
+
+function renderTotalLine(locs) {
+  destroyChart('totalLine');
+  const wk1 = locs.reduce((s,l)=>s+l.wk1,0);
+  const wk2 = locs.reduce((s,l)=>s+l.wk2,0);
+  const wk3 = locs.reduce((s,l)=>s+l.wk3,0);
+  const wk4 = locs.reduce((s,l)=>s+l.wk4,0);
+  const ctx = document.getElementById('chartTotalLine').getContext('2d');
+  charts['totalLine'] = new Chart(ctx, { type:'line',
+    data:{ labels:['Wk1: 3/2','Wk2: 3/9','Wk3: 3/16','Wk4: 3/23'],
+      datasets:[{ label:'Total Hours', data:[wk1,wk2,wk3,wk4].map(v=>+v.toFixed(1)),
+        borderColor:'#e2007a', backgroundColor:'rgba(226,0,122,0.07)',
+        fill:true, tension:0.4, pointBackgroundColor:'#e2007a', pointRadius:5, pointHoverRadius:7 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ ...CHART_DEFAULTS.plugins, tooltip:{ callbacks:{ label: ctx=>`${ctx.raw.toFixed(0)}h` } } },
+      scales:CHART_DEFAULTS.scales }});
+}
+
+function renderOvOtList() {
+  const top = RAW.loc_ot.filter(l=>l.total_ot>0).sort((a,b)=>b.total_ot-a.total_ot).slice(0,8);
+  const max = top[0]?.total_ot||1;
+  document.getElementById('ov-ot-list').innerHTML = top.map(l=>`
+    <div class="ot-row">
+      <div class="ot-loc" style="color:${coachColor(l.coach)}">${l.location}</div>
+      <div class="ot-bar-wrap">
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${l.total_ot/max*100}%;background:${l.total_ot>15?'#e2007a':l.total_ot>5?'#7b2d8b':'#9b3ab0'}"></div></div>
+          <div class="progress-label">${l.total_ot.toFixed(1)}h</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════
+// LOCATIONS PAGE
+// ══════════════════════════════════════
+function initLocFilters() { populateCoachDropdown('locCoachFilter'); }
+
+function renderLocTable() {
+  const search = document.getElementById('locSearch')?.value.toLowerCase()||'';
+  const coach  = document.getElementById('locCoachFilter')?.value||'';
+  const gCoach = document.getElementById('globalCoach')?.value||'';
+  const {wA, wB, comparing} = getWeeks();
+  let data = RAW.locations.filter(l=>
+    (!coach || l.coach===coach) && (!gCoach || l.coach===gCoach) &&
+    (!search || l.location.toLowerCase().includes(search) || l.coach.toLowerCase().includes(search))
+  );
+  if(wA) data.sort((a,b)=>b[wA]-a[wA]);
+  else data.sort((a,b)=>(a[locSortCol]<b[locSortCol]?-1:1)*locSortDir);
+
+  const wkColors = {wk1:'#e2007a',wk2:'#7b2d8b',wk3:'#f0339a',wk4:'#c4006b'};
+  const cell = (val, wk) => {
+    const hiA = wA===wk, hiB = wB===wk;
+    const style = hiA ? `font-weight:700;color:#e2007a;background:#e2007a11` : hiB ? `font-weight:700;color:#7b2d8b;background:#7b2d8b11` : '';
+    return `<td style="font-family:'DM Mono',monospace;${style}">${val.toFixed(1)}</td>`;
+  };
+
+  document.getElementById('loc-tbody').innerHTML = data.map(l=>{
+    const trend = l.wk4-l.wk1;
+    const tClass = trend>5?'up':trend<-5?'down':'flat';
+    const tLabel = trend>0?`▲ ${trend.toFixed(1)}`:`▼ ${Math.abs(trend).toFixed(1)}`;
+
+    let extraCols = '';
+    if(comparing && wA && wB) {
+      const diff = l[wB]-l[wA];
+      const pct  = l[wA]>0 ? (diff/l[wA]*100).toFixed(1) : '—';
+      const cls  = diff>=0 ? 'cmp-diff-pos' : 'cmp-diff-neg';
+      extraCols = `<td class="compare-diff ${cls}">${diff>=0?'▲':'▼'}${Math.abs(diff).toFixed(1)}h (${diff>=0?'+':''}${pct}%)</td>`;
+    }
+
+    const totalCell = comparing && wA && wB
+      ? `<td style="font-family:'DM Mono',monospace">${l[wA].toFixed(1)} <span style="color:#888;font-size:10px">vs</span> ${l[wB].toFixed(1)}</td>`
+      : `<td style="font-family:'DM Mono',monospace;color:var(--text)">${wA ? l[wA].toFixed(1) : l.total.toFixed(0)}</td>`;
+
+    return `<tr>
+      <td style="color:var(--text);font-weight:500">${l.location}</td>
+      <td>${coachTag(l.coach)}</td>
+      ${cell(l.wk1,'wk1')}${cell(l.wk2,'wk2')}${cell(l.wk3,'wk3')}${cell(l.wk4,'wk4')}
+      <td><span class="trend ${tClass}">${tLabel}h</span></td>
+      <td style="font-family:'DM Mono',monospace">${l.avg.toFixed(1)}</td>
+      ${totalCell}${extraCols}
+    </tr>`;
+  }).join('');
+}
+
+function sortLocTable(col) { if(locSortCol===col) locSortDir*=-1; else{locSortCol=col;locSortDir=-1;} renderLocTable(); }
+
+function renderLocCompare() {
+  destroyChart('locCompare');
+  const coach  = document.getElementById('globalCoach')?.value||'';
+  const {wA, wB, comparing} = getWeeks();
+  const data   = RAW.locations.filter(l=>!coach||l.coach===coach);
+  const ctx    = document.getElementById('chartLocCompare').getContext('2d');
+  const allWks = [{k:'wk1',label:'Wk1',color:'#e2007a'},{k:'wk2',label:'Wk2',color:'#7b2d8b'},{k:'wk3',label:'Wk3',color:'#f0339a'},{k:'wk4',label:'Wk4',color:'#c4006b'}];
+  let wks;
+  if(comparing)   wks = [{k:wA,label:`${getWeekLabel(wA)} (A)`,color:'#e2007a'},{k:wB,label:`${getWeekLabel(wB)} (B)`,color:'#7b2d8b'}];
+  else if(wA)     wks = allWks.filter(w=>w.k===wA);
+  else            wks = allWks;
+  charts['locCompare'] = new Chart(ctx, { type:'bar',
+    data:{ labels: data.map(l=>l.location.replace(/^(MA|RI|TN|CT|AR)-/,'')),
+      datasets: wks.map(w=>({label:w.label, data:data.map(l=>l[w.k]),
+        backgroundColor:w.color+'22', borderColor:w.color, borderWidth:1, borderRadius:2}))},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{...CHART_DEFAULTS.plugins},
+      scales:{ x:{...CHART_DEFAULTS.scales.x, ticks:{...CHART_DEFAULTS.scales.x.ticks,maxRotation:45,font:{size:9}}}, y:{...CHART_DEFAULTS.scales.y} }
+    }});
+}
+
+// ══════════════════════════════════════
+// EMPLOYEES PAGE
+// ══════════════════════════════════════
+function initEmpFilters() { populateCoachDropdown('empCoachFilter'); }
+
+function renderEmpKpis() {
+  const grouped = getGroupedEmployees();
+  const counts = {};
+  grouped.forEach(e=>{ counts[e.st]=(counts[e.st]||0)+1; });
+  const kpis = [
+    {label:'Total Employees',val:grouped.length,sub:'unique workers',color:'#e2007a'},
+    {label:'Active',val:counts['Active']||0,sub:'meeting threshold',color:'#1a7a4a'},
+    {label:'Below Threshold',val:counts['Below Threshold']||0,sub:'avg < 20h/wk',color:'#7a5200'},
+    {label:'Critical',val:counts['Critical']||0,sub:'avg < 10h/wk',color:'#c41a1a'},
+    {label:'Sporadic',val:(counts['Sporadic']||0)+(counts['Low Hours + Sporadic']||0),sub:'1–2 weeks only',color:'#c45000'},
+    {label:'Sharp Decline',val:counts['Sharp Decline']||0,sub:'Wk3 vs Wk1 drop',color:'#7b2d8b'},
+  ];
+  document.getElementById('emp-kpi-strip').innerHTML = kpis.map(k=>`
+    <div class="kpi" style="--kpi-color:${k.color}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value" style="color:${k.color}">${k.val}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+}
+
+function statusBadge(s) {
+  const m={'Active':'badge-active','Below Threshold':'badge-below','Critical':'badge-critical','Sporadic':'badge-sporadic','Sharp Decline':'badge-decline','Low Hours + Sporadic':'badge-sporadic'};
+  return `<span class="badge ${m[s]||'badge-below'}">${s}</span>`;
+}
+
+function getGroupedEmployees() {
+  return RAW.employees.map(e => ({
+    ...e,
+    full_name: e.n,
+    coaches: new Set(e.c),
+    locations: new Set(e.l),
+    wk1: e.w1, wk2: e.w2, wk3: e.w3, wk4: e.w4,
+    avg: e.a, weeks_active: e.wa, status: e.st,
+    sun_wk1: e.sw1, sun_wk2: e.sw2, sun_wk3: e.sw3, sun_wk4: e.sw4,
+    sun_total: e.st2, sun_premium: e.sp,
+    location_list: e.l.join(', '),
+    coach_list: e.c.join(', '),
+    multi_loc: e.l.length > 1,
+  }));
+}
+
+function renderEmpTable() {
+  const search = document.getElementById('empSearch')?.value.toLowerCase()||'';
+  const status = document.getElementById('empStatusFilter')?.value||'';
+  const coach  = document.getElementById('empCoachFilter')?.value||'';
+  const gCoach = document.getElementById('globalCoach')?.value||'';
+  const {wA, wB, comparing} = getWeeks();
+
+  let data = getGroupedEmployees().filter(e=>
+    (!status || e.st===status) &&
+    (!coach  || e.c.has(coach)) &&
+    (!gCoach || e.c.has(gCoach)) &&
+    (!search || e.n.toLowerCase().includes(search) ||
+                e.location_list.toLowerCase().includes(search) ||
+                e.coach_list.toLowerCase().includes(search))
+  );
+
+  if(wA) data.sort((a,b)=>b[wA]-a[wA]);
+  else data.sort((a,b)=>{
+    const va=typeof a[empSortCol]==='string'?a[empSortCol]:(a[empSortCol]??0);
+    const vb=typeof b[empSortCol]==='string'?b[empSortCol]:(b[empSortCol]??0);
+    return (va<vb?-1:va>vb?1:0)*empSortDir;
+  });
+
+  const cell = (val, wk) => {
+    const hiA=wA===wk, hiB=wB===wk;
+    const style=hiA?`font-weight:700;color:#e2007a;background:#e2007a11`:hiB?`font-weight:700;color:#7b2d8b;background:#7b2d8b11`:'';
+    return `<td style="font-family:'DM Mono',monospace;${style}">${val.toFixed(1)}</td>`;
+  };
+
+  document.getElementById('emp-tbody').innerHTML = data.map(e=>{
+    const trend = e.w4-e.w1;
+    const tClass=trend>3?'up':trend<-3?'down':'flat';
+    const tLabel=trend>=0?`▲ ${trend.toFixed(1)}`:`▼ ${Math.abs(trend).toFixed(1)}`;
+    const avgColor=e.a>=30?'var(--green)':e.a>=20?'var(--purple)':e.a>=10?'var(--yellow)':'var(--red)';
+    const locDisplay=e.multi_loc
+      ?`<span title="${e.location_list}" style="cursor:default">${[...e.l][0].replace(/^(MA|RI|TN|CT|AR)-/,'')}<span class="badge badge-solo" style="margin-left:4px">+${e.l.size-1} more</span></span>`
+      :`<span style="font-size:11px">${e.location_list}</span>`;
+    const coachDisplay=[...e.c].map(c=>coachTag(c)).join(' ');
+
+    let extraCols='';
+    if(comparing && wA && wB) {
+      const diff=e[wB]-e[wA];
+      const pct=e[wA]>0?(diff/e[wA]*100).toFixed(1):'—';
+      const cls=diff>=0?'cmp-diff-pos':'cmp-diff-neg';
+      extraCols=`<td class="compare-diff ${cls}">${diff>=0?'▲':'▼'}${Math.abs(diff).toFixed(1)}h (${diff>=0?'+':''}${pct}%)</td>`;
+    }
+
+    return `<tr>
+      <td style="color:var(--text);font-weight:600">${e.n}</td>
+      <td>${locDisplay}</td>
+      <td>${coachDisplay}</td>
+      ${cell(e.w1,'wk1')}${cell(e.w2,'wk2')}${cell(e.w3,'wk3')}${cell(e.w4,'wk4')}
+      <td><span class="trend ${tClass}">${tLabel}h</span></td>
+      <td style="font-family:'DM Mono',monospace;color:${avgColor};font-weight:700">${e.a.toFixed(1)}</td>
+      <td style="text-align:center;font-family:'DM Mono',monospace">${e.wa}/4</td>
+      <td>${statusBadge(e.st)}</td>
+      ${extraCols}
+    </tr>`;
+  }).join('')||`<tr><td colspan="11" class="empty">No employees match filters</td></tr>`;
+}
+function sortEmpTable(col) { if(empSortCol===col) empSortDir*=-1; else{empSortCol=col;empSortDir=-1;} renderEmpTable(); }
+
+// ══════════════════════════════════════
+// LUNCH PAGE
+// ══════════════════════════════════════
+function initLunchFilters() { populateCoachDropdown('lunchCoachFilter'); }
+
+function renderLunchKpis() {
+  const total = RAW.missed_lunch.length;
+  const solo  = RAW.missed_lunch.filter(m=>m.x===1).length;
+  const noBreak = RAW.missed_lunch.filter(m=>m.g===0).length;
+  const shift8  = RAW.missed_lunch.filter(m=>m.s===1).length;
+  document.getElementById('lunch-kpi-strip').innerHTML = [
+    {label:'Total Missed Lunches',val:total,sub:'all 4 weeks',color:'#f97316'},
+    {label:'Non-Solo Misses',val:total-solo,sub:'compliance risk',color:'#ef4444'},
+    {label:'Solo (Poss. Exempt)',val:solo,sub:'manager review needed',color:'#3b82f6'},
+    {label:'No Break at All',val:noBreak,sub:'zero gap recorded',color:'#dc2626'},
+    {label:'On 8h+ Shifts',val:shift8,sub:'require 60 min break',color:'#f59e0b'},
+    {label:'On 6-8h Shifts',val:total-shift8,sub:'require 30 min break',color:'#a78bfa'},
+  ].map(k=>`<div class="kpi" style="--kpi-color:${k.color}">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-value" style="color:${k.color}">${k.val}</div>
+    <div class="kpi-sub">${k.sub}</div>
+  </div>`).join('');
+}
+
+function lunchStatus(row) {
+  if(row.x===1) return '<span class="badge badge-solo">Solo / Exempt?</span>';
+  if(row.g===0) return '<span class="badge badge-missed">No Break</span>';
+  if(row.r===60 && row.g<30) return '<span class="badge badge-missed">Critical</span>';
+  if(row.r===60 && row.g<50) return '<span class="badge badge-sporadic">Insufficient</span>';
+  return '<span class="badge badge-below">Short Break</span>';
+}
+
+function renderLunchTable() {
+  const search = document.getElementById('lunchSearch')?.value.toLowerCase()||'';
+  const coach  = document.getElementById('lunchCoachFilter')?.value||'';
+  const solo   = document.getElementById('lunchSoloFilter')?.value||'';
+  const week   = document.getElementById('lunchWeekFilter')?.value||'';
+  const gCoach = document.getElementById('globalCoach')?.value||'';
+  const {wA, wB, comparing} = getWeeks();
+  const weekMap = {wk1:'Wk1: 3/2–3/8', wk2:'Wk2: 3/9–3/15', wk3:'Wk3: 3/16–3/22', wk4:'Wk4: 3/23–3/29'};
+  const activeWeekStr = wA ? weekMap[wA] : '';
+  const activeWeekStrB = wB ? weekMap[wB] : '';
+
+  let data = RAW.missed_lunch.filter(m=>
+    (!coach  || (Array.isArray(m.c)?m.c.includes(coach):m.c===coach)) &&
+    (!gCoach || (Array.isArray(m.c)?m.c.includes(gCoach):m.c===gCoach)) &&
+    (!week   || m.w===week) &&
+    (!activeWeekStr || comparing ? (m.w===activeWeekStr||m.w===activeWeekStrB) : m.w===activeWeekStr) &&
+    (solo===''||(solo==='solo'&&m.x===1)||(solo==='nonSolo'&&!m.x===1)) &&
+    (!search || m.n.toLowerCase().includes(search) ||
+                (Array.isArray(m.l)?m.l.join(' '):m.l).toLowerCase().includes(search))
+  );
+
+  document.getElementById('lunch-tbody').innerHTML = data.map(m=>{
+    const rowBg = m.x===1?'rgba(123,45,139,0.05)':m.g===0?'rgba(226,0,122,0.05)':'';
+    const locDisplay = (Array.isArray(m.l)&&m.l.length>1)
+      ? `${(Array.isArray(m.l)?m.l[0]:m.l).replace(/^(MA|RI|TN|CT|AR)-/,'')} <span class="badge badge-solo">+${m.l.length-1}</span>`
+      : m.ls[0];
+    const coachDisplay = (Array.isArray(m.c)?[...new Set(m.c)].join(', '):m.c);
+    return `<tr style="background:${rowBg}">
+      <td style="color:var(--text);font-weight:600">${m.n}</td>
+      <td style="font-size:11px">${locDisplay}</td>
+      <td style="font-size:11px">${coachDisplay}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${m.d}</td>
+      <td>${m.h.toFixed(1)}</td>
+      <td><span class="badge" style="background:rgba(155,58,176,0.15);color:var(--purple)">${(m.s?'8h+':'6-8h')}</span></td>
+      <td style="font-family:'DM Mono',monospace;color:${m.g===0?'var(--magenta)':m.g<30?'var(--purple)':'var(--text2)'};font-weight:700">${m.g}m</td>
+      <td style="font-family:'DM Mono',monospace">${m.r}m</td>
+      <td>${m.x===1?'<span style="color:var(--purple);font-size:11px;font-weight:600">YES</span>':'<span style="color:var(--text3);font-size:11px">No</span>'}</td>
+      <td>${lunchStatus(m)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="10" class="empty">No records match filters</td></tr>`;
+}
+
+function renderLunchCharts() {
+  // By location
+  const byLoc = {};
+  RAW.missed_lunch.forEach(m=>{ if(!m.x===1) m.ls.forEach(loc=>{ byLoc[loc]=(byLoc[loc]||0)+(1/m.ls.length); }); });
+  const locEntries = Object.entries(byLoc).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  destroyChart('lunchLoc');
+  const ctx1 = document.getElementById('chartLunchLoc').getContext('2d');
+  charts['lunchLoc'] = new Chart(ctx1,{ type:'bar',
+    data:{ labels:locEntries.map(e=>e[0].replace(/^(MA|RI|TN|CT|AR)-/,'')),
+      datasets:[{ label:'Non-Solo Missed Lunches', data:locEntries.map(e=>e[1]),
+        backgroundColor:'#e2007a22', borderColor:'#e2007a', borderWidth:1, borderRadius:3 }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{...CHART_DEFAULTS.plugins}, scales:{x:{...CHART_DEFAULTS.scales.x},y:{...CHART_DEFAULTS.scales.y,ticks:{...CHART_DEFAULTS.scales.y.ticks,font:{size:9}}}} }});
+
+  // Solo vs non-solo
+  const solo = RAW.missed_lunch.filter(m=>m.x===1).length;
+  const nonSolo = RAW.missed_lunch.length-solo;
+  destroyChart('lunchSolo');
+  const ctx2 = document.getElementById('chartLunchSolo').getContext('2d');
+  charts['lunchSolo'] = new Chart(ctx2,{ type:'doughnut',
+    data:{ labels:['Non-Solo (Risk)','Solo (Poss. Exempt)'],
+      datasets:[{ data:[nonSolo,solo], backgroundColor:['#e2007a22','#7b2d8b22'],
+        borderColor:['#e2007a','#7b2d8b'], borderWidth:1.5, hoverOffset:4 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{ legend:{ position:'bottom', labels:{ color:'#8892b0', font:{family:'DM Mono',size:10}, boxWidth:8 } },
+        tooltip:{ callbacks:{ label: ctx=>`${ctx.label}: ${ctx.raw}` } } } }});
+}
+
+// ══════════════════════════════════════
+// OVERTIME PAGE
+// ══════════════════════════════════════
+function initOtFilters() { populateCoachDropdown('otCoachFilter'); }
+
+function renderOtKpis() {
+  const totalOt = RAW.loc_ot.reduce((s,l)=>s+l.total_ot,0);
+  const otLocs  = RAW.loc_ot.filter(l=>l.total_ot>0).length;
+  const empOt   = new Set(RAW.emp_ot.map(e=>e.empnumber)).size;
+  const totalOtHrs = RAW.emp_ot.reduce((s,e)=>s+e.o,0);
+  const critInst = RAW.emp_ot.filter(e=>e.o>=15).length;
+  const wk4Tot  = RAW.loc_ot.reduce((s,l)=>s+l.wk4,0);
+  const wk3Tot  = RAW.loc_ot.reduce((s,l)=>s+l.wk3,0);
+  const wkTrend = ((wk4Tot-wk3Tot)/Math.max(wk3Tot,1)*100).toFixed(1);
+  document.getElementById('ot-kpi-strip').innerHTML = [
+    {label:'Total OT Hours',val:totalOt.toFixed(1),sub:'all 4 weeks',color:'#ef4444'},
+    {label:'Locations with OT',val:otLocs,sub:`of ${RAW.loc_ot.length} total`,color:'#f97316'},
+    {label:'Employees with OT',val:empOt,sub:'unique workers',color:'#f59e0b'},
+    {label:'OT Instances',val:RAW.emp_ot.length,sub:'employee-week pairs',color:'#a78bfa'},
+    {label:'Critical Instances',val:critInst,sub:'15h+ OT in a week',color:'#dc2626'},
+    {label:'Wk4 OT Trend',val:`${wkTrend>0?'+':''}${wkTrend}%`,sub:'vs Wk3',color: wkTrend>0?'#c41a1a':'#1a7a4a'},
+  ].map(k=>`<div class="kpi" style="--kpi-color:${k.color}">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-value" style="color:${k.color}">${k.val}</div>
+    <div class="kpi-sub">${k.sub}</div>
+  </div>`).join('');
+}
+
+function otSeverityBadge(ot) {
+  if(ot>=15) return '<span class="badge badge-ot-crit">Critical 15h+</span>';
+  if(ot>=8)  return '<span class="badge badge-ot-high">High 8-15h</span>';
+  if(ot>=4)  return '<span class="badge badge-ot-mod">Moderate 4-8h</span>';
+  return '<span class="badge badge-ot-low">Low &lt;4h</span>';
+}
+
+function renderOtTable() {
+  const coach = document.getElementById('otCoachFilter')?.value||'';
+  const gCoach= document.getElementById('globalCoach')?.value||'';
+  const {wA, wB, comparing} = getWeeks();
+  const wMap  = {wk1:'Wk1: 3/2–3/8',wk2:'Wk2: 3/9–3/15',wk3:'Wk3: 3/16–3/22',wk4:'Wk4: 3/23–3/29'};
+  const wkStrA = wA ? wMap[wA] : '', wkStrB = wB ? wMap[wB] : '';
+  let data = RAW.emp_ot.filter(e=>
+    (!coach  || e.c.includes(coach)) &&
+    (!gCoach || e.c.includes(gCoach)) &&
+    (!wkStrA || comparing ? (e.w===wkStrA||e.w===wkStrB) : e.w===wkStrA)
+  );
+  document.getElementById('ot-tbody').innerHTML = data.map(e=>{
+    const locDisplay = e.l.length>1
+      ? `${e.l[0].replace(/^(MA|RI|TN|CT|AR)-/,'')} <span class="badge badge-solo">+${e.l.length-1}</span>`
+      : e.l[0];
+    return `<tr>
+      <td style="color:var(--text);font-weight:600">${e.n}</td>
+      <td style="font-size:11px">${locDisplay}</td>
+      <td style="font-size:11px">${[...new Set(e.c)].join(', ')}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${e.w}</td>
+      <td>${e.h.toFixed(1)}h</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${e.o>=8?'var(--magenta)':e.o>=4?'var(--purple)':'var(--text3)'}">${e.o.toFixed(2)}h</td>
+      <td>${otSeverityBadge(e.o)}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" class="empty">No OT records</td></tr>`;
+}
+
+function renderOtLocTable() {
+  const gCoach = document.getElementById('globalCoach')?.value||'';
+  let data = RAW.loc_ot.filter(l=>!gCoach||l.coach===gCoach);
+  document.getElementById('ot-loc-tbody').innerHTML = data.map(l=>{
+    const trend = l.wk4-l.wk1;
+    const tClass = trend>2?'up':trend<-2?'down':'flat';
+    const tLabel = trend>=0?`▲ +${trend.toFixed(1)}h`:`▼ ${trend.toFixed(1)}h`;
+    const rowBg  = l.total_ot>=15?'rgba(226,0,122,0.05)':l.total_ot>=5?'rgba(180,83,9,0.04)':l.total_ot>0?'rgba(146,98,10,0.04)':'';
+    return `<tr style="background:${rowBg}">
+      <td style="color:var(--text);font-weight:${l.total_ot>=15?700:400}">${l.location}</td>
+      <td>${coachTag(l.coach)}</td>
+      <td style="font-family:'DM Mono',monospace;color:${l.wk1>0?'var(--magenta)':'var(--text3)'}">${l.wk1.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;color:${l.wk2>0?'var(--purple)':'var(--text3)'}">${l.wk2.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;color:${l.wk3>0?'var(--magenta3)':'var(--text3)'}">${l.wk3.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;color:${l.wk4>0?'var(--magenta)'  :'var(--text3)'}">${l.wk4.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${l.total_ot>=15?'var(--magenta)':l.total_ot>=5?'var(--purple)':l.total_ot>0?'var(--purple3)':'var(--text3)'}">${l.total_ot.toFixed(2)}</td>
+      <td><span class="trend ${tClass}">${tLabel}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderOtBar() {
+  destroyChart('otBar');
+  const gCoach = document.getElementById('globalCoach')?.value||'';
+  const data = RAW.loc_ot.filter(l=>l.total_ot>0&&(!gCoach||l.coach===gCoach)).sort((a,b)=>b.total_ot-a.total_ot);
+  const ctx = document.getElementById('chartOtBar').getContext('2d');
+  charts['otBar'] = new Chart(ctx,{ type:'bar',
+    data:{ labels:data.map(l=>l.location.replace(/^(MA|RI|TN|CT|AR)-/,'')),
+      datasets:[
+        {label:'Wk1 OT',data:data.map(l=>l.wk1),backgroundColor:'#e2007a22',borderColor:'#e2007a',borderWidth:1,borderRadius:2},
+        {label:'Wk2 OT',data:data.map(l=>l.wk2),backgroundColor:'#7b2d8b22',borderColor:'#7b2d8b',borderWidth:1,borderRadius:2},
+        {label:'Wk3 OT',data:data.map(l=>l.wk3),backgroundColor:'#f0339a22',borderColor:'#f0339a',borderWidth:1,borderRadius:2},
+        {label:'Wk4 OT',data:data.map(l=>l.wk4),backgroundColor:'#c4006b22',borderColor:'#c4006b',borderWidth:1,borderRadius:2},
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{...CHART_DEFAULTS.plugins, tooltip:{ callbacks:{ label: ctx=>`${ctx.dataset.label}: ${ctx.raw.toFixed(2)}h` } }},
+      scales:{x:{...CHART_DEFAULTS.scales.x,stacked:false,ticks:{...CHART_DEFAULTS.scales.x.ticks,maxRotation:40,font:{size:9}}},y:{...CHART_DEFAULTS.scales.y}}
+    }});
+}
+
+// ══════════════════════════════════════
+// SUNDAY PREMIUM
+// ══════════════════════════════════════
+function initSunFilters() { populateCoachDropdown('sunCoachFilter'); }
+
+function renderSunKpis() {
+  const empsWithSun = RAW.employees.filter(e=>e.st2>0);
+  const totalSunHrs = RAW.loc_sun.reduce((s,l)=>s+l.total_sun,0);
+  const totalPrem   = RAW.loc_sun.reduce((s,l)=>s+l.total_premium,0);
+  const rate = parseFloat(document.getElementById('baseRate')?.value||15);
+  const estCost = (totalPrem * rate).toFixed(2);
+  const wk3Sun = RAW.loc_sun.reduce((s,l)=>s+l.sun_wk3,0);
+  const wk4Sun = RAW.loc_sun.reduce((s,l)=>s+l.sun_wk4,0);
+  document.getElementById('sun-kpi-strip').innerHTML = [
+    {label:'Total RI Sunday Hours',    val:totalSunHrs.toFixed(1), sub:'across 4 weeks',          color:'#e2007a'},
+    {label:'Total Premium Hours',      val:totalPrem.toFixed(1),   sub:'Sunday hrs × 0.5 extra',  color:'#7b2d8b'},
+    {label:'Est. Premium Cost',        val:`$${Number(estCost).toLocaleString()}`, sub:`at $${rate}/hr base`, color:'#c41a1a'},
+    {label:'Employees w/ Sun Hours',   val:empsWithSun.length,     sub:'RI staff working Sundays', color:'#7b2d8b'},
+    {label:'Wk4 Sunday Hours',         val:wk4Sun.toFixed(1),      sub:`vs Wk3: ${wk3Sun.toFixed(1)}h`, color:wk4Sun>=wk3Sun?'#c41a1a':'#1a7a4a'},
+    {label:'RI Locations w/ Sun Hrs',  val:RAW.loc_sun.filter(l=>l.total_sun>0).length, sub:'of 11 RI locations', color:'#b45309'},
+  ].map(k=>`<div class="kpi" style="--kpi-color:${k.color}">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-value" style="color:${k.color}">${k.val}</div>
+    <div class="kpi-sub">${k.sub}</div>
+  </div>`).join('');
+}
+
+function renderSunLocTable() {
+  const gCoach = document.getElementById('globalCoach')?.value||'';
+  const data = RAW.loc_sun.filter(l=>!gCoach||l.coach===gCoach).sort((a,b)=>b.total_sun-a.total_sun);
+  document.getElementById('sun-loc-tbody').innerHTML = data.map(l=>`<tr>
+    <td style="color:var(--text);font-weight:600">${l.location}</td>
+    <td>${coachTag(l.coach)}</td>
+    <td style="font-family:'DM Mono',monospace;color:${l.sun_wk1>0?'var(--magenta)':'var(--text3)'}">${l.sun_wk1.toFixed(2)}</td>
+    <td style="font-family:'DM Mono',monospace;color:${l.sun_wk2>0?'var(--purple)':'var(--text3)'}">${l.sun_wk2.toFixed(2)}</td>
+    <td style="font-family:'DM Mono',monospace;color:${l.sun_wk3>0?'var(--magenta3)':'var(--text3)'}">${l.sun_wk3.toFixed(2)}</td>
+    <td style="font-family:'DM Mono',monospace;color:${l.sun_wk4>0?'var(--magenta)'  :'var(--text3)'}">${l.sun_wk4.toFixed(2)}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--magenta)">${l.total_sun.toFixed(2)}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--purple)">${l.total_premium.toFixed(2)}</td>
+  </tr>`).join('');
+}
+
+function renderSunBar() {
+  destroyChart('sunBar');
+  const gCoach = document.getElementById('globalCoach')?.value||'';
+  const {wA, wB, comparing} = getWeeks();
+  const data = RAW.loc_sun.filter(l=>l.total_sun>0&&(!gCoach||l.coach===gCoach)).sort((a,b)=>b.total_sun-a.total_sun);
+  const allWks = [
+    {k:'sw1',label:'Wk1 Sun Hrs',color:'#e2007a'},
+    {k:'sw2',label:'Wk2 Sun Hrs',color:'#7b2d8b'},
+    {k:'sw3',label:'Wk3 Sun Hrs',color:'#f0339a'},
+    {k:'sw4',label:'Wk4 Sun Hrs',color:'#c4006b'},
+  ];
+  let wks;
+  if(comparing) wks = [{k:{wk1:'sw1',wk2:'sw2',wk3:'sw3',wk4:'sw4'}[wA]||wA,label:`${getWeekLabel(wA)} (A)`,color:'#e2007a'},{k:{wk1:'sw1',wk2:'sw2',wk3:'sw3',wk4:'sw4'}[wB]||wB,label:`${getWeekLabel(wB)} (B)`,color:'#7b2d8b'}];
+  else if(wA)   wks = allWks.filter(w=>w.k===`sun_${wA}`);
+  else          wks = allWks;
+  const ctx = document.getElementById('chartSunBar').getContext('2d');
+  charts['sunBar'] = new Chart(ctx, { type:'bar',
+    data:{ labels: data.map(l=>l.location.replace('RI-','')),
+      datasets: wks.map(w=>({label:w.label, data:data.map(l=>l[w.k]),
+        backgroundColor:w.color+'33', borderColor:w.color, borderWidth:1, borderRadius:2}))},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{...CHART_DEFAULTS.plugins, tooltip:{ callbacks:{ label:ctx=>`${ctx.dataset.label}: ${ctx.raw.toFixed(2)}h` } }},
+      scales:{ x:{...CHART_DEFAULTS.scales.x}, y:{...CHART_DEFAULTS.scales.y} }
+    }});
+}
+
+function renderSunTable() {
+  const search  = document.getElementById('sunSearch')?.value.toLowerCase()||'';
+  const coach   = document.getElementById('sunCoachFilter')?.value||'';
+  const gCoach  = document.getElementById('globalCoach')?.value||'';
+  const rate    = parseFloat(document.getElementById('baseRate')?.value||15);
+  const {wA, wB, comparing} = getWeeks();
+  const sunKeyA = wA ? {wk1:'sw1',wk2:'sw2',wk3:'sw3',wk4:'sw4'}[wA] : null;
+  const sunKeyB = wB ? {wk1:'sw1',wk2:'sw2',wk3:'sw3',wk4:'sw4'}[wB] : null;
+
+  const data = RAW.employees.filter(e=>
+    (sunKeyA ? e[sunKeyA]>0 : e.st2>0) &&
+    (!coach  || e.c.includes(coach)) &&
+    (!gCoach || e.c.includes(gCoach)) &&
+    (!search || e.n.toLowerCase().includes(search) ||
+                e.l.join(' ').toLowerCase().includes(search))
+  ).sort((a,b)=> sunKeyA ? b[sunKeyA]-a[sunKeyA] : b.st2-a.st2);
+
+  const scell = (val, k) => {
+    const hiA = sunKeyA===k, hiB = sunKeyB===k;
+    const style = hiA ? `font-weight:700;color:#e2007a;background:#e2007a11`
+                : hiB ? `font-weight:700;color:#7b2d8b;background:#7b2d8b11`
+                : val>0 ? `color:var(--magenta)` : `color:var(--text3)`;
+    return `<td style="font-family:'DM Mono',monospace;${style}">${val.toFixed(2)}</td>`;
+  };
+
+  document.getElementById('sun-emp-tbody').innerHTML = data.map(e=>{
+    const riLocs = e.l.filter(l=>l.startsWith('RI-'));
+    const locDisplay = riLocs.length>1
+      ? `${riLocs[0].replace('RI-','')} <span class="badge badge-solo">+${riLocs.length-1}</span>`
+      : (riLocs[0]?.replace('RI-','')||e.l[0]);
+    const sunHrs  = sunKeyA ? e[sunKeyA]  : e.st2;
+    const premHrs = sunKeyA ? e[sunKeyA]*0.5 : e.sp;
+    const premCost = (premHrs * rate).toFixed(2);
+
+    let diffCol = '';
+    if(comparing && sunKeyA && sunKeyB) {
+      const diff = e[sunKeyB]-e[sunKeyA];
+      const cls  = diff>=0 ? 'cmp-diff-pos' : 'cmp-diff-neg';
+      diffCol = `<td class="compare-diff ${cls}">${diff>=0?'▲':'▼'}${Math.abs(diff).toFixed(2)}h</td>`;
+    }
+
+    return `<tr>
+      <td style="color:var(--text);font-weight:600">${e.n}</td>
+      <td style="font-size:11px">${locDisplay}</td>
+      <td style="font-size:11px">${[...new Set(e.c)].join(', ')}</td>
+      ${scell(e.sw1,'sw1')}${scell(e.sw2,'sw2')}${scell(e.sw3,'sw3')}${scell(e.sw4,'sw4')}
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--magenta)">${sunHrs.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--purple)">${premHrs.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">$${Number(premCost).toLocaleString()}</td>
+      ${diffCol}
+    </tr>`;
+  }).join('') || `<tr><td colspan="10" class="empty">No Sunday hours found</td></tr>`;
+  renderSunKpis();
+}
+
+// ══════════════════════════════════════
+// EXECUTIVE SUMMARY
+// ══════════════════════════════════════
+function renderExecSummary() {
+  const coach = document.getElementById('globalCoach')?.value||'';
+  const locs  = RAW.locations.filter(l=>!coach||l.coach===coach);
+  const emps  = RAW.employees.filter(e=>!coach||e.c.includes(coach));
+
+  const totalHrs = locs.reduce((s,l)=>s+l.total,0);
+  const wk3      = locs.reduce((s,l)=>s+l.wk3,0);
+  const wk4      = locs.reduce((s,l)=>s+l.wk4,0);
+  const wow      = ((wk4-wk3)/Math.max(wk3,1)*100);
+  const totalOt  = RAW.emp_ot.filter(e=>!coach||e.c.includes(coach)).reduce((s,e)=>s+e.o,0);
+  const wk4Ot    = RAW.emp_ot.filter(e=>(!coach||e.c.includes(coach))&&e.w.includes('Wk4')).reduce((s,e)=>s+e.o,0);
+  const nonSolo  = RAW.missed_lunch.filter(m=>m.x!==1&&(!coach||(Array.isArray(m.c)?m.c.includes(coach):m.c===coach))).length;
+  const sunPrem  = RAW.loc_sun.reduce((s,l)=>s+l.total_premium,0)*15;
+  const active   = emps.filter(e=>e.st==='Active').length;
+  const flagged  = emps.filter(e=>e.st!=='Active').length;
+
+  document.getElementById('exec-total-hrs').textContent = totalHrs.toLocaleString('en-US',{maximumFractionDigits:0});
+  document.getElementById('exec-hero-sub').innerHTML    = `Total hours worked &nbsp;·&nbsp; ${locs.length} locations &nbsp;·&nbsp; ${emps.length} employees`;
+  const wowBadge = document.getElementById('exec-wow-badge');
+  wowBadge.textContent   = `${wow>=0?'+':''}${wow.toFixed(1)}%\nWoW`;
+  wowBadge.style.cssText += `;background:${wow>=0?'rgba(196,0,27,0.12)':'rgba(26,122,74,0.12)'};color:${wow>=0?'#c41a1a':'#1a7a4a'};border:1px solid ${wow>=0?'rgba(196,0,27,0.3)':'rgba(26,122,74,0.3)'};white-space:pre;line-height:1.3`;
+
+  document.getElementById('exec-wk4-hrs').textContent    = wk4.toLocaleString('en-US',{maximumFractionDigits:0});
+  document.getElementById('exec-ot-hrs').textContent     = totalOt.toFixed(0)+'h';
+  document.getElementById('exec-ot-sub').textContent     = `${wk4Ot.toFixed(1)}h this week (Wk4)`;
+  document.getElementById('exec-lunch-val').textContent  = nonSolo.toLocaleString();
+  document.getElementById('exec-active').textContent     = active;
+  document.getElementById('exec-active-sub').textContent = `of ${emps.length} total employees`;
+  document.getElementById('exec-flagged').textContent    = flagged;
+  document.getElementById('exec-sun-cost').textContent   = '$'+sunPrem.toLocaleString('en-US',{maximumFractionDigits:0});
+
+  // Locations alert — biggest WoW movers
+  const locWow = locs.map(l=>({...l,diff:l.wk4-l.wk3,pct:(l.wk4-l.wk3)/Math.max(l.wk3,1)*100}))
+    .filter(l=>Math.abs(l.diff)>3).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff)).slice(0,8);
+  document.getElementById('exec-alert-locs').innerHTML = locWow.map(l=>{
+    const bad=l.diff>0, color=bad?'#c41a1a':'#1a7a4a', bg=bad?'rgba(196,0,27,0.06)':'rgba(26,122,74,0.06)';
+    return `<li style="background:${bg}">
+      <span class="alert-dot" style="background:${color}"></span>
+      <span class="alert-name">${l.location.replace(/^(MA|RI|TN|CT|AR)-/,'')}</span>
+      <span style="font-size:11px">${coachTag(l.coach)}</span>
+      <span class="alert-val" style="color:${color}">${bad?'▲':'▼'} ${Math.abs(l.diff).toFixed(1)}h (${bad?'+':''}${l.pct.toFixed(1)}%)</span>
+    </li>`;
+  }).join('')||'<li style="padding:12px;color:var(--text3);font-size:12px">No significant changes</li>';
+
+  // Employees alert — flagged sorted by severity
+  const statusRank={'Critical':0,'Sporadic':1,'Sharp Decline':2,'Below Threshold':3};
+  const statusColors={'Critical':'#c41a1a','Sporadic':'#c45000','Sharp Decline':'#7b2d8b','Below Threshold':'#7a5200'};
+  const flagEmps=emps.filter(e=>e.st!=='Active').sort((a,b)=>(statusRank[a.st]??9)-(statusRank[b.st]??9)).slice(0,8);
+  document.getElementById('exec-alert-emps').innerHTML = flagEmps.map(e=>{
+    const color=statusColors[e.st]||'#888';
+    const loc=e.l.length>1?e.l[0].replace(/^(MA|RI|TN|CT|AR)-/,'')+` +${e.l.length-1}`:e.l[0].replace(/^(MA|RI|TN|CT|AR)-/,'');
+    return `<li style="background:rgba(${e.st==='Critical'?'196,0,27':'123,45,139'},0.05)">
+      <span class="alert-dot" style="background:${color}"></span>
+      <span class="alert-name">${e.n}</span>
+      <span style="font-size:11px;color:var(--text3)">${loc}</span>
+      <span class="alert-val" style="color:${color}">${e.st} · ${e.a.toFixed(1)}h avg</span>
+    </li>`;
+  }).join('')||'<li style="padding:12px;color:var(--text3);font-size:12px">No flagged employees</li>';
+
+  // Coach bar chart
+  destroyChart('execCoach');
+  const coaches=[...new Set(locs.map(l=>l.coach))].sort();
+  const ctx=document.getElementById('chartExecCoach').getContext('2d');
+  charts['execCoach']=new Chart(ctx,{type:'bar',
+    data:{labels:coaches,datasets:[
+      {label:'Wk3',data:coaches.map(c=>locs.filter(l=>l.coach===c).reduce((s,l)=>s+l.wk3,0)),backgroundColor:'#7b2d8b44',borderColor:'#7b2d8b',borderWidth:1,borderRadius:3},
+      {label:'Wk4',data:coaches.map(c=>locs.filter(l=>l.coach===c).reduce((s,l)=>s+l.wk4,0)),backgroundColor:'#e2007a44',borderColor:'#e2007a',borderWidth:1,borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{...CHART_DEFAULTS.plugins,tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw.toFixed(0)}h`}}},
+      scales:{x:{...CHART_DEFAULTS.scales.x},y:{...CHART_DEFAULTS.scales.y}}}});
+}
+
+// ══════════════════════════════════════
+// WEEK-OVER-WEEK
+// ══════════════════════════════════════
+function renderWow() {
+  const coach=document.getElementById('globalCoach')?.value||'';
+  const locs=RAW.locations.filter(l=>!coach||l.coach===coach);
+  const maxHrs=Math.max(...locs.map(l=>Math.max(l.wk3,l.wk4)));
+  const withDiff=locs.map(l=>({...l,diff:l.wk4-l.wk3,pct:(l.wk4-l.wk3)/Math.max(l.wk3,1)*100})).sort((a,b)=>b.diff-a.diff);
+  const rising=withDiff.filter(l=>l.diff>0);
+  const falling=[...withDiff.filter(l=>l.diff<=0)].reverse();
+
+  function barBlock(l) {
+    const w3pct=Math.min((l.wk3/maxHrs*100),100).toFixed(1);
+    const w4pct=Math.min((l.wk4/maxHrs*100),100).toFixed(1);
+    const bad=l.diff>0, color=bad?'#c41a1a':'#1a7a4a';
+    return `<div class="wow-bar-wrap">
+      <div class="wow-loc-name" title="${l.location}">${l.location.replace(/^(MA|RI|TN|CT|AR)-/,'')}</div>
+      <div class="wow-bars">
+        <div class="wow-bar-row">
+          <div class="wow-bar-label" style="color:#7b2d8b">Wk3</div>
+          <div class="wow-bar" style="width:${w3pct}%;background:#7b2d8b88"></div>
+          <div class="wow-bar-val">${l.wk3.toFixed(0)}h</div>
+        </div>
+        <div class="wow-bar-row">
+          <div class="wow-bar-label" style="color:#e2007a">Wk4</div>
+          <div class="wow-bar" style="width:${w4pct}%;background:#e2007a88"></div>
+          <div class="wow-bar-val">${l.wk4.toFixed(0)}h</div>
+        </div>
+      </div>
+      <div class="wow-diff" style="color:${color}">${bad?'▲':'▼'} ${Math.abs(l.diff).toFixed(1)}h</div>
+    </div>`;
+  }
+
+  document.getElementById('wow-rising-title').textContent  = `▲ Rising Hours — ${rising.length} locations`;
+  document.getElementById('wow-falling-title').textContent = `▼ Falling Hours — ${falling.length} locations`;
+  document.getElementById('wow-rising').innerHTML  = rising.map(barBlock).join('')||'<p style="color:var(--text3);font-size:12px;padding:12px 0">None</p>';
+  document.getElementById('wow-falling').innerHTML = falling.map(barBlock).join('')||'<p style="color:var(--text3);font-size:12px;padding:12px 0">None</p>';
+
+  destroyChart('wowChart');
+  const sorted=[...withDiff].sort((a,b)=>b.diff-a.diff);
+  const ctx=document.getElementById('chartWow').getContext('2d');
+  charts['wowChart']=new Chart(ctx,{type:'bar',
+    data:{labels:sorted.map(l=>l.location.replace(/^(MA|RI|TN|CT|AR)-/,'')),
+      datasets:[
+        {label:'Wk3',data:sorted.map(l=>l.wk3),backgroundColor:'#7b2d8b55',borderColor:'#7b2d8b',borderWidth:1,borderRadius:2},
+        {label:'Wk4',data:sorted.map(l=>l.wk4),
+          backgroundColor:sorted.map(l=>l.diff>0?'#c41a1a55':'#1a7a4a55'),
+          borderColor:sorted.map(l=>l.diff>0?'#c41a1a':'#1a7a4a'),borderWidth:1,borderRadius:2},
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{...CHART_DEFAULTS.plugins,tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.raw.toFixed(1)}h`}}},
+      scales:{x:{...CHART_DEFAULTS.scales.x,ticks:{...CHART_DEFAULTS.scales.x.ticks,maxRotation:45,font:{size:9}}},y:{...CHART_DEFAULTS.scales.y}}}});
+}
+
+// kick off
+</script>
+</body>
+</html>
