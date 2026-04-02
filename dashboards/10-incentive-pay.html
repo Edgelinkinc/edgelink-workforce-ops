@@ -729,8 +729,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <div class="card"><div class="card-hdr card-hdr-dk">
         <div class="card-title">💵 Breakdown &amp; Payouts</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn bghost sm" onclick="requirePin(()=>document.getElementById('dzR').querySelector('input').click())">⬆ RTPOS CSV</button>
-          <button class="btn bghost sm" onclick="requirePin(()=>document.getElementById('dzM').querySelector('input').click())">⬆ Metro CSV</button>
+
           <button class="btn bp sm" onclick="printAllStubs()">🖨️ Print All</button>
           <button class="btn bok sm" onclick="doExp()">⬇ Payroll CSV</button>
         </div>
@@ -880,6 +879,7 @@ body.page-pg-assign .week-bar{display:none!important;}
         </div>
       </div>
       <div class="card-body">
+
         <!-- ACTIVE BACKSHEET BANNER -->
         <div id="bsBanner" style="display:none;background:linear-gradient(135deg,#F3E8FF,#FFF0F7);border:1px solid var(--se);border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
           <div>
@@ -978,7 +978,8 @@ body.page-pg-assign .week-bar{display:none!important;}
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth"/></div>
           <div class="fi" style="min-width:160px"><label>Company Acc Total ($)</label><input type="number" id="coachSheetCoAcc" placeholder="e.g. 310000" min="0" onchange="renCoachSheet()"/></div>
-          <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+          
+        <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals per store. Each coach section shows their stores. Bonus calculates automatically.
           </div>
         </div>
@@ -1120,6 +1121,7 @@ body.page-pg-assign .week-bar{display:none!important;}
         <button class="sub-tab" onclick="swAdmin('tiers',this)">⚙️ Tier Editor</button>
         <button class="sub-tab" onclick="swAdmin('spiffs',this)">⚡ Spiff Manager</button>
         <button class="sub-tab" onclick="swAdmin('data',this)">📊 Data Management</button>
+        <button class="sub-tab" onclick="swAdmin('datastatus',this)">🔗 Data Status</button>
       </div>
 
       <!-- LOCK CONTROLS -->
@@ -1474,7 +1476,38 @@ body.page-pg-assign .week-bar{display:none!important;}
         </div>
       </div>
 
-    </div><!-- /adminContent -->
+    
+      <!-- DATA STATUS & SHAREPOINT CHECK -->
+      <div class="sub-pane" id="admin-datastatus">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hdr card-hdr-pr">
+            <div class="card-title">📋 Currently Loaded Data</div>
+            <button class="btn bghost sm" onclick="refreshDataStatus()">↺ Refresh</button>
+          </div>
+          <div class="card-body" id="loadedDataStatus">
+            <div style="color:var(--mu);font-size:13px;text-align:center;padding:16px">Loading…</div>
+          </div></div>
+          <div class="card"><div class="card-hdr" style="background:var(--se)">
+            <div class="card-title">🔗 GitHub / SharePoint Status</div>
+            <button class="btn bghost sm" onclick="checkFileStatus()">↺ Check Now</button>
+          </div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--mu);margin-bottom:12px">Checks when data files were last updated on GitHub. Flags files not updated within the expected refresh window.</div>
+            <div id="fileStatusList">
+              <div style="color:var(--mu);font-size:13px;text-align:center;padding:16px">Click Check Now to verify file freshness</div>
+            </div>
+            <div style="margin-top:14px;border-top:1px solid var(--bo);padding-top:12px">
+              <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:var(--se);margin-bottom:8px">GitHub Repository Settings</div>
+              <div class="fi" style="margin-bottom:8px"><label>Repo (owner/repo)</label><input type="text" id="ghRepo" placeholder="Edgelinkinc/edgelink-workforce-ops" style="font-size:12px" oninput="localStorage.setItem('wfo_gh_repo',this.value)"/></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div class="fi"><label>RTPOS file path</label><input type="text" id="ghRtbdi" placeholder="data/rtbdi/export.csv" style="font-size:11px" oninput="localStorage.setItem('wfo_gh_rtbdi',this.value)"/></div>
+                <div class="fi"><label>Metro file path</label><input type="text" id="ghMetro" placeholder="data/metro/export.csv" style="font-size:11px" oninput="localStorage.setItem('wfo_gh_metro',this.value)"/></div>
+              </div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+</div><!-- /adminContent -->
   </div><!-- /pg-admin -->
 
 
@@ -2478,6 +2511,13 @@ function renCBL(){
 }
 
 // ── CSV UPLOAD ──
+function handleAdminDrop(e,src,dzId){
+  e.preventDefault();
+  dzl(dzId);
+  const f=e.dataTransfer.files[0];
+  if(f)pF(f,src);
+}
+
 function dzo(e,id){e.preventDefault();document.getElementById(id).classList.add("ov");}
 function dzl(id){document.getElementById(id).classList.remove("ov");}
 function dzd(e,src){e.preventDefault();const idMap={metro:"dzM",rtbdi:"dzR",mgr_metro:"dzMgr",coach_metro:"dzCoach"};document.getElementById(idMap[src])?.classList.remove("ov");const f=e.dataTransfer.files[0];if(f)pF(f,src);}
@@ -3977,6 +4017,7 @@ function swAdmin(tab,btn){
   if(tab==='tiers')initAdminTiers();
   if(tab==='spiffs')renAdminSpiffs();
   if(tab==='data')renAdminSysInfo();
+  if(tab==='datastatus'){refreshDataStatus();initDataStatus();}
   if(tab==='backsheet'){const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
 }
 
@@ -5721,7 +5762,77 @@ function loadEmpBonus(){
 }
 
 function printEmpBonus(){
-  window.print();
+  const card=document.getElementById('emp-card');
+  if(!card||card.style.display==='none'){tst2('Select your name first.','wn');return;}
+  // Create print container
+  const existing=document.getElementById('empPrintFrame');
+  if(existing)existing.remove();
+  const frame=document.createElement('div');
+  frame.id='empPrintFrame';
+  frame.style.cssText='display:none;position:fixed;inset:0;background:#fff;z-index:9999;padding:20px;overflow:auto';
+  // Build slip HTML
+  const empName=document.getElementById('empName')?.textContent||'—';
+  const empInfo=document.getElementById('empInfo')?.textContent||'—';
+  const empWeek=document.getElementById('empWeekDisp')?.textContent||'—';
+  const empBx=document.getElementById('empBx')?.textContent||'$0';
+  const empBxD=document.getElementById('empBxDetail')?.textContent||'';
+  const empAc=document.getElementById('empAc')?.textContent||'$0';
+  const empAcD=document.getElementById('empAcDetail')?.textContent||'';
+  const empPu=document.getElementById('empPu')?.textContent||'$0';
+  const empPuD=document.getElementById('empPuDetail')?.textContent||'';
+  const empMim=document.getElementById('empMim')?.textContent||'$0';
+  const empMimD=document.getElementById('empMimDetail')?.textContent||'';
+  const empSp=document.getElementById('empSp')?.textContent||'$0';
+  const empArc=document.getElementById('empArc')?.textContent||'$0';
+  const empNet=document.getElementById('empNet')?.textContent||'$0';
+  const empGross=document.getElementById('empGross')?.textContent||'0';
+  const cbSection=document.getElementById('empCbSection');
+  const cbHtml=cbSection?.style.display!=='none'?cbSection?.outerHTML||'':'';
+  frame.innerHTML=`
+  <div style="max-width:520px;margin:0 auto;font-family:'Nunito',sans-serif">
+    <div style="background:linear-gradient(135deg,#4A1A6B,#E20074);border-radius:12px;padding:20px 22px;margin-bottom:16px;color:#fff">
+      <div style="font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Edgelink Inc — Work Force Ops</div>
+      <div style="font-family:'Arial',sans-serif;font-weight:900;font-size:22px;margin-bottom:3px">${empName}</div>
+      <div style="font-size:12px;opacity:.75">${empInfo}</div>
+      <div style="font-size:12px;opacity:.75">${empWeek}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:13px">
+      <thead><tr style="background:#FFF0F7"><th style="padding:8px 12px;text-align:left;font-weight:700;color:#6E2B8B;border-bottom:2px solid #E20074">Category</th><th style="padding:8px 12px;text-align:right;font-weight:700;color:#6E2B8B;border-bottom:2px solid #E20074">Amount</th><th style="padding:8px 12px;text-align:left;font-weight:700;color:#6E2B8B;border-bottom:2px solid #E20074">Detail</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #E8E8E8"><td style="padding:8px 12px">📦 Box Bonus</td><td style="padding:8px 12px;text-align:right;font-weight:700;color:#E20074">${empBx}</td><td style="padding:8px 12px;font-size:11px;color:#666">${empBxD}</td></tr>
+        <tr style="border-bottom:1px solid #E8E8E8;background:#FAFAFA"><td style="padding:8px 12px">🛍️ Accessory Bonus</td><td style="padding:8px 12px;text-align:right;font-weight:700;color:#6E2B8B">${empAc}</td><td style="padding:8px 12px;font-size:11px;color:#666">${empAcD}</td></tr>
+        <tr style="border-bottom:1px solid #E8E8E8"><td style="padding:8px 12px">⚡ Power Ups</td><td style="padding:8px 12px;text-align:right;font-weight:700;color:#00897B">${empPu}</td><td style="padding:8px 12px;font-size:11px;color:#666">${empPuD}</td></tr>
+        <tr style="border-bottom:1px solid #E8E8E8;background:#FAFAFA"><td style="padding:8px 12px">📱 MIM Spiff</td><td style="padding:8px 12px;text-align:right;font-weight:700;color:#00A651">${empMim}</td><td style="padding:8px 12px;font-size:11px;color:#666">${empMimD}</td></tr>
+        <tr style="border-bottom:1px solid #E8E8E8"><td style="padding:8px 12px">⭐ Spiffs</td><td style="padding:8px 12px;text-align:right;font-weight:700;color:#FF69B4">${empSp}</td><td style="padding:8px 12px;font-size:11px;color:#666"></td></tr>
+        <tr style="border-bottom:2px solid #E20074;background:#FFF8E1"><td style="padding:8px 12px;font-weight:700;color:#8a6000">Arcade MIM (Paid by Coach)</td><td style="padding:8px 12px;text-align:right;font-weight:700;color:#D32F2F">${empArc}</td><td style="padding:8px 12px;font-size:11px;color:#666">Coach-paid via Arcade</td></tr>
+      </tbody>
+    </table>
+    ${cbHtml?`<div style="background:#FFEBEE;border:1px solid #D32F2F;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px">${cbHtml}</div>`:''}
+    <div style="background:linear-gradient(135deg,#4A1A6B,#6E2B8B);border-radius:12px;padding:16px 20px;color:#fff;text-align:center;margin-bottom:14px">
+      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em">Net Owed This Week</div>
+      <div style="font-family:'Arial',sans-serif;font-weight:900;font-size:36px">${empNet}</div>
+      <div style="font-size:11px;opacity:.7;margin-top:4px">Gross $${empGross} · ${empArc} Arcade · Chargebacks included</div>
+    </div>
+    <div style="text-align:center;font-size:10px;color:#666;line-height:1.8">
+      Questions about your bonus? See your manager or coach.<br>
+      CONFIDENTIAL — Edgelink Inc Internal Use Only<br>
+      Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}
+    </div>
+  </div>`;
+  document.body.appendChild(frame);
+  // Print just this frame
+  const style=document.createElement('style');
+  style.id='empPrintStyle';
+  style.textContent='@media print{body>*{display:none!important}#empPrintFrame{display:block!important}}';
+  document.head.appendChild(style);
+  frame.style.display='block';
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      frame.remove();
+      style.remove();
+    },500);
+  },100);
 }
 
 // ══════════════════════════════════════════════════════
@@ -5989,6 +6100,138 @@ function saveContacts(){
   localStorage.setItem('wfo_contacts',JSON.stringify(contacts));
   document.getElementById('contactsModal').style.display='none';
   renContacts();tst2('Contacts saved!','ok');
+}
+
+
+// ══════════════════════════════════════════════════════
+// DATA STATUS & SHAREPOINT/GITHUB CHECK
+// ══════════════════════════════════════════════════════
+
+function refreshDataStatus(){
+  const el=document.getElementById('loadedDataStatus');if(!el)return;
+  const now=new Date();
+  const wkLabel=document.getElementById('wkb')?.textContent||'—';
+  const items=[
+    {
+      icon:'📊',label:'RTPOS / Rep Data',
+      val:reps.length?reps.length+' reps loaded':'No data loaded',
+      detail:reps.length?'Week of '+wkLabel:'Upload RTPOS CSV in Data Management',
+      ok:reps.length>0,
+      clearFn:'clearRepData()',
+      clearLabel:'Clear Rep Data'
+    },
+    {
+      icon:'📡',label:'Metro CSV (Reps)',
+      val:reps.some(r=>r.ta>0)?'Loaded':'Not loaded',
+      detail:reps.some(r=>r.ta>0)?reps.length+' reps with activation data':'Upload Metro CSV in Data Management',
+      ok:reps.some(r=>r.ta>0),
+      clearFn:'clearRepData()',
+      clearLabel:'Clear'
+    },
+    {
+      icon:'🏢',label:'Manager Actuals',
+      val:Object.keys(mgrSheetData).filter(k=>Object.keys(mgrSheetData[k]||{}).length>0).length+' stores entered',
+      detail:Object.keys(mgrSheetData).length?'Manual entry or CSV uploaded':'No manager data yet',
+      ok:Object.keys(mgrSheetData).length>0,
+      clearFn:'clearMgrData()',
+      clearLabel:'Clear Manager Data'
+    },
+    {
+      icon:'🎯',label:'Coach Actuals',
+      val:Object.keys(coachSheetData).filter(k=>Object.keys(coachSheetData[k]||{}).length>0).length+' stores entered',
+      detail:Object.keys(coachSheetData).length?'Manual entry or CSV uploaded':'No coach data yet',
+      ok:Object.keys(coachSheetData).length>0,
+      clearFn:'clearCoachData()',
+      clearLabel:'Clear Coach Data'
+    },
+    {
+      icon:'⚡',label:'Chargebacks',
+      val:CBs.length+' this week',
+      detail:getCBQueue?.().filter(c=>!c.appliedTo).length+' queued for next period',
+      ok:true,
+      clearFn:'if(confirm(\'Clear all chargebacks?\')){CBs=[];saveSession();renCBL();tst2(\'Cleared.\',\'ok\');}',
+      clearLabel:'Clear CBs'
+    },
+    {
+      icon:'📋',label:'Weeks in History',
+      val:getWeekIndex?.()?.length||0,
+      detail:'Max 52 weeks stored',
+      ok:true,
+      clearFn:null,
+      clearLabel:null
+    },
+  ];
+  el.innerHTML=items.map(item=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bo)">
+      <span style="font-size:20px;flex-shrink:0">${item.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700;color:var(--se)">${item.label}</div>
+        <div style="font-size:13px;font-weight:700;color:${item.ok?'var(--ok)':'var(--wa)'}">${item.val}</div>
+        <div style="font-size:10px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.detail}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <div style="width:10px;height:10px;border-radius:50%;background:${item.ok?'var(--ok)':'var(--wa)'}"></div>
+        ${item.clearFn?`<button class="btn bd xs" onclick="${item.clearFn};refreshDataStatus()">${item.clearLabel}</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ── GITHUB FILE STATUS CHECK ──
+async function checkFileStatus(){
+  const el=document.getElementById('fileStatusList');if(!el)return;
+  el.innerHTML='<div style="color:var(--mu);font-size:12px;text-align:center;padding:12px">🔄 Checking GitHub…</div>';
+  
+  const repo=document.getElementById('ghRepo')?.value||localStorage.getItem('wfo_gh_repo')||'Edgelinkinc/edgelink-workforce-ops';
+  const files=[
+    {label:'RTPOS Export',path:document.getElementById('ghRtbdi')?.value||localStorage.getItem('wfo_gh_rtbdi')||'data/rtbdi',staleDays:7,icon:'📊'},
+    {label:'Metro Export',path:document.getElementById('ghMetro')?.value||localStorage.getItem('wfo_gh_metro')||'data/metro',staleDays:7,icon:'📡'},
+    {label:'Dashboard',path:'dashboards/10-incentive-pay.html',staleDays:30,icon:'💻'},
+  ];
+  
+  const apiBase=`https://api.github.com/repos/${repo}/commits?per_page=1&path=`;
+  const results=[];
+  
+  for(const file of files){
+    try{
+      const res=await fetch(apiBase+encodeURIComponent(file.path),{
+        headers:{'Accept':'application/vnd.github.v3+json'}
+      });
+      if(!res.ok){results.push({...file,status:'error',msg:'API error '+res.status,lastMod:null});continue;}
+      const data=await res.json();
+      if(!data.length){results.push({...file,status:'unknown',msg:'No commits found',lastMod:null});continue;}
+      const lastMod=new Date(data[0].commit.committer.date);
+      const daysSince=Math.floor((new Date()-lastMod)/(1000*60*60*24));
+      const stale=daysSince>file.staleDays;
+      results.push({...file,status:stale?'stale':'ok',msg:stale?`Last updated ${daysSince} days ago — may be stale`:`Updated ${daysSince===0?'today':daysSince===1?'yesterday':daysSince+' days ago'}`,lastMod,daysSince,stale});
+    }catch(err){
+      results.push({...file,status:'error',msg:'Network error — check connection',lastMod:null});
+    }
+  }
+  
+  el.innerHTML=results.map(r=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bo)">
+      <span style="font-size:18px">${r.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:var(--se)">${r.label}</div>
+        <div style="font-size:11px;color:var(--mu);font-family:monospace">${r.path}</div>
+        <div style="font-size:12px;font-weight:700;color:${r.status==='ok'?'var(--ok)':r.status==='stale'?'var(--wa)':'var(--da)'};margin-top:2px">${r.msg}</div>
+        ${r.lastMod?`<div style="font-size:10px;color:var(--mu)">${r.lastMod.toLocaleString()}</div>`:''}
+      </div>
+      <div style="width:12px;height:12px;border-radius:50%;flex-shrink:0;background:${r.status==='ok'?'var(--ok)':r.status==='stale'?'var(--wa)':'var(--da)'}"></div>
+    </div>`).join('')+`
+    <div style="margin-top:10px;font-size:11px;color:var(--mu);text-align:center">
+      <a href="https://github.com/${repo}" target="_blank" style="color:var(--pr)">Open GitHub Repository ↗</a>
+    </div>`;
+}
+
+// Init gh inputs from localStorage
+function initDataStatus(){
+  const repo=document.getElementById('ghRepo');
+  const rtbdi=document.getElementById('ghRtbdi');
+  const metro=document.getElementById('ghMetro');
+  if(repo)repo.value=localStorage.getItem('wfo_gh_repo')||'Edgelinkinc/edgelink-workforce-ops';
+  if(rtbdi)rtbdi.value=localStorage.getItem('wfo_gh_rtbdi')||'data/rtbdi';
+  if(metro)metro.value=localStorage.getItem('wfo_gh_metro')||'data/metro';
 }
 
 </script>
