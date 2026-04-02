@@ -235,6 +235,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .pin-enter{background:var(--pr);border-color:var(--pr);color:#fff;font-size:13px}
 .pin-err{color:var(--da);font-size:12px;font-weight:700;height:18px;margin-bottom:4px}
 .pin-cancel{font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;margin-top:4px;text-decoration:underline}
+body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{display:none!important;}body.admin-active .content{padding:0!important;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .pin-box.shake{animation:shake .3s ease}
 .stbar{display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px}
@@ -354,8 +355,9 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
           </div>
         </div>
         <div class="spiff-ban" id="spb"><div class="spiff-ban-t">⚡ Active Spiffs This Week — Stack on All Payouts</div><div class="spiff-pills" id="spp"></div></div>
-        <div class="emp" id="re"><div class="emp-ic">📂</div><div class="emp-t">Drop CSV files above to get started</div><div class="emp-s">Upload RTPOS and Metro exports. All calculations are automatic.</div></div>
+        <div class="emp" id="re"><div class="emp-ic">📂</div><div class="emp-t">Drop CSV files above to get started</div><div class="emp-s">Upload RTPOS and Metro exports. All calculations are automatic.</div><div style="margin-top:14px"><button class="btn bp" onclick="requirePin(loadSmp)">▶ Load Sample Data</button></div></div>
         <div id="rw" style="display:none">
+          <div style="font-size:11px;color:var(--mu);margin-bottom:6px;font-style:italic">💡 Click any row to edit — requires Admin PIN</div>
           <div class="srch-bar">
             <input class="srch-inp" type="text" id="repSearch" placeholder="🔍 Search rep, store, coach, NTID…" oninput="apF()"/>
             <span class="srch-count" id="repCountLbl"></span>
@@ -368,14 +370,14 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
           <div class="tw"><table>
             <thead><tr>
               <th>Rep / Store / Coach</th>
-              <th class="gr" style="background:#FFF8E1;color:#8a6000">PPD ✎</th><th class="gr">New</th><th class="gr">React</th><th class="gr">Upg</th>
-              <th class="gr">Tab</th><th class="gr">Watch</th><th class="gr" style="background:#FFF8E1;color:#8a6000">BTS ✎</th>
-              <th class="gr" style="background:#FFF8E1;color:#8a6000">HSI ✎</th><th class="gr" style="background:#FFF8E1;color:#8a6000">Affirm ✎</th><th class="gr">Hrs</th>
-              <th class="gr">Box/Hr</th><th class="gr">Acc/Hr</th><th class="gr" style="background:#FFF8E1;color:#8a6000">Acc Net $ ✎</th>
+              <th class="gr">PPD</th><th class="gr">New</th><th class="gr">React</th><th class="gr">Upg</th>
+              <th class="gr">Tab</th><th class="gr">Watch</th><th class="gr">BTS</th>
+              <th class="gr">HSI</th><th class="gr">Affirm</th><th class="gr">Hrs</th>
+              <th class="gr">Box/Hr</th><th class="gr">Acc/Hr</th><th class="gr">Acc Net $</th>
               <th class="gc">Box Tier</th><th class="gc">Box $</th>
               <th class="gc">Acc Tier</th><th class="gc">Acc $</th>
               <th class="gc">PU $</th>
-              <th class="gc" style="background:#FFF8E1;color:#8a6000">BANs ✎</th><th class="gc" style="background:#FFF8E1;color:#8a6000">Lines ✎</th><th class="gc">MIM $</th>
+              <th class="gc">BANs</th><th class="gc">MIM Lines</th><th class="gc">MIM $</th>
               <th class="gc">Spiffs $</th><th class="gc">GROSS $</th>
               <th class="ga">Arcade</th>
               <th class="gn">Net Owed</th><th class="gn">Actions</th>
@@ -445,7 +447,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
       <div class="card-body">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div class="fi" style="min-width:160px"><label>Active Month</label><input type="month" id="mgrSheetMonthIn" onchange="onMgrSheetMonth()"/></div>
-          <div id="mgrSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+          <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals for all stores. Targets pull from Backsheet Setup. Bonus calculates automatically per store tier and monthly rules.
           </div>
         </div>
@@ -466,6 +468,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
         </div>
       </div></div>
     </div>
+    
     <div class="sub-pane" id="mgr-calc">
       <div class="card"><div class="card-hdr card-hdr-dk">
         <div class="card-title">🏢 Manager Bonus Calculator</div>
@@ -516,7 +519,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
         </div>
       </div></div>
     </div>
-
+    
     <div class="sub-pane" id="mgr-mim">
       <div class="card"><div class="card-hdr"><div class="card-title">📱 Manager MIM Spiffs</div><button class="btn bghost sm" onclick="doMimExp('mgr')">⬇ CSV</button></div>
         <div class="card-body">
@@ -550,7 +553,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth"/></div>
           <div class="fi" style="min-width:160px"><label>Company Acc Total ($)</label><input type="number" id="coachSheetCoAcc" placeholder="e.g. 310000" min="0" onchange="renCoachSheet()"/></div>
-          <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+          <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals per coach. Each coach section shows their stores. Bonus calculates automatically.
           </div>
         </div>
@@ -683,10 +686,9 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
     </div>
   </div>
 
-</main></div>
-<div class="page" id="pg-admin">
+<div class="page" id="pg-admin" style="margin:-22px;min-height:calc(100vh - 60px);">
     <!-- PIN GATE -->
-    <div id="adminGate" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
+    <div id="adminGate" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);text-align:center;padding:40px">
       <div style="background:var(--sf);border-radius:18px;padding:40px 36px;box-shadow:var(--shm);border:1px solid var(--bo);max-width:340px;width:100%">
         <div style="font-size:48px;margin-bottom:8px">🔐</div>
         <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--se);margin-bottom:4px">Admin Center</div>
@@ -709,7 +711,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
     </div>
 
     <!-- ADMIN CONTENT — hidden until PIN entered -->
-    <div id="adminContent" style="display:none">
+    <div id="adminContent" style="display:none;padding:22px;">
       <!-- HEADER -->
       <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:var(--ra);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
@@ -1059,12 +1061,15 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
           <div class="card"><div class="card-hdr card-hdr-pr"><div class="card-title">🗑 Clear Data</div></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
-            <button class="btn bd" onclick="clrAll()">🗑 Clear All Rep Data</button>
-            <button class="btn bd" onclick="if(confirm('Clear all chargebacks?')){CBs=[];saveSession();renCBL();tst2('Cleared.','ok')}">🗑 Clear All Chargebacks</button>
-            <button class="btn bd" onclick="if(confirm('Clear all store assignments?')){clrAssign()}">🗑 Clear Store Assignments</button>
-            <button class="btn bd" onclick="if(confirm('Clear all manager records?')){localStorage.removeItem('wfo_mgr_recs');renMgrHist();renMgrOverview();tst2('Cleared.','ok')}">🗑 Clear Manager Records</button>
-            <button class="btn bd" onclick="if(confirm('Clear all coach records?')){localStorage.removeItem('wfo_coach_recs');renCoachOv();tst2('Cleared.','ok')}">🗑 Clear Coach Records</button>
-            <button class="btn bd" onclick="rstT()">↺ Reset All Tiers to Defaults</button>
+            <button class="btn bd" onclick="clearRepData()">🗑 Clear Rep Data</button>
+            <button class="btn bd" onclick="clearMgrData()">🗑 Clear Manager Actuals</button>
+            <button class="btn bd" onclick="clearCoachData()">🗑 Clear Coach Actuals</button>
+            <button class="btn bd" onclick="if(confirm('Clear chargebacks?')){CBs=[];saveSession();renCBL();tst2('Cleared.','ok')}">🗑 Clear Chargebacks</button>
+            <button class="btn bd" onclick="if(confirm('Clear store assignments?')){clrAssign()}">🗑 Clear Store Assignments</button>
+            <button class="btn bd" onclick="if(confirm('Clear manager records?')){localStorage.removeItem('wfo_mgr_recs');renMgrHist();renMgrOverview();tst2('Cleared.','ok')}">🗑 Clear Manager Records</button>
+            <button class="btn bd" onclick="if(confirm('Clear coach records?')){localStorage.removeItem('wfo_coach_recs');renCoachOv();tst2('Cleared.','ok')}">🗑 Clear Coach Records</button>
+            <div style="border-top:1px solid var(--bo);padding-top:10px;margin-top:2px"><button class="btn bd" style="background:#7B0000;width:100%" onclick="clearAllData()">⚠️ Clear ALL Data</button></div>
+            <button class="btn bo sm" onclick="rstT()">↺ Reset Tiers</button>
           </div></div>
           <div class="card"><div class="card-hdr" style="background:var(--ok)"><div class="card-title">⬇ Export Everything</div></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
@@ -1197,14 +1202,13 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
       <div class="srch-bar" style="margin-bottom:12px">
         <input class="srch-inp" type="text" id="assignSearch" placeholder="🔍 Search rep name or NTID…" oninput="renAssign()"/>
         <span class="srch-count" id="assignCountLbl"></span>
-        <select id="assignFilterState" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All States</option><option value="TN">TN</option><option value="MA">MA</option><option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option></select>
         <select id="assignFilterSt" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Stores</option></select>
         <select id="assignFilterCo" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Coaches</option></select>
       </div>
       <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
         <table>
           <thead><tr>
-            <th>Full Name</th><th>NTID</th><th>State</th><th class="gc">Last Name Override</th>
+            <th>Rep Name</th><th>NTID</th>
             <th class="gc">Assign Store</th><th class="gc">Coach (auto)</th>
             <th class="gc">PPD This Week</th><th class="gc">Gross $</th>
             <th class="gn">Status</th>
@@ -1223,7 +1227,8 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
   </div>
 
 
-  <div id="pf"></div>
+</main></div>
+<div id="pf"></div>
 
 <!-- ADMIN OVERLAY -->
 <div class="adov" id="adov" onclick="if(event.target===this)closeA()">
@@ -1257,7 +1262,6 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
         <button class="btn bp" onclick="closeA();requirePin(()=>openBacksheet())">📋 Open Backsheet Setup</button>
       </div>
     </div>
-
     <div class="ad-pane" id="at-coach-tiers">
       <div class="ad-sec"><div class="ad-sec-t">🎯 Activation Bonus — Per Door — 0 if under 100%</div>
         <div class="tr2"><label>100%+ payout per door ($):</label><input type="number" id="cAt100" value="200" min="0"/></div>
@@ -1475,23 +1479,13 @@ const REP_ROSTER = {
 // Apply roster data when CSV uploads — enriches each rep
 function applyRosterToRep(rep){
   const ri=rep.ri;if(!ri)return;
-  const r=REP_ROSTER[ri];
-  // Apply name overrides (manually set last names)
-  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
-  const ov=overrides[ri];
-  if(r){
-    if(r.full)rep.fullName=r.full;
-    if(r.first)rep.firstName=r.first;
-    if(r.last&&!ov)rep.lastName=r.last;
-    if(r.coach&&(!rep.c||rep.c===''||rep.c==='TBD'))rep.c=r.coach;
-    if(r.state)rep.state=r.state;
-    // Apply stored assignment if exists
-    const asgn=getAssignment(ri);
-    if(asgn?.s&&!rep.s)rep.s=asgn.s;
-    if(asgn?.c)rep.c=asgn.c;
-  }
-  // Override takes priority over roster last name
-  if(ov){rep.lastName=ov;rep.fullName=((rep.firstName||rep.n||'')+' '+ov).trim();}
+  const r=REP_ROSTER[ri];if(!r)return;
+  if(r.full)rep.fullName=r.full;
+  if(r.first)rep.firstName=r.first;
+  if(r.last)rep.lastName=r.last;
+  if(r.coach&&(!rep.c||rep.c===''||rep.c==='TBD'))rep.c=r.coach;
+    const asgn2=getAssignment(ri);if(asgn2?.s&&!rep.s)rep.s=asgn2.s;if(asgn2?.c)rep.c=asgn2.c;
+  if(r.state)rep.state=r.state;
 }
 function applyRosterToAll(){reps.forEach(applyRosterToRep);saveSession();}
 
@@ -1514,6 +1508,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
   const mn=document.getElementById("mgrMonth");if(mn){const n=new Date();mn.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
   const cm=document.getElementById("coachMonth");if(cm){const n=new Date();cm.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
+  loadCustomRoster();
   updSheetStatus();
   const last=sessionStorage.getItem("wfo_page")||"pg-reps";
   goPage(last,document.querySelector('[data-page="'+last+'"]'));
@@ -1523,7 +1518,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 function requirePin(cb){if(_pinUnlocked){cb();return;}_pinCb=cb;_pinEntry="";updPinDots();document.getElementById("pinErr").textContent="";document.getElementById("pinOv").classList.add("open");}
 function pinKey(d){if(_pinEntry.length>=4)return;_pinEntry+=d;updPinDots();if(_pinEntry.length===4)setTimeout(pinSubmit,100);}
 function pinSubmit(){
-  if(_pinEntry===PIN){_pinUnlocked=true;document.getElementById("pinOv").classList.remove("open");_pinEntry="";updPinDots();if(_pinCb){const cb=_pinCb;_pinCb=null;cb();}}
+  if(_pinEntry===PIN){_pinUnlocked=true;document.getElementById("pinOv").classList.remove("open");_pinEntry="";updPinDots();const _ps=document.getElementById("pinStatus");if(_ps){_ps.textContent="✅ Admin Mode — Editing ON";_ps.style.background="var(--ok)";_ps.style.color="#fff";}if(_pinCb){const cb=_pinCb;_pinCb=null;cb();}clearTimeout(_renTimer);_renTimer=setTimeout(()=>{renR();if(typeof updSheetStatus==="function")updSheetStatus();},80);}
   else{document.getElementById("pinErr").textContent="Incorrect PIN. Try again.";document.getElementById("pinBox").classList.add("shake");setTimeout(()=>document.getElementById("pinBox").classList.remove("shake"),350);_pinEntry="";updPinDots();}
 }
 function pinClear(){_pinEntry="";updPinDots();document.getElementById("pinErr").textContent="";}
@@ -1539,11 +1534,17 @@ function goPage(id,el){
   else{const si=document.querySelector('[data-page="'+id+'"]');if(si)si.classList.add("active");}
   sessionStorage.setItem("wfo_page",id);
   if(id==="pg-leaderboard")renLB();
-  if(id==="pg-roster")renRoster();
-  if(id==="pg-admin"){if(_pinUnlocked){document.getElementById('adminGate').style.display='none';document.getElementById('adminContent').style.display='block';initAdminCenter();}else{document.getElementById('adminGate').style.display='flex';document.getElementById('adminContent').style.display='none';}}
   if(id==="pg-summary")renSum();
   if(id==="pg-managers")renMgrOverview();
   if(id==="pg-coaches")renCoachOv();
+  if(id==="pg-roster")renRoster();
+  if(id==="pg-admin"){
+    document.body.classList.add("admin-active");
+    if(_pinUnlocked){document.getElementById("adminGate").style.display="none";document.getElementById("adminContent").style.display="block";initAdminCenter();}
+    else{document.getElementById("adminGate").style.display="flex";document.getElementById("adminContent").style.display="none";}
+  } else {
+    document.body.classList.remove("admin-active");
+  }
 }
 function swSub(prefix,id,btn){
   const pg=btn.closest(".page");
@@ -1586,6 +1587,7 @@ function cbT(n){return CBs.filter(c=>c.rp===n).reduce((s,c)=>s+(c.a||0),0);}
 function actSp(wd){const d=wd||(wk?new Date(wk+"T12:00:00"):new Date());return sps.filter(s=>{if(!s.on)return false;const st=new Date(s.sd+"T12:00:00"),en=s.ed?new Date(s.ed+"T12:00:00"):null;return d>=st&&(!en||d<=en);});}
 function cSp(r){const wd=wk?new Date(wk+"T12:00:00"):new Date();let tot=0,det=[];actSp(wd).forEach(sp=>{if(sp.sc==="store"&&sp.sv&&r.s!==sp.sv)return;if(sp.sc==="coach"&&sp.sv&&r.c!==sp.sv)return;let pay=0;if(sp.ty==="flat_per_rep")pay=sp.a;else if(sp.ty==="flat_per_unit")pay=sp.a;else if(sp.ty==="pct_gross"){const g=cBx(r.ta||0)+cAc(r.ap||0)+cPU(r).t+cMI(r.ml).p;pay=g*sp.a/100;}tot+=pay;det.push({n:sp.nm,p:pay});});return{tot,det};}
 function cRp(r){const bx=cBx(r.ta||0),ac=cAc(r.ap||0),pu=cPU(r),mi=cMI(r.ml),sp=cSp(r);const gr=bx+ac+pu.t+mi.p+sp.tot,arc=arcT(r),cb=cbT(r.n),nt=gr-arc-cb;return{bx,ac,pu,mi,sp,gr,arc,cb,nt};}
+
 // ── RENDER REPS ──
 function renR(fS,fC,srch,fState){
   if(fS===undefined)fS=document.getElementById("fSt")?.value||"";
@@ -1605,39 +1607,22 @@ function renR(fS,fC,srch,fState){
     const i=reps.indexOf(r),c=cRp(r),bT=bBd(r.ta||0),aT=aBd(r.ap||0);
     const bts=(r.tb||0)+(r.wt||0),al=r.al||[],at=arcT(r),ng=c.nt<0,top=(r.ta||0)>=25;
     tG+=c.gr;tA+=c.arc;tC+=c.cb;tN+=c.nt;tB+=c.bx;tAc+=c.ac;tSp+=c.sp.tot;
-    return`<tr class="${ng?"row-neg":top?"row-top":""}">
-      <td><div style="font-weight:700;color:var(--se);font-size:12px">${X(dispName(r))}</div><div style="font-size:9px;color:var(--mu)">${r.lastName?X(r.lastName):''}</div>${r.ri?`<div style="font-size:9px;color:var(--mu);font-family:monospace">${r.ri}</div>`:""}<div style="font-size:10px;color:var(--mu)">${X(r.state||'')} ${X(r.s||"—")}</div><div style="font-size:10px;color:var(--mu)">${X(r.c||"—")}</div></td>
-      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
-        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.ta||0}" min="0" style="width:54px" onchange="requirePin(()=>uR(${i},'ta',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">PPD</span>`:`<strong style="color:var(--se)">${r.ta||0}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
-      </td>
+    return`<tr class="${ng?"row-neg":top?"row-top":""}" style="cursor:pointer" onclick="openRepPanel(${i})">
+      <td><div style="font-weight:700;color:var(--se);font-size:12px">${X(dispName(r))}</div><div style="font-size:9px;color:var(--mu)">${r.lastName?X(r.lastName):""}</div>${r.ri?`<div style="font-size:9px;color:var(--mu);font-family:monospace">${r.ri}</div>`:""}<div style="font-size:10px;color:var(--mu)">${X(r.state||"")} ${X(r.s||"—")}</div><div style="font-size:10px;color:var(--mu)">${X(r.c||"—")}</div></td>
+      <td style="text-align:center;font-weight:700;color:var(--se)">${r.ta||0}</td>
       <td style="text-align:center;color:var(--mu)">${r.na||0}</td><td style="text-align:center;color:var(--mu)">${r.ra||0}</td><td style="text-align:center;color:var(--mu)">${r.up||0}</td>
-      <td style="text-align:center;color:var(--mu)">${r.tb||0}</td><td style="text-align:center;color:var(--mu)">${r.wt||0}</td>
-      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
-        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${bts}" min="0" style="width:54px" onchange="requirePin(()=>{reps[${i}].tb=+this.value;reps[${i}].wt=0;saveSession();renR();})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">BTS</span>`:`<strong>${bts}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
-      </td>
-      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
-        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.hs||0}" min="0" style="width:54px" onchange="requirePin(()=>uR(${i},'hs',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">HSI</span>`:`<span>${r.hs||0}</span>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
-      </td>
-      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
-        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.af||0}" min="0" style="width:54px" onchange="requirePin(()=>uR(${i},'af',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">Affirm</span>`:`<span>${r.af||0}</span>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
-      </td>
-      <td style="text-align:center;color:var(--mu)">${r.hr||0}</td>
+      <td style="text-align:center;color:var(--mu)">${r.tb||0}</td><td style="text-align:center;color:var(--mu)">${r.wt||0}</td><td style="text-align:center;font-weight:700">${bts}</td>
+      <td style="text-align:center;color:var(--mu)">${r.hs||0}</td><td style="text-align:center;color:var(--mu)">${r.af||0}</td><td style="text-align:center;color:var(--mu)">${r.hr||0}</td>
       <td style="text-align:center;font-size:10px;color:var(--mu)">${r.hr?((r.ta||0)/r.hr).toFixed(2):"—"}</td>
       <td style="text-align:center;font-size:10px;color:var(--mu)">${r.hr?((r.ap||0)/r.hr).toFixed(2):"—"}</td>
-      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="font-weight:600">
-        ${_pinUnlocked&&!wkLocked?`<input class="ni niw" type="number" value="${(r.ap||0).toFixed(2)}" min="0" step="0.01" style="width:80px" onchange="requirePin(()=>uR(${i},'ap',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">Acc $</span>`:`<strong>$${(r.ap||0).toFixed(2)}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
-      </td>
+      <td style="font-weight:600">$${(r.ap||0).toFixed(2)}</td>
       <td><span class="bdg ${bT.c}">${bT.l}</span></td>
       <td><strong style="color:var(--pr)">$${c.bx.toFixed(2)}</strong></td>
       <td><span class="bdg ${aT.c}">${aT.l}</span></td>
       <td><strong style="color:var(--se)">$${c.ac.toFixed(2)}</strong><div class="pb">${aT.p}% of net</div></td>
       <td><strong>$${c.pu.t.toFixed(2)}</strong><div class="pb">Af $${c.pu.a.toFixed(0)} HSI $${c.pu.h.toFixed(0)}</div></td>
-      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}">
-        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.mb||0}" min="0" onchange="requirePin(()=>uR(${i},'mb',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">BANs</span>`:`<strong>${r.mb||0}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
-      </td>
-      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}">
-        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.ml||0}" min="0" onchange="requirePin(()=>uR(${i},'ml',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">Lines</span>`:`<strong>${r.ml||0}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
-      </td>
+      <td class="edit-cell"><input class="ni" type="number" value="${r.mb||0}" min="0" onchange="uR(${i},'mb',+this.value)"/><span class="edit-hint">✎</span></td>
+      <td class="edit-cell"><input class="ni" type="number" value="${r.ml||0}" min="0" onchange="uR(${i},'ml',+this.value)"/><span class="edit-hint">✎</span></td>
       <td><strong style="color:var(--ok)">$${c.mi.p.toFixed(2)}</strong></td>
       <td>${c.sp.tot>0?`<strong style="color:var(--ac)">$${c.sp.tot.toFixed(2)}</strong>`:`<span style="color:var(--mu)">$0</span>`}</td>
       <td><div class="pt">$${c.gr.toFixed(2)}</div></td>
@@ -1788,6 +1773,7 @@ function renCBL(){
   tb.innerHTML=CBs.map(c=>`<tr><td style="font-weight:700">${X(c.rp)}</td><td style="font-size:11px;color:var(--mu)">${X(c.st)}</td><td><span class="bdg bfl">${X(c.tp)}</span></td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--da)">$${c.a.toFixed(2)}</td><td style="font-size:11px">${X(c.by)}</td><td style="font-size:11px;color:var(--mu)">${X(c.rf)||"—"}</td><td style="font-size:11px;color:var(--mu);max-width:150px">${X(c.nt)||"—"}</td><td style="font-size:11px;color:var(--mu)">${c.at}</td><td><button class="btn bd xs" onclick="requirePin(()=>rmCB(${c.id}))">x</button></td></tr>`).join("");
   upK();
 }
+
 // ── CSV UPLOAD ──
 function dzo(e,id){e.preventDefault();document.getElementById(id).classList.add("ov");}
 function dzl(id){document.getElementById(id).classList.remove("ov");}
@@ -1795,9 +1781,9 @@ function dzd(e,src){e.preventDefault();const idMap={metro:"dzM",rtbdi:"dzR",mgr_
 function dzfs(e,src){const f=e.target.files[0];if(f)pF(f,src);}
 function pF(f,src){
   const fnMap={metro:"fnM",rtbdi:"fnR",mgr_metro:"fnMgr",coach_metro:"fnCoach"};
-  const fnEl=document.getElementById(fnMap[src]);if(fnEl)fnEl.textContent="Parsing "+f.name+"...";
+  const fnEl=document.getElementById(fnMap[src]);if(fnEl)fnEl.textContent="Reading "+f.name+"...";
   const rd=new FileReader();
-  rd.onload=e=>pC(e.target.result,src,f.name);
+  rd.onload=e=>{const content=e.target.result;showUploadPrompt(f.name,src,content);};
   rd.onerror=()=>{st2("Failed to read "+f.name,"er");if(fnEl)fnEl.textContent="Failed";};
   rd.readAsText(f);
 }
@@ -1822,9 +1808,7 @@ function pC(txt,src,fn){
     const s=stI>=0?cs[stI]?.replace(/"/g,"").trim():"";
     const e=SR.find(r=>r.s===s);const co=e?.c||"";
     const n=idx=>idx>=0?+(cs[idx]?.replace(/"/g,"").replace(/[$,]/g,"").trim())||0:0;
-    // Match by NTID first, then name
     const ex=reps.find(r=>(ri&&r.ri===ri)||(nm&&!ri&&r.n===nm));
-    // Look up stored assignment
     const asgn=getAssignment(ri||nm);
     const aStore=asgn?.s||s;const aCo=asgn?.c||co;
     if(ex){
@@ -1839,15 +1823,30 @@ function pC(txt,src,fn){
   }
   setDZ(true);saveSession();renR();document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
   applyRosterToAll();
+  // Auto-add any new NTIDs to roster
+  if(src==='rtbdi'||src==='metro'){const newCount=checkAndAutoAddNewReps(reps);}
   saveSession();
-  // Show week confirmation banner
   const wkDisplay=document.getElementById('wkb')?.textContent||'selected week';
   st2("✅ "+fn+" loaded — "+ad+" new, "+up+" updated — Data for: "+wkDisplay+"","ok");
-  // Prompt week confirmation
   showWeekConfirm(fn,ad+up);
 }
 function csvSp(l){const r=[];let c="",q=false;for(const ch of l){if(ch==='"'){q=!q;continue;}if(ch===","&&!q){r.push(c);c="";continue;}c+=ch;}r.push(c);return r;}
 
+// ── SAMPLE DATA ──
+function loadSmp(){
+  reps=[
+    {n:"Marcus D.",ri:"UAO36325",s:"TN-MORRISTOWN",c:"Mr. Watts",ta:27,na:18,ra:6,up:3,tb:2,wt:1,hs:2,af:3,hr:38,ap:1620,mb:8,ml:3,al:[{id:1,dt:"2026-04-01",ln:2,a:45,nt:"MIM"},{id:2,dt:"2026-04-03",ln:1,a:20,nt:"MIM"}]},
+    {n:"Layla C.",ri:"DXP98939",s:"RI-BROAD ST",c:"Rose Perez",ta:19,na:12,ra:4,up:3,tb:1,wt:0,hs:1,af:2,hr:40,ap:880,mb:7,ml:2,al:[{id:3,dt:"2026-04-02",ln:2,a:45,nt:"MIM"}]},
+    {n:"Devon R.",ri:"NRG89467",s:"MA-HOLYOKE",c:"Joel Montero",ta:14,na:9,ra:3,up:2,tb:0,wt:2,hs:0,af:1,hr:36,ap:520,mb:6,ml:4,al:[]},
+    {n:"Tina W.",ri:"YBT81977",s:"MA-COGGESHALL",c:"Manny",ta:9,na:6,ra:2,up:1,tb:1,wt:0,hs:0,af:0,hr:32,ap:310,mb:4,ml:1,al:[]},
+    {n:"Carlos M.",ri:"KOW08275",s:"RI-COVENTRY",c:"Ambulai Sheku",ta:22,na:14,ra:5,up:3,tb:2,wt:1,hs:3,af:4,hr:40,ap:1100,mb:9,ml:5,al:[{id:4,dt:"2026-04-01",ln:3,a:75,nt:"MIM"}]},
+    {n:"Jess P.",ri:"OLP39593",s:"TN-WEST MARKET",c:"Cheryl",ta:12,na:8,ra:2,up:2,tb:0,wt:0,hs:1,af:1,hr:35,ap:490,mb:3,ml:2,al:[]},
+    {n:"Ahmad T.",ri:"CSO68288",s:"CT-BUCKLAND HILLS MALL",c:"TBD",ta:25,na:16,ra:6,up:3,tb:3,wt:2,hs:2,af:5,hr:40,ap:1800,mb:10,ml:6,al:[{id:5,dt:"2026-04-02",ln:4,a:110,nt:"MIM"}]},
+    {n:"Renee B.",ri:"KAM65097",s:"MA-STATE STREET",c:"Joel Montero",ta:8,na:5,ra:2,up:1,tb:0,wt:0,hs:0,af:0,hr:30,ap:220,mb:5,ml:1,al:[]},
+  ];
+  CBs=[{id:101,rp:"Tina W.",st:"MA-COGGESHALL",tp:"Deposit Shortage",a:25,by:"HR",rf:"DS-001",nt:"Register short",at:"4/1/2026"},{id:102,rp:"Jess P.",st:"TN-WEST MARKET",tp:"MIM Cancellation",a:20,by:"HR",rf:"MIM-CB-1",nt:"Cancelled",at:"4/2/2026"}];
+  saveSession();renR();renCBL();tst2("Sample data loaded.","ok");
+}
 
 // ── EXPORT ──
 function doExp(){
@@ -1922,6 +1921,7 @@ function renSum(){
     bd.innerHTML=rows.length?rows.map(cg=>`<tr><td style="font-weight:700;color:var(--se)">${X(cg.co)}</td><td style="text-align:center;color:var(--mu)">${cg.stores.size}</td><td style="text-align:center;font-weight:700">${cg.n}</td><td style="text-align:center;font-weight:700;color:var(--se)">${cg.ppd}</td><td style="text-align:center;color:var(--mu)">${cg.n?Math.round(cg.ppd/cg.n):0}</td><td><div style="display:flex;align-items:center;gap:6px"><span style="font-weight:700;color:${cg.top>0?"var(--pr)":"var(--mu)"}">${cg.top}</span><div class="z-bar" style="flex:1;min-width:40px"><div class="z-fill" style="width:${cg.n?Math.min((cg.top/cg.n)*100,100):0}%"></div></div></div></td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${cg.gr.toFixed(2)}</td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:${cg.nt<0?"var(--da)":"var(--dk)"}">$${cg.nt.toFixed(2)}</td></tr>`).join(""):`<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--mu)">No data yet</td></tr>`;
   }
 }
+
 // ── BACKSHEET SYSTEM ──
 // Storage: wfo_bs_{YYYY-MM} = {month, locked, qualifiers, categories, targets}
 // qualifiers: {elbCutoff, attachCutoff, attachPenalty}
@@ -2456,6 +2456,7 @@ function renCoachHist(){
 }
 function delCoachRec(e,id){e.stopPropagation();const recs=JSON.parse(localStorage.getItem("wfo_coach_recs")||"[]").filter(r=>r.id!==id);localStorage.setItem("wfo_coach_recs",JSON.stringify(recs));renCoachHist();renCoachOv();}
 function clearCoach(){["coachSel","coachMonth","coachDoors","coachActPct","coachAccBox","coachShrink","coachELB","coachBoxes","coachCoAcc"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});const res=document.getElementById("coachResult");if(res)res.style.display="none";}
+
 // ── ADMIN / TIERS ──
 function openAdm(tab){renTE();renMgrTE();renCoachTE();renSL();document.getElementById("adov").classList.add("open");swA(tab,document.querySelector('.ad-tab[onclick*="'+tab+'"]'));}
 function closeA(){document.getElementById("adov").classList.remove("open");}
@@ -2574,64 +2575,32 @@ function exportCoachPDF(){
   openPF(body,"Coach Bonus - "+coach);
 }
 
-// ── WEEK CONFIRM BANNER ──
+// ── WEEK CONFIRM ──
 function showWeekConfirm(fn,count){
-  // Remove existing banner
-  const ex=document.getElementById('wkConfirmBanner');if(ex)ex.remove();
-  const wkDisplay=document.getElementById('wkb')?.textContent||'—';
-  const wkVal=document.getElementById('wks')?.value||'';
-  const div=document.createElement('div');
-  div.id='wkConfirmBanner';
-  div.style.cssText='background:linear-gradient(135deg,#E8F5E9,#F0FBF4);border:2px solid var(--ok);border-radius:10px;padding:11px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px';
-  div.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
-    <span style="font-size:20px">✅</span>
-    <div>
-      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--ok)">${fn} loaded — ${count} reps</div>
-      <div style="font-size:12px;color:var(--mu)">Data assigned to: <strong style="color:var(--se)">${wkDisplay}</strong></div>
-    </div>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <span style="font-size:12px;color:var(--mu)">Wrong week?</span>
-    <input type="date" value="${wkVal}" style="padding:5px 8px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none" onchange="requirePin(()=>{document.getElementById('wks').value=this.value;onWC();div.querySelector('strong').textContent=document.getElementById('wkb').textContent;})" id="wkConfirmDate"/>
-    <button class="btn bo sm" onclick="this.closest('#wkConfirmBanner').remove()">✕ Dismiss</button>
-  </div>`;
-  // Insert before stbar or at top of content
-  const stb=document.getElementById('stb');
-  if(stb&&stb.parentNode)stb.parentNode.insertBefore(div,stb.nextSibling);
+  const ex=document.getElementById("wkConfirmBanner");if(ex)ex.remove();
+  const wkDisplay=document.getElementById("wkb")?.textContent||"—";
+  const wkVal=document.getElementById("wks")?.value||"";
+  const div=document.createElement("div");div.id="wkConfirmBanner";
+  div.style.cssText="background:linear-gradient(135deg,#E8F5E9,#F0FBF4);border:2px solid var(--ok);border-radius:10px;padding:11px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px";
+  div.innerHTML=`<div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">✅</span><div><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--ok)">${fn} loaded — ${count} reps</div><div style="font-size:12px;color:var(--mu)">Data assigned to: <strong style="color:var(--se)">${wkDisplay}</strong></div></div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--mu)">Wrong week?</span><input type="date" value="${wkVal}" id="wkConfirmDate" style="padding:5px 8px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none" onchange="requirePin(()=>{document.getElementById('wks').value=this.value;onWC();})"/><button class="btn bo sm" onclick="this.closest('#wkConfirmBanner').remove()">✕</button></div>`;
+  const stb=document.getElementById("stb");if(stb&&stb.parentNode)stb.parentNode.insertBefore(div,stb.nextSibling);
 }
-
 // ── SHEET STATUS ──
 function updSheetStatus(){
-  const ms=document.getElementById('mgrSheetStatus');
-  const cs=document.getElementById('coachSheetStatus');
-  const ps=document.getElementById('pinStatus');
-  const isAdmin=_pinUnlocked;const isLocked=wkLocked;
-  if(ms){
-    if(isLocked)ms.innerHTML='🔒 Period locked — unlock with PIN to make corrections';
-    else if(isAdmin)ms.innerHTML='✅ Admin mode — all fields editable. Click Save All when done.';
-    else ms.innerHTML='🔑 PIN required to edit — enter PIN in top bar then fields become active';
-    ms.style.background=isLocked?'#FFEBEE':isAdmin?'#E8F5E9':'#FFF8E1';
-    ms.style.borderColor=isLocked?'var(--da)':isAdmin?'var(--ok)':'var(--wa)';
-    ms.style.color=isLocked?'var(--da)':isAdmin?'var(--ok)':'#8a6000';
-  }
-  if(cs){
-    if(isLocked)cs.innerHTML='🔒 Period locked — unlock with PIN to make corrections';
-    else if(isAdmin)cs.innerHTML='✅ Admin mode — all fields editable. Click Save All when done.';
-    else cs.innerHTML='🔑 PIN required to edit — enter PIN in top bar then fields become active';
-    cs.style.background=isLocked?'#FFEBEE':isAdmin?'#E8F5E9':'#FFF8E1';
-    cs.style.borderColor=isLocked?'var(--da)':isAdmin?'var(--ok)':'var(--wa)';
-    cs.style.color=isLocked?'var(--da)':isAdmin?'var(--ok)':'#8a6000';
-  }
+  const ps=document.getElementById("pinStatus");
+  const isAdmin=_pinUnlocked,isLocked=wkLocked;
   if(ps){
-    if(isLocked){ps.textContent='🔒 Locked — Click to Unlock';ps.style.background='var(--da)';ps.style.color='#fff';ps.style.border='none';ps.onclick=()=>requirePin(unlockWk);}
-    else if(isAdmin){ps.textContent='✅ Admin Mode — Editing ON';ps.style.background='var(--ok)';ps.style.color='#fff';ps.style.border='none';ps.onclick=null;}
-    else{ps.textContent='🔑 Click to Enable Editing';ps.style.background='var(--wa)';ps.style.color='#1A1A1A';ps.style.border='none';ps.onclick=()=>requirePin(()=>{});}}
+    if(isLocked){ps.textContent="🔒 Locked";ps.style.background="var(--da)";ps.style.color="#fff";ps.onclick=()=>requirePin(unlockWk);}
+    else if(isAdmin){ps.textContent="✅ Admin Mode — Editing ON";ps.style.background="var(--ok)";ps.style.color="#fff";ps.onclick=null;}
+    else{ps.textContent="🔐 Admin Center";ps.style.background="var(--wa)";ps.style.color="#1A1A1A";ps.onclick=()=>goPage("pg-admin",document.querySelector("[data-page=\"pg-admin\"]"));}
+  }
 }
-
 // ── HELPERS ──
 function st2(msg,type="in"){const el=document.getElementById("stb");if(!el)return;el.textContent=msg;el.className="stbar show "+type;setTimeout(()=>el.classList.remove("show"),6000);}
 function tst2(msg,type="ok"){const el=document.getElementById("tst");el.textContent=msg;el.className="tst "+type;el.style.display="block";el.style.animation="su .3s ease";setTimeout(()=>el.style.display="none",3000);}
 function X(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+// ── NEW FEATURES JS ──
 // ══════════════════════════════════════════════════════
 // STORE ASSIGNMENTS
 // ══════════════════════════════════════════════════════
@@ -2654,7 +2623,6 @@ function renAssign(){
   const srch=(document.getElementById('assignSearch')?.value||'').toLowerCase();
   const fSt=document.getElementById('assignFilterSt')?.value||'';
   const fCo=document.getElementById('assignFilterCo')?.value||'';
-  const fStateA=document.getElementById('assignFilterState')?.value||'';
   const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
   // Build rep list: uploaded reps + any NTIDs in assignments not in reps
   let rows=[...reps];
@@ -2663,21 +2631,15 @@ function renAssign(){
     if(srch&&!(r.n||'').toLowerCase().includes(srch)&&!(r.ri||'').toLowerCase().includes(srch))return false;
     if(fSt&&r.s!==fSt)return false;
     if(fCo&&r.c!==fCo)return false;
-    if(fStateA&&r.state!==fStateA)return false;
     return true;
   });
   if(lbl)lbl.textContent=fil.length+' reps';
   body.innerHTML=fil.map((r,i)=>{
     const c=cRp(r),asgn=assigns[r.ri]||assigns[r.n]||null;
     const assigned=!!r.s;
-    const rInfo=REP_ROSTER[r.ri]||{};
     return`<tr>
-      <td style="font-weight:700;color:var(--se)">${X(dispName(r))}<div style="font-size:10px;color:var(--mu)">${X(r.firstName||r.n||'')}</div></td>
+      <td style="font-weight:700;color:var(--se)">${X(r.n)}</td>
       <td style="font-family:monospace;font-size:11px;color:var(--mu)">${r.ri||'—'}</td>
-      <td style="text-align:center"><span class="bdg bt2">${r.state||rInfo.state||'—'}</span></td>
-      <td class="edit-cell" style="min-width:130px">
-        <input type="text" value="${r.lastName||rInfo.last||''}" placeholder="Last name" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRepLastName('${r.ri||r.n}',this.value,${reps.indexOf(r)}))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
-      </td>
       <td class="edit-cell" style="min-width:220px">
         <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>applyAssign('${r.ri||r.n}',this.value,${reps.indexOf(r)}))">
           <option value="">${r.s||'— Unassigned —'}</option>
@@ -2712,20 +2674,6 @@ function bulkAssignAll(){
   if(!confirm('Assign all '+fil.length+' filtered reps to '+store+'?'))return;
   fil.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
   saveSession();renAssign();renR();tst2(fil.length+' reps assigned to '+store,'ok');
-}
-function updRepLastName(key,lastName,repIdx){
-  lastName=lastName.trim();
-  // Save to roster override in localStorage
-  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
-  overrides[key]=lastName;
-  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
-  // Update rep in memory
-  if(repIdx>=0&&repIdx<reps.length){
-    reps[repIdx].lastName=lastName;
-    const fn=reps[repIdx].firstName||reps[repIdx].n||'';
-    reps[repIdx].fullName=(fn+' '+lastName).trim();
-  }
-  saveSession();renR();tst2('Last name saved.','ok');
 }
 function expAssignCSV(){
   const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
@@ -2822,8 +2770,6 @@ function renMgrSheet(){
   u('mgrSheetMax',maxCount);
 }
 function setMgrSheet(store,field,val){
-  if(!_pinUnlocked){tst2('PIN required to edit.','er');renMgrSheet();return;}
-  if(wkLocked){tst2('Period is locked. Unlock first.','er');renMgrSheet();return;}
   if(!mgrSheetData[store])mgrSheetData[store]={};
   mgrSheetData[store][field]=val;
   // Debounce re-render
@@ -2889,6 +2835,867 @@ function printMgrSheet(){
   tst2('Use browser print on the grid — Ctrl+P','wn');
 }
 
+// ══════════════════════════════════════════════════════
+// COACH ONE-SHEET
+// ══════════════════════════════════════════════════════
+let coachSheetData={}; // {coachName: {actPct, accPerBox, shrinkPct, elbPctile, totalBoxes}}
+
+function renCoachSheet(){
+  const el=document.getElementById('coachSheetSections');if(!el)return;
+  const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
+  const ct=T.coach||DT.coach;
+  let totalPayout=0,totalMim=0,totalKick=0,guardCount=0;
+
+  el.innerHTML=COACHES.map(coach=>{
+    const sd=coachSheetData[coach]||{};
+    const stores=SR.filter(s=>s.c===coach);
+    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    const mimSpiff=mimBans*ct.mimRate;
+    // Calculate bonus
+    const doors=+sd.doors||stores.length;
+    const actPct=+sd.actPct||0;
+    const accPerBox=+sd.accPerBox||0;
+    const shrinkPct=+sd.shrinkPct||0;
+    const elbPctile=+sd.elbPctile||0;
+    const totalBoxes=+sd.totalBoxes||0;
+    const elbBottom40=elbPctile>60;
+    let actBonus=0,accBonus=0,kicker=0;const guardrails=[];
+    if(actPct>=100){let rate=actPct>=125?ct.at125:actPct>=115?ct.at115:ct.at100;if(elbBottom40){rate*=(1-ct.atPen/100);guardrails.push('ELB −'+ct.atPen+'%');}actBonus=rate*doors;}
+    if(accPerBox>=50&&totalBoxes>0){let accRate=accPerBox>=70?ct.ac70:accPerBox>=60?ct.ac60:ct.ac50;if(elbBottom40){const drop=ct.acElbDrop||1;const tiers=[ct.ac50,ct.ac60,ct.ac70];const ci=accPerBox>=70?2:accPerBox>=60?1:0;accRate=tiers[Math.max(0,ci-drop)];guardrails.push('ELB acc drop');}let sm=1;if(shrinkPct>5){sm=0;guardrails.push('Shrink >5%');}else if(shrinkPct>3){sm=1-ct.sh2/100;guardrails.push('Shrink −'+ct.sh2+'%');}else if(shrinkPct>2){sm=1-ct.sh1/100;guardrails.push('Shrink −'+ct.sh1+'%');}accBonus=accRate*totalBoxes*sm;}
+    if(coAcc>=350000)kicker=ct.kick2;else if(coAcc>=300000)kicker=ct.kick1;
+    const total=actBonus+accBonus+mimSpiff+kicker;
+    totalPayout+=total;totalMim+=mimSpiff;totalKick+=kicker;if(guardrails.length)guardCount++;
+
+    return`<div style="margin-bottom:20px;border:1px solid var(--bo);border-radius:12px;overflow:hidden">
+      <!-- COACH HEADER -->
+      <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">${coach}</div><div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${stores.length} stores · ${mimBans} MM BANs</div></div>
+        <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em">Total Bonus</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;color:#fff">$${total.toFixed(2)}</div></div>
+      </div>
+      <!-- INPUT GRID -->
+      <div style="padding:14px 16px;background:#FAFAFA;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+        ${[
+          ['Doors (auto: '+stores.length+')','doors','number',doors||''],
+          ['Activation % to Goal','actPct','number',sd.actPct||''],
+          ['Avg Acc / Box ($)','accPerBox','number',sd.accPerBox||''],
+          ['Shrink %','shrinkPct','number',sd.shrinkPct||''],
+          ['ELB Percentile (national)','elbPctile','number',sd.elbPctile||''],
+          ['Total Boxes (all stores)','totalBoxes','number',sd.totalBoxes||''],
+        ].map(([lbl,fld,typ,val])=>`<div class="fi"><label>${lbl}</label><input type="${typ}" value="${val}" placeholder="Enter…" style="padding:6px 9px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:13px;outline:none" onchange="setCoachSheet('${coach}','${fld}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></div>`).join('')}
+      </div>
+      <!-- RESULTS BAR -->
+      <div style="padding:10px 16px;background:#fff;border-top:1px solid var(--bo);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;flex:1">
+          ${[['Act Bonus',actBonus,'var(--pr)'],['Acc Bonus',accBonus,'var(--se)'],['MIM Spiff',mimSpiff,'var(--ok)'],['Kicker',kicker,'#00897B)']].map(([l,v,c])=>`<div><div style="font-size:9px;color:var(--mu);font-weight:700;text-transform:uppercase">${l}</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:${c}">$${v.toFixed(2)}</div></div>`).join('')}
+        </div>
+        ${guardrails.length?`<div style="display:flex;gap:4px;flex-wrap:wrap">${guardrails.map(g=>`<span class="bdg bfl">${g}</span>`).join('')}</div>`:'<span class="bdg bok2">✓ Clean</span>'}
+      </div>
+      <!-- STORES TABLE -->
+      <div style="border-top:1px solid var(--bo)">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead><tr style="background:var(--thb)">
+            <th style="padding:6px 12px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Store</th>
+            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Tier</th>
+            <th style="padding:6px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Manager</th>
+            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Reps</th>
+            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Total PPD</th>
+            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">MM BANs</th>
+          </tr></thead>
+          <tbody>${stores.map((s,si)=>{
+            const storeReps=reps.filter(r=>r.s===s.s);
+            const storePPD=storeReps.reduce((sum,r)=>sum+(r.ta||0),0);
+            const storeBans=storeReps.reduce((sum,r)=>sum+(r.mb||0),0);
+            return`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}">
+              <td style="padding:5px 12px;font-weight:600;font-size:11px">${s.s}</td>
+              <td style="padding:5px 10px;text-align:center"><span class="bdg ${s.tier===1?'bok2':s.tier===2?'bt1':'bt2'}">${s.me}</span></td>
+              <td style="padding:5px 10px;font-size:10px;color:var(--mu)">${s.mgr==='TBD'?'—':s.mgr}</td>
+              <td style="padding:5px 10px;text-align:center;font-weight:700">${storeReps.length}</td>
+              <td style="padding:5px 10px;text-align:center;font-weight:700;color:var(--se)">${storePPD}</td>
+              <td style="padding:5px 10px;text-align:center;font-weight:700;color:var(--ok)">${storeBans}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Update summary strip
+  const u=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  u('cSheetTotal','$'+totalPayout.toFixed(2));
+  u('cSheetMim','$'+totalMim.toFixed(2));
+  u('cSheetGuard',guardCount);
+  u('cSheetKick','$'+totalKick.toFixed(2));
+}
+function setCoachSheet(coach,field,val){
+  if(!coachSheetData[coach])coachSheetData[coach]={};
+  coachSheetData[coach][field]=val;
+  clearTimeout(window._coachSheetTimer);
+  window._coachSheetTimer=setTimeout(()=>renCoachSheet(),200);
+}
+function saveCoachSheet(){
+  const mn=document.getElementById('coachSheetMonth')?.value;
+  if(!mn){tst2('Select a period.','er');return;}
+  const ct=T.coach||DT.coach;
+  const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
+  const existing=JSON.parse(localStorage.getItem('wfo_coach_recs')||'[]');
+  COACHES.forEach(coach=>{
+    const sd=coachSheetData[coach];if(!sd)return;
+    const stores=SR.filter(s=>s.c===coach);
+    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    const mimSpiff=mimBans*ct.mimRate;
+    const doors=+sd.doors||stores.length;
+    const actPct=+sd.actPct||0,accPerBox=+sd.accPerBox||0,shrinkPct=+sd.shrinkPct||0,elbPctile=+sd.elbPctile||0,totalBoxes=+sd.totalBoxes||0;
+    const elbBottom40=elbPctile>60;
+    let actBonus=0,accBonus=0,kicker=0;const guardrails=[];
+    if(actPct>=100){let rate=actPct>=125?ct.at125:actPct>=115?ct.at115:ct.at100;if(elbBottom40){rate*=(1-ct.atPen/100);guardrails.push('ELB −'+ct.atPen+'%');}actBonus=rate*doors;}
+    if(accPerBox>=50&&totalBoxes>0){let accRate=accPerBox>=70?ct.ac70:accPerBox>=60?ct.ac60:ct.ac50;if(elbBottom40){const drop=ct.acElbDrop||1;const tiers=[ct.ac50,ct.ac60,ct.ac70];const ci=accPerBox>=70?2:accPerBox>=60?1:0;accRate=tiers[Math.max(0,ci-drop)];guardrails.push('ELB drop');}let sm=1;if(shrinkPct>5)sm=0;else if(shrinkPct>3)sm=1-ct.sh2/100;else if(shrinkPct>2)sm=1-ct.sh1/100;accBonus=accRate*totalBoxes*sm;}
+    if(coAcc>=350000)kicker=ct.kick2;else if(coAcc>=300000)kicker=ct.kick1;
+    const total=actBonus+accBonus+mimSpiff+kicker;
+    const rec={id:Date.now(),coach,period:mn,actPct,accPerBox,shrinkPct,elbPctile,doors,totalBoxes,coAcc,actBonus,accBonus,mimSpiff,kicker,total,guardrails,savedAt:new Date().toLocaleString()};
+    const idx=existing.findIndex(r=>r.coach===coach&&r.period===mn);
+    if(idx>=0)existing[idx]=rec;else existing.unshift(rec);
+  });
+  localStorage.setItem('wfo_coach_recs',JSON.stringify(existing));
+  renCoachOv();tst2('All coach data saved!','ok');
+}
+function expCoachSheet(){
+  const mn=document.getElementById('coachSheetMonth')?.value||'';
+  const ct=T.coach||DT.coach;
+  const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
+  const hd=['Coach','Doors','Act%','Acc/Box$','Shrink%','ELB Pctile','Boxes','Act Bonus$','Acc Bonus$','MIM$','Kicker$','Total$','Guardrails'];
+  const rows=COACHES.map(coach=>{
+    const sd=coachSheetData[coach]||{};
+    const stores=SR.filter(s=>s.c===coach);
+    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    const mimSpiff=mimBans*ct.mimRate;
+    return[coach,sd.doors||stores.length,sd.actPct||'',sd.accPerBox||'',sd.shrinkPct||'',sd.elbPctile||'',sd.totalBoxes||'','','','','','',''];
+  });
+  dlC([hd,...rows],'WFO_CoachActuals_'+mn+'.csv');tst2('Exported.','ok');
+}
+function printCoachSheet(){tst2('Use browser print — Ctrl+P','wn');}
+
+// ── REP ROSTER FUNCTIONS ──
+// ══════════════════════════════════════════════════════
+// REP ROSTER PAGE — Admin Only
+// ══════════════════════════════════════════════════════
+
+// Get merged roster — REP_ROSTER + any overrides + uploaded rep data
+function getMergedRoster(){
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  // Start from REP_ROSTER as base
+  const merged=Object.entries(REP_ROSTER).map(([ntid,r])=>{
+    const ov=overrides[ntid]||null;
+    const asgn=assigns[ntid]||null;
+    const uploadedRep=reps.find(x=>x.ri===ntid);
+    return{
+      ntid,
+      first:r.first,
+      last:ov||r.last,
+      full:ov?(r.first+' '+ov).trim():r.full,
+      state:r.state,
+      coach:asgn?.c||r.coach,
+      store:asgn?.s||uploadedRep?.s||'',
+      inCSV:!!uploadedRep,
+      ppd:uploadedRep?.ta||0,
+      gross:uploadedRep?cRp(uploadedRep).gr:0,
+      source:'roster'
+    };
+  });
+  // Add any uploaded reps not in REP_ROSTER
+  reps.forEach(r=>{
+    if(!r.ri||REP_ROSTER[r.ri])return;
+    const ov=overrides[r.ri]||overrides[r.n]||null;
+    merged.push({
+      ntid:r.ri||'',
+      first:r.firstName||r.n||'',
+      last:ov||r.lastName||'',
+      full:r.fullName||r.n||'',
+      state:r.state||'',
+      coach:r.c||'TBD',
+      store:r.s||'',
+      inCSV:true,
+      ppd:r.ta||0,
+      gross:cRp(r).gr,
+      source:'csv'
+    });
+  });
+  return merged;
+}
+
+function renRoster(){
+  if(!_pinUnlocked){
+    const body=document.getElementById('rosterBody');
+    if(body)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:8px">🔒</div><div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--se);margin-bottom:6px">Admin Access Required</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">Enter your PIN to view the rep roster</div><button class="btn bp" onclick="requirePin(renRoster)">Enter PIN</button></td></tr>`;
+    return;
+  }
+  const srch=(document.getElementById('rosterSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('rosterFState')?.value||'';
+  const fCoach=document.getElementById('rosterFCoach')?.value||'';
+  const all=getMergedRoster();
+
+  // Update summary counts
+  const coachCounts={};
+  all.forEach(r=>{const c=r.coach||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  upd('rosterTotal',all.length);
+  upd('rosterRP',coachCounts['Rose Perez']||0);
+  upd('rosterMW',coachCounts['Mr. Watts']||0);
+  upd('rosterAS',coachCounts['Ambulai Sheku']||0);
+  upd('rosterJM',coachCounts['Joel Montero']||0);
+  upd('rosterMN',coachCounts['Manny']||0);
+  upd('rosterCH',coachCounts['Cheryl']||0);
+  upd('rosterTBD',coachCounts['TBD']||0);
+
+  const fil=all.filter(r=>{
+    if(fState&&r.state!==fState)return false;
+    if(fCoach&&r.coach!==fCoach)return false;
+    if(srch&&!(r.full||'').toLowerCase().includes(srch)&&!(r.ntid||'').toLowerCase().includes(srch)&&!(r.coach||'').toLowerCase().includes(srch)&&!(r.state||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+
+  const lbl=document.getElementById('rosterCountLbl');
+  if(lbl)lbl.textContent=fil.length+' reps'+(srch||fState||fCoach?' (filtered)':'');
+
+  const body=document.getElementById('rosterBody');if(!body)return;
+  body.innerHTML=fil.map((r,i)=>{
+    const coachColors={'Rose Perez':'bt1','Mr. Watts':'bt3','Ambulai Sheku':'bt2','Joel Montero':'bt4','Manny':'bok2','Cheryl':'btop','TBD':'bno'};
+    const cc=coachColors[r.coach]||'bno';
+    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 10px;color:var(--mu);font-size:11px">${i+1}</td>
+      <td style="padding:7px 10px">
+        <div style="font-weight:700;color:var(--se);font-size:13px">${X(r.full||'—')}</div>
+        ${r.inCSV?`<span class="bdg bok2" style="font-size:8px">✓ In CSV</span>`:`<span class="bdg bno" style="font-size:8px">Not uploaded</span>`}
+      </td>
+      <td style="padding:7px 10px;font-family:monospace;font-size:12px;color:var(--mu)">${X(r.ntid||'—')}</td>
+      <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||'—'}</span></td>
+      <td style="padding:5px 8px">
+        <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterCoach('${r.ntid}',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">
+          ${['Ambulai Sheku','Cheryl','Joel Montero','Manny','Mr. Watts','Rose Perez','TBD'].map(c=>`<option value="${c}"${r.coach===c?' selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:5px 8px">
+        <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterStore('${r.ntid}',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">
+          <option value="">${r.store||'— Unassigned —'}</option>
+          ${SR.map(s=>`<option value="${s.s}"${r.store===s.s?' selected':''}>${s.s}</option>`).join('')}
+        </select>
+      </td>
+      <td style="padding:5px 8px">
+        <input type="text" value="${X(r.first||'')}" placeholder="First" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterName('${r.ntid}','first',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+      </td>
+      <td style="padding:5px 8px">
+        <input type="text" value="${X(r.last||'')}" placeholder="Last" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterName('${r.ntid}','last',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+      </td>
+      <td style="padding:5px 8px;text-align:center">
+        ${r.ppd>0?`<div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;color:var(--pr)">$${r.gross.toFixed(0)}</div><div style="font-size:9px;color:var(--mu)">${r.ppd} PPD</div>`:'<span style="font-size:10px;color:var(--mu)">No data</span>'}
+      </td>
+    </tr>`;
+  }).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps match filter.</td></tr>`;
+}
+
+function updRosterCoach(ntid,coach){
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  if(!assigns[ntid])assigns[ntid]={};
+  assigns[ntid].c=coach;
+  localStorage.setItem('wfo_assign',JSON.stringify(assigns));
+  // Update in reps array
+  const rep=reps.find(r=>r.ri===ntid);if(rep)rep.c=coach;
+  saveSession();renRoster();renR();tst2('Coach updated.','ok');
+}
+function updRosterStore(ntid,store){
+  const coach=setAssignment(ntid,store);
+  const rep=reps.find(r=>r.ri===ntid);
+  if(rep){rep.s=store;rep.c=coach;}
+  // Clear new flag once store assigned
+  if(REP_ROSTER[ntid]&&store){REP_ROSTER[ntid].isNew=false;const cr=JSON.parse(localStorage.getItem('wfo_custom_roster')||'{}');if(cr[ntid])cr[ntid].isNew=false;localStorage.setItem('wfo_custom_roster',JSON.stringify(cr));}
+  saveSession();renAdminRoster();renR();tst2('Store updated.','ok');
+}
+function updRosterName(ntid,field,val){
+  val=val.trim();
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  if(!overrides[ntid])overrides[ntid]={};
+  if(typeof overrides[ntid]==='string')overrides[ntid]={last:overrides[ntid]};
+  overrides[ntid][field]=val;
+  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
+  // Update rep in memory
+  const rep=reps.find(r=>r.ri===ntid);
+  if(rep){
+    if(field==='first')rep.firstName=val;
+    if(field==='last')rep.lastName=val;
+    rep.fullName=((rep.firstName||rep.n||'')+' '+(rep.lastName||'')).trim();
+  }
+  saveSession();renRoster();renR();tst2('Name updated.','ok');
+}
+function saveRosterAll(){tst2('All roster changes auto-save as you edit.','ok');}
+function addRosterRep(){
+  // Populate store dropdown
+  const s=document.getElementById('newRosterStore');
+  if(s&&s.options.length<=1){SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}
+  document.getElementById('addRosterForm').style.display='block';
+}
+function saveNewRosterRep(){
+  const ntid=document.getElementById('newNTID').value.trim();
+  const first=document.getElementById('newFirst').value.trim();
+  const last=document.getElementById('newLast').value.trim();
+  const state=document.getElementById('newState').value;
+  const coach=document.getElementById('newCoach').value;
+  const store=document.getElementById('newRosterStore').value;
+  if(!ntid){tst2('Enter NTID.','er');return;}
+  if(!first){tst2('Enter first name.','er');return;}
+  // Add to REP_ROSTER dynamically
+  REP_ROSTER[ntid]={coach,state,full:(first+' '+last).trim(),first,last};
+  // Save assignment
+  if(store)setAssignment(ntid,store);
+  // Save name override
+  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  overrides[ntid]={first,last};
+  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
+  // Clear form
+  ['newNTID','newFirst','newLast'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('newState').value='';
+  document.getElementById('newCoach').value='TBD';
+  document.getElementById('newRosterStore').value='';
+  document.getElementById('addRosterForm').style.display='none';
+  renRoster();tst2('Rep added to roster.','ok');
+}
+function expRosterCSV(){
+  const all=getMergedRoster();
+  const hd=['#','NTID','Full Name','First','Last','State','Coach','Store','In CSV','PPD','Gross $'];
+  const rows=all.map((r,i)=>[i+1,r.ntid,r.full,r.first,r.last,r.state,r.coach,r.store,r.inCSV?'Yes':'No',r.ppd,r.gross.toFixed(2)]);
+  dlC([hd,...rows],'WFO_RepRoster.csv');tst2('Roster exported.','ok');
+}
+
+// ── ADMIN CENTER JS ──
+// ══════════════════════════════════════════════════════
+// ADMIN CENTER
+// ══════════════════════════════════════════════════════
+let _adminPinEntry = '';
+let mgrPeriodLocked = false;
+let coachPeriodLocked = false;
+
+function adminPinKey(d){
+  if(_adminPinEntry.length>=4)return;
+  _adminPinEntry+=d;updAdminPinDots();
+  if(_adminPinEntry.length===4)setTimeout(adminPinSubmit,100);
+}
+function adminPinClear(){_adminPinEntry='';updAdminPinDots();document.getElementById('adminPinErr').textContent='';}
+function adminPinSubmit(){
+  if(_adminPinEntry===PIN){
+    _pinUnlocked=true;
+    document.getElementById('adminGate').style.display='none';
+    document.getElementById('adminContent').style.display='block';
+    _adminPinEntry='';updAdminPinDots();
+    initAdminCenter();
+    // Also update button in week bar
+    const ps=document.getElementById('pinStatus');
+    if(ps){ps.textContent='✅ Admin Mode — Editing ON';ps.style.background='var(--ok)';ps.style.color='#fff';ps.onclick=null;}
+    updSheetStatus();
+    clearTimeout(_renTimer);_renTimer=setTimeout(()=>renR(),80);
+  } else {
+    document.getElementById('adminPinErr').textContent='Incorrect PIN. Try again.';
+    document.getElementById('adminPinBox')?.classList.add('shake');
+    setTimeout(()=>document.getElementById('adminPinBox')?.classList.remove('shake'),350);
+    _adminPinEntry='';updAdminPinDots();
+  }
+}
+function updAdminPinDots(){
+  for(let i=0;i<4;i++){const d=document.getElementById('apd'+i);if(d)d.className='pin-dot'+(_adminPinEntry.length>i?' filled':'');}
+}
+function adminLockOut(){
+  _pinUnlocked=false;
+  document.getElementById('adminGate').style.display='flex';
+  document.getElementById('adminContent').style.display='none';
+  _adminPinEntry='';updAdminPinDots();
+  const ps=document.getElementById('pinStatus');
+  if(ps){ps.textContent='🔑 Click to Enable Editing';ps.style.background='var(--wa)';ps.style.color='#1A1A1A';}
+  updSheetStatus();renR();
+  goPage('pg-reps',document.querySelector('[data-page="pg-reps"]'));
+}
+function swAdmin(tab,btn){
+  document.querySelectorAll('#adminContent .sub-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#adminContent .sub-tab').forEach(b=>b.classList.remove('active'));
+  const p=document.getElementById('admin-'+tab);if(p)p.classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(tab==='roster')renAdminRoster();
+  if(tab==='assignments')renAdminAssign();
+  if(tab==='tiers')initAdminTiers();
+  if(tab==='spiffs')renAdminSpiffs();
+  if(tab==='data')renAdminSysInfo();
+  if(tab==='backsheet'){const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
+}
+
+function initAdminCenter(){
+  // Set week display
+  const wkd=document.getElementById('wkb')?.textContent||'—';
+  const wd=document.getElementById('adminWkDisp');if(wd)wd.textContent=wkd;
+  // Rep count and gross
+  let tG=0;reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
+  const rc=document.getElementById('adminRepCount');if(rc)rc.textContent=reps.length;
+  const gr=document.getElementById('adminGross');if(gr)gr.textContent='$'+tG.toFixed(2);
+  // Lock status
+  updAdminLockUI();
+  // Month defaults
+  const n=new Date(),mn=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));
+  const aml=document.getElementById('adminMgrLockMonth');if(aml&&!aml.value)aml.value=mn;
+  const acl=document.getElementById('adminCoachLockMonth');if(acl&&!acl.value)acl.value=mn;
+  // Populate bulk assign store dropdown
+  const bs=document.getElementById('aBulkStore');
+  if(bs&&bs.options.length<=1)SR.forEach(r=>bs.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
+  // Populate new roster store dropdown
+  const ns=document.getElementById('newRosterStore');
+  if(ns&&ns.options.length<=1)SR.forEach(r=>ns.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
+  // Backsheet month default
+  const abm=document.getElementById('aBsMonth');if(abm&&!abm.value)abm.value=mn;
+  // Init spiff scope dropdowns
+  const aSpSV=document.getElementById('aSpSV');
+  if(aSpSV&&aSpSV.options.length<=1)SR.forEach(r=>aSpSV.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
+}
+function updAdminLockUI(){
+  const dot=document.getElementById('adminLkDot'),lbl=document.getElementById('adminLkLbl'),btn=document.getElementById('adminLkBtn');
+  if(dot)dot.className='lk-dot'+(wkLocked?' locked':' open');
+  if(lbl){lbl.className='lk-lbl'+(wkLocked?' locked':' open');lbl.textContent=wkLocked?'Locked — Paid':'Unlocked';}
+  if(btn){btn.textContent=wkLocked?'🔓 Unlock Week':'🔒 Lock & Mark Paid';btn.className=wkLocked?'btn bd':'btn bok';}
+  const md=document.getElementById('adminMgrDot'),ml=document.getElementById('adminMgrLbl'),mb=document.getElementById('adminMgrBtn');
+  if(md)md.className='lk-dot'+(mgrPeriodLocked?' locked':' open');
+  if(ml){ml.className='lk-lbl'+(mgrPeriodLocked?' locked':' open');ml.textContent=mgrPeriodLocked?'Locked':'Unlocked';}
+  if(mb){mb.textContent=mgrPeriodLocked?'🔓 Unlock Manager':'🔒 Lock Manager Period';mb.className=mgrPeriodLocked?'btn bd':'btn bok';}
+  const cd=document.getElementById('adminCoachDot'),cl=document.getElementById('adminCoachLbl'),cb=document.getElementById('adminCoachBtn');
+  if(cd)cd.className='lk-dot'+(coachPeriodLocked?' locked':' open');
+  if(cl){cl.className='lk-lbl'+(coachPeriodLocked?' locked':' open');cl.textContent=coachPeriodLocked?'Locked':'Unlocked';}
+  if(cb){cb.textContent=coachPeriodLocked?'🔓 Unlock Coach':'🔒 Lock Coach Period';cb.className=coachPeriodLocked?'btn bd':'btn bok';}
+}
+function adminToggleLock(){
+  if(wkLocked){if(!confirm('Unlock week for corrections?'))return;wkLocked=false;tst2('Week unlocked.','ok');}
+  else{if(!reps.length){tst2('No rep data to lock.','er');return;}if(!confirm('Lock & mark as paid?'))return;lockWk();}
+  updAdminLockUI();updLk();renR();
+}
+function adminToggleMgrLock(){
+  mgrPeriodLocked=!mgrPeriodLocked;
+  const mn=document.getElementById('adminMgrLockMonth')?.value||'';
+  tst2('Manager period '+(mgrPeriodLocked?'locked':'unlocked')+(mn?' — '+mn:'')+'.',mgrPeriodLocked?'ok':'wn');
+  updAdminLockUI();updSheetStatus();
+}
+function adminToggleCoachLock(){
+  coachPeriodLocked=!coachPeriodLocked;
+  const mn=document.getElementById('adminCoachLockMonth')?.value||'';
+  tst2('Coach period '+(coachPeriodLocked?'locked':'unlocked')+(mn?' — '+mn:'')+'.',coachPeriodLocked?'ok':'wn');
+  updAdminLockUI();updSheetStatus();
+}
+
+// ── ADMIN ROSTER ──
+function renAdminRoster(){
+  const srch=(document.getElementById('aRosterSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('aRosterFState')?.value||'';
+  const fCoach=document.getElementById('aRosterFCoach')?.value||'';
+  const all=getMergedRoster();
+  const coachCounts={};
+  all.forEach(r=>{const c=r.coach||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  upd('aRosterTotal',all.length);upd('aRosterRP',coachCounts['Rose Perez']||0);upd('aRosterMW',coachCounts['Mr. Watts']||0);
+  upd('aRosterAS',coachCounts['Ambulai Sheku']||0);upd('aRosterJM',coachCounts['Joel Montero']||0);
+  upd('aRosterMN',coachCounts['Manny']||0);upd('aRosterCH',coachCounts['Cheryl']||0);upd('aRosterTBD',coachCounts['TBD']||0);
+  const fil=all.filter(r=>{
+    if(window._filterNewOnly&&!REP_ROSTER[r.ntid]?.isNew)return false;
+    if(fState&&r.state!==fState)return false;
+    if(fCoach&&r.coach!==fCoach)return false;
+    if(srch&&!(r.full||'').toLowerCase().includes(srch)&&!(r.ntid||'').toLowerCase().includes(srch)&&!(r.coach||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+  const lbl=document.getElementById('aRosterCount');if(lbl)lbl.textContent=fil.length+' reps';
+  const body=document.getElementById('aRosterBody');if(!body)return;
+  body.innerHTML=fil.map((r,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+    <td style="padding:7px 10px;color:var(--mu);font-size:11px">${i+1}</td>
+    <td style="padding:7px 10px"><div style="font-weight:700;color:var(--se);font-size:13px">${X(r.full||'—')}</div>${r.inCSV?`<span class="bdg bok2" style="font-size:8px">✓ CSV</span>`:`<span class="bdg bno" style="font-size:8px">Not uploaded</span>`}${REP_ROSTER[r.ntid]?.isNew?`<span class="bdg btop" style="font-size:8px;background:var(--pr)">🆕 New</span>`:``}</td>
+    <td style="padding:7px 10px;font-family:monospace;font-size:11px;color:var(--mu)">${r.ntid||'—'}</td>
+    <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||'—'}</span></td>
+    <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterCoach('${r.ntid}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">${['Ambulai Sheku','Cheryl','Joel Montero','Manny','Mr. Watts','Rose Perez','TBD'].map(c=>`<option value="${c}"${r.coach===c?' selected':''}>${c}</option>`).join('')}</select></td>
+    <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterStore('${r.ntid}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"><option value="">${r.store||'— Unassigned —'}</option>${getStoresForState(r.state).map(s=>`<option value="${s.s}"${r.store===s.s?' selected':''}>${s.s}</option>`).join('')}${r.state&&getStoresForState(r.state).length<SR.length?`<optgroup label="── Other States ──">${SR.filter(s=>!s.s.startsWith(r.state+'-')).map(s=>`<option value="${s.s}"${r.store===s.s?' selected':''}>${s.s}</option>`).join('')}</optgroup>`:''}</select></td>
+    <td style="padding:5px 8px"><input type="text" value="${X(r.first||'')}" placeholder="First" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterName('${r.ntid}','first',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
+    <td style="padding:5px 8px"><input type="text" value="${X(r.last||'')}" placeholder="Last" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterName('${r.ntid}','last',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
+    <td style="padding:7px 10px;text-align:center">${r.ppd>0?`<div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;color:var(--pr)">$${r.gross.toFixed(0)}</div><div style="font-size:9px;color:var(--mu)">${r.ppd} PPD</div>`:'<span style="font-size:10px;color:var(--mu)">—</span>'}</td>
+  </tr>`).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps match.</td></tr>`;
+}
+
+// ── ADMIN ASSIGNMENTS ──
+function renAdminAssign(){
+  const srch=(document.getElementById('aAssignSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('aAssignFState')?.value||'';
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  const fil=reps.filter(r=>{
+    if(fState&&r.state!==fState)return false;
+    if(srch&&!(dispName(r)).toLowerCase().includes(srch)&&!(r.ri||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+  const lbl=document.getElementById('aAssignCount');if(lbl)lbl.textContent=fil.length+' reps';
+  const body=document.getElementById('aAssignBody');if(!body)return;
+  const rInfo=ri=>REP_ROSTER[ri]||{};
+  body.innerHTML=fil.map((r,i)=>{
+    const c=cRp(r),assigned=!!r.s,ri2=r.ri||r.n;
+    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 10px"><div style="font-weight:700;color:var(--se)">${X(dispName(r))}</div></td>
+      <td style="padding:7px 10px;font-family:monospace;font-size:11px;color:var(--mu)">${r.ri||'—'}</td>
+      <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||rInfo(r.ri)?.state||'—'}</span></td>
+      <td style="padding:5px 8px;background:#FFFBF0;border-left:2px solid var(--wa)"><input type="text" value="${X(r.lastName||rInfo(r.ri)?.last||'')}" placeholder="Last name" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRepLastName('${ri2}',this.value,${reps.indexOf(r)})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
+      <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="applyAssign('${ri2}',this.value,${reps.indexOf(r)})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"><option value="">${r.s||'— Unassigned —'}</option>${getStoresForState(r.state||REP_ROSTER[r.ri]?.state).map(s=>`<option value="${s.s}"${r.s===s.s?' selected':''}>${s.s}</option>`).join('')}${(r.state||REP_ROSTER[r.ri]?.state)&&getStoresForState(r.state||REP_ROSTER[r.ri]?.state).length<SR.length?`<optgroup label="── Other States ──">${SR.filter(s=>!s.s.startsWith((r.state||REP_ROSTER[r.ri]?.state)+'-')).map(s=>`<option value="${s.s}"${r.s===s.s?' selected':''}>${s.s}</option>`).join('')}</optgroup>`:''}</select></td>
+      <td style="padding:7px 10px;font-size:11px;color:var(--mu)">${r.c||'—'}</td>
+      <td style="text-align:center;font-weight:700;color:var(--se);padding:7px 10px">${r.ta||0}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr);padding:7px 10px">$${c.gr.toFixed(2)}</td>
+      <td style="padding:7px 10px">${assigned?`<span class="bdg bok2">✓</span>`:`<span class="bdg bfl">Unassigned</span>`}</td>
+    </tr>`;
+  }).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps yet — upload RTPOS CSV first.</td></tr>`;
+}
+function adminBulkAssign(){
+  const store=document.getElementById('aBulkStore')?.value;if(!store){tst2('Select a store.','er');return;}
+  const unassigned=reps.filter(r=>!r.s);if(!unassigned.length){tst2('No unassigned reps.','wn');return;}
+  unassigned.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
+  saveSession();renAdminAssign();renR();tst2(unassigned.length+' reps assigned to '+store,'ok');
+}
+function adminBulkAssignAll(){
+  const store=document.getElementById('aBulkStore')?.value;if(!store){tst2('Select a store.','er');return;}
+  const srch=(document.getElementById('aAssignSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('aAssignFState')?.value||'';
+  const fil=reps.filter(r=>(!srch||dispName(r).toLowerCase().includes(srch))&&(!fState||r.state===fState));
+  if(!confirm('Assign '+fil.length+' reps to '+store+'?'))return;
+  fil.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
+  saveSession();renAdminAssign();renR();tst2(fil.length+' reps assigned.','ok');
+}
+
+// ── ADMIN TIERS ──
+function initAdminTiers(){
+  // Rep tiers
+  const bxEl=document.getElementById('aBxR');
+  if(bxEl)bxEl.innerHTML=T.box.map((t,i)=>`<div class="tr2"><label>Tier ${i+1} min totact:</label><input type="number" id="aBM${i}" value="${t.mn}" min="0" style="width:75px"/><label style="min-width:auto;margin-left:8px">$/act:</label><input type="number" id="aBR${i}" value="${t.r}" min="0" step="0.5" style="width:70px"/></div>`).join('');
+  const acEl=document.getElementById('aAcR');
+  if(acEl)acEl.innerHTML=T.acc.map((t,i)=>`<div class="tr2"><label>Tier ${i+1} min $:</label><input type="number" id="aAM${i}" value="${t.mp}" min="0" style="width:80px"/><label style="min-width:auto;margin-left:8px">Payout %:</label><input type="number" id="aAP${i}" value="${t.p}" min="0" max="100" step="0.5" style="width:70px"/></div>`).join('');
+  document.getElementById('aTAf').value=T.af;
+  document.getElementById('aTHs').value=T.hs;
+  T.mi.forEach((v,i)=>{const el=document.getElementById('aTM'+(i+1));if(el)el.value=v;});
+  // Coach tiers
+  const ct=T.coach||DT.coach;
+  const cids={aCAt100:'at100',aCAt115:'at115',aCAt125:'at125',aCAtPen:'atPen',aCAc50:'ac50',aCAc60:'ac60',aCAc70:'ac70',aCAcElbDrop:'acElbDrop',aCSh1:'sh1',aCSh2:'sh2',aCKick1:'kick1',aCKick2:'kick2',aCMimRate:'mimRate'};
+  Object.entries(cids).forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)el.value=ct[key]??DT.coach[key];});
+  // Manager tiers
+  const mgr=T.mgr||DT.mgr;
+  const tn={1:'Tier 1 (High Volume)',2:'Tier 2 (2ME)',3:'Tier 3 (1ME)'};
+  const cn={acts:'New Voice Acts',hsi:'HSI',bts:'BTS',acc:'Accessories'};
+  const mgrEl=document.getElementById('aAdminMgrTiers');
+  if(mgrEl)mgrEl.innerHTML=[1,2,3].map(tier=>`<div style="margin-bottom:16px"><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:6px">${tn[tier]}</div>${Object.keys(cn).map(cat=>`<div class="tr2"><label>${cn[cat]}:</label><span style="font-size:11px;color:var(--mu);min-width:50px">Base $</span><input type="number" id="amte_${tier}_${cat}_b" value="${mgr[tier]?.cats[cat]?.base||DT.mgr[tier].cats[cat].base}" min="0" step="0.25" style="width:85px"/><span style="font-size:11px;color:var(--mu);min-width:55px">Up $</span><input type="number" id="amte_${tier}_${cat}_u" value="${mgr[tier]?.cats[cat]?.up||DT.mgr[tier].cats[cat].up}" min="0" step="0.25" style="width:85px"/></div>`).join('')}</div>`).join('<hr style="border:1px solid var(--bo);margin:10px 0"/>');
+}
+function saveAdminTiers(){
+  T.box.forEach((t,i)=>{t.mn=+document.getElementById('aBM'+i)?.value||t.mn;t.r=+document.getElementById('aBR'+i)?.value||t.r;});
+  for(let i=0;i<T.box.length-1;i++)T.box[i].mx=T.box[i+1].mn-1;
+  T.acc.forEach((t,i)=>{t.mp=+document.getElementById('aAM'+i)?.value||t.mp;t.p=+document.getElementById('aAP'+i)?.value||t.p;});
+  for(let i=0;i<T.acc.length-1;i++)T.acc[i].xp=T.acc[i+1].mp-1;
+  T.af=+document.getElementById('aTAf').value||5;T.hs=+document.getElementById('aTHs').value||5;
+  T.mi=T.mi.map((_,i)=>+document.getElementById('aTM'+(i+1))?.value||_);
+  localStorage.setItem('wfo_tiers',JSON.stringify(T));localStorage.setItem('wfo_ts',new Date().toISOString());
+  renR();tst2('Rep tiers saved!','ok');
+}
+function saveAdminCoachTiers(){
+  if(!T.coach)T.coach=JSON.parse(JSON.stringify(DT.coach));
+  const cids={aCAt100:'at100',aCAt115:'at115',aCAt125:'at125',aCAtPen:'atPen',aCAc50:'ac50',aCAc60:'ac60',aCAc70:'ac70',aCAcElbDrop:'acElbDrop',aCSh1:'sh1',aCSh2:'sh2',aCKick1:'kick1',aCKick2:'kick2',aCMimRate:'mimRate'};
+  Object.entries(cids).forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)T.coach[key]=+el.value||DT.coach[key];});
+  localStorage.setItem('wfo_tiers',JSON.stringify(T));
+  tst2('Coach tiers saved!','ok');
+}
+function saveAdminMgrTiers(){
+  if(!T.mgr)T.mgr=JSON.parse(JSON.stringify(DT.mgr));
+  [1,2,3].forEach(tier=>{['acts','hsi','bts','acc'].forEach(cat=>{const b=document.getElementById('amte_'+tier+'_'+cat+'_b');const u=document.getElementById('amte_'+tier+'_'+cat+'_u');if(b&&u){T.mgr[tier].cats[cat].base=+b.value||T.mgr[tier].cats[cat].base;T.mgr[tier].cats[cat].up=+u.value||T.mgr[tier].cats[cat].up;}});T.mgr[tier].baseMax=Object.values(T.mgr[tier].cats).reduce((s,c)=>s+c.base,0);T.mgr[tier].upMax=Object.values(T.mgr[tier].cats).reduce((s,c)=>s+c.up,0);});
+  localStorage.setItem('wfo_tiers',JSON.stringify(T));
+  tst2('Manager tiers saved!','ok');
+}
+
+// ── ADMIN BACKSHEET ──
+function loadAdminBsMonth(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);
+  document.getElementById('aBsElbCut').value=bs.qualifiers.elbCutoff;
+  document.getElementById('aBsAttachCut').value=bs.qualifiers.attachCutoff;
+  document.getElementById('aBsAttachPen').value=bs.qualifiers.attachPenalty;
+  const lockEl=document.getElementById('aBsLockStatus');
+  if(lockEl)lockEl.innerHTML=bs.locked?`<span style="color:var(--da);font-weight:700;font-size:12px">🔒 Locked</span><button class="btn bo sm" onclick="unlockAdminBs()">Unlock</button>`:`<span style="color:var(--ok);font-weight:700;font-size:12px">🟢 Open</span><button class="btn bd sm" onclick="lockAdminBs()">🔒 Lock</button>`;
+  renAdminBsCats(bs);renAdminBsGrid(bs);
+}
+function renAdminBsCats(bs){
+  const body=document.getElementById('aBsCatBody');if(!body)return;
+  body.innerHTML=bs.categories.map((cat,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+    <td style="padding:5px 8px"><input style="width:180px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none" value="${X(cat.name)}" onchange="updAdminBsCat('${cat.id}','name',this.value)"/></td>
+    <td style="padding:5px 8px;text-align:center"><input type="number" style="width:60px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.baseThresh}" onchange="updAdminBsCat('${cat.id}','baseThresh',+this.value)"/>%</td>
+    <td style="padding:5px 8px;text-align:center"><input type="number" style="width:60px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.upThresh}" onchange="updAdminBsCat('${cat.id}','upThresh',+this.value)"/>%</td>
+    <td style="padding:5px 8px;text-align:center;background:#F5FBF5"><input type="number" style="width:62px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t1base}" onchange="updAdminBsCat('${cat.id}','t1base',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#F5FBF5"><input type="number" style="width:62px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t1up}" onchange="updAdminBsCat('${cat.id}','t1up',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#FFF8FC"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t2base}" onchange="updAdminBsCat('${cat.id}','t2base',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#FFF8FC"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t2up}" onchange="updAdminBsCat('${cat.id}','t2up',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#F8F5FF"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t3base}" onchange="updAdminBsCat('${cat.id}','t3base',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#F8F5FF"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t3up}" onchange="updAdminBsCat('${cat.id}','t3up',+this.value)"/>$</td>
+    <td style="padding:5px 8px"><button class="btn bd xs" onclick="rmAdminBsCat('${cat.id}')">✕</button></td>
+  </tr>`).join('');
+}
+function renAdminBsGrid(bs){
+  const hdr=document.getElementById('aBsTgtHdr'),body=document.getElementById('aBsTgtBody');if(!hdr||!body)return;
+  hdr.innerHTML=`<th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);white-space:nowrap;position:sticky;left:0;background:var(--thb)">Store</th><th style="padding:7px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Tier</th><th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Mgr</th>`+bs.categories.map(cat=>`<th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);white-space:nowrap">${X(cat.name)}</th>`).join('');
+  body.innerHTML=SR.map((store,si)=>{
+    const tgts=bs.targets[store.s]||{};
+    return`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}"><td style="padding:5px 10px;font-weight:700;color:var(--se);font-size:11px;white-space:nowrap;position:sticky;left:0;background:inherit">${X(store.s)}</td><td style="padding:5px 8px;text-align:center"><span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span></td><td style="padding:5px 10px;font-size:10px;color:var(--mu);white-space:nowrap">${X(store.mgr==='TBD'?'—':store.mgr)}</td>${bs.categories.map(cat=>`<td style="padding:3px 6px;text-align:center"><input type="number" min="0" step="0.01" value="${tgts[cat.id]||''}" placeholder="0" style="width:80px;padding:4px 7px;border:1px solid var(--bo);border-radius:6px;font-size:11px;font-family:'Nunito',sans-serif;outline:none;text-align:center" onchange="setAdminBsTgt('${store.s}','${cat.id}',+this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>`).join('')}</tr>`;
+  }).join('');
+}
+function updAdminBsCat(id,field,val){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);const cat=bs.categories.find(c=>c.id===id);if(cat)cat[field]=val;
+  saveBs(bs);if(field==='name')renAdminBsGrid(bs);
+}
+function setAdminBsTgt(store,catId,val){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);if(!bs.targets[store])bs.targets[store]={};bs.targets[store][catId]=val;saveBs(bs);
+}
+function addAdminBsCat(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month){tst2('Select a month first.','er');return;}
+  const bs=getOrCreateBs(month);const id='cat_'+Date.now();
+  bs.categories.push({id,name:'New Category',t1base:0,t1up:0,t2base:0,t2up:0,t3base:0,t3up:0,baseThresh:100,upThresh:125});
+  saveBs(bs);renAdminBsCats(bs);renAdminBsGrid(bs);
+}
+function rmAdminBsCat(id){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);bs.categories=bs.categories.filter(c=>c.id!==id);saveBs(bs);renAdminBsCats(bs);renAdminBsGrid(bs);
+}
+function saveAdminBsAll(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month){tst2('Select a month.','er');return;}
+  const bs=getOrCreateBs(month);
+  bs.qualifiers.elbCutoff=+document.getElementById('aBsElbCut').value||3368;
+  bs.qualifiers.attachCutoff=+document.getElementById('aBsAttachCut').value||60;
+  bs.qualifiers.attachPenalty=+document.getElementById('aBsAttachPen').value||25;
+  saveBs(bs);updBsBanner();tst2('Backsheet saved!','ok');
+}
+function lockAdminBs(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  if(!confirm('Lock '+month+'? Rules will be frozen.'))return;
+  const bs=getOrCreateBs(month);bs.locked=true;saveBs(bs);loadAdminBsMonth();tst2('Backsheet locked.','ok');
+}
+function unlockAdminBs(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);bs.locked=false;saveBs(bs);loadAdminBsMonth();tst2('Backsheet unlocked.','ok');
+}
+function addAdminDecelerator(){
+  const el=document.getElementById('aExtraDecels');if(!el)return;
+  const div=document.createElement('div');
+  div.style.cssText='display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap';
+  div.innerHTML=`<input type="text" placeholder="Name" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:150px;font-family:'Nunito',sans-serif;outline:none"/><input type="text" placeholder="Rule" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:200px;font-family:'Nunito',sans-serif;outline:none"/><input type="number" placeholder="Penalty %" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:80px;font-family:'Nunito',sans-serif;outline:none"/><button class="btn bd xs" onclick="this.parentElement.remove()">✕</button>`;
+  el.appendChild(div);
+}
+
+// ── ADMIN SPIFFS ──
+function renAdminSpiffs(){
+  const el=document.getElementById('aSpiffList');if(!el)return;
+  if(!sps.length){el.innerHTML="<p style='font-size:13px;color:var(--mu)'>No spiffs yet.</p>";return;}
+  const td=new Date();
+  el.innerHTML=sps.map(s=>{const st=new Date(s.sd+'T12:00:00'),en=s.ed?new Date(s.ed+'T12:00:00'):null,exp=en&&td>en;const cl=!s.on?'off':exp?'exp':'',sl=!s.on?'Inactive':exp?'Expired':'Active',sc=!s.on?'off':exp?'ex':'on';const tl={flat_per_rep:'$/rep/week',flat_per_unit:'$/unit',pct_gross:'% of gross'};return`<div class="spiff-item ${cl}" style="margin-bottom:8px"><div class="spiff-ih"><div class="spiff-name">⚡ ${X(s.nm)}</div><div style="display:flex;gap:6px;align-items:center"><span class="ss-dot ${sc}">${sl}</span><button class="btn bo xs" onclick="tgSp(${s.id});renAdminSpiffs()">${s.on?'Pause':'Activate'}</button><button class="btn bd xs" onclick="rmSp(${s.id});renAdminSpiffs()">✕</button></div></div><div class="spiff-meta"><span>$${s.a} ${tl[s.ty]||s.ty}</span><span>${s.sd}${s.ed?' → '+s.ed:''}</span><span>${s.sc==='all'?'All Reps':s.sc+': '+s.sv}</span></div></div>`;}).join('');
+}
+function onAdminSS(){
+  const v=document.getElementById('aSpSc').value,w=document.getElementById('aSpSW'),l=document.getElementById('aSpSL'),s=document.getElementById('aSpSV');
+  if(v==='all'){w.style.display='none';return;}
+  w.style.display='block';
+  if(v==='store'){l.textContent='Store';s.innerHTML='<option value="">Select...</option>';SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}
+  else{l.textContent='Coach';s.innerHTML='<option value="">Select...</option>';COACHES.sort().forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);}
+}
+function addAdminSp(){
+  const nm=document.getElementById('aSpN').value.trim(),ty=document.getElementById('aSpT').value,a=+document.getElementById('aSpA').value||0;
+  const sc=document.getElementById('aSpSc').value,sv=document.getElementById('aSpSV').value;
+  const sd=document.getElementById('aSpSd').value,ed=document.getElementById('aSpEd').value,nt=document.getElementById('aSpNt').value.trim();
+  if(!nm){tst2('Enter a name.','er');return;}if(a<=0){tst2('Enter amount.','er');return;}if(!sd){tst2('Enter start date.','er');return;}
+  sps.push({id:Date.now(),nm,ty,a,sc,sv,sd,ed,nt,on:true});
+  savSp();renSB();renR();renAdminSpiffs();
+  ['aSpN','aSpA','aSpSd','aSpEd','aSpNt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('aSpSc').value='all';document.getElementById('aSpSW').style.display='none';
+  tst2('Spiff added!','ok');
+}
+
+// ── DATA MANAGEMENT ──
+function renAdminSysInfo(){
+  const el=document.getElementById('adminSysInfo');if(!el)return;
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  const hist=JSON.parse(localStorage.getItem('wfo_wk_hist')||'[]');
+  const mgrRecs=JSON.parse(localStorage.getItem('wfo_mgr_recs')||'[]');
+  const coachRecs=JSON.parse(localStorage.getItem('wfo_coach_recs')||'[]');
+  let tG=0;reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
+  el.innerHTML=`
+    <div><strong>Reps loaded:</strong> ${reps.length}</div>
+    <div><strong>Week:</strong> ${document.getElementById('wkb')?.textContent||'—'}</div>
+    <div><strong>Rep Gross:</strong> $${tG.toFixed(2)}</div>
+    <div><strong>Chargebacks:</strong> ${CBs.length} ($${CBs.reduce((s,c)=>s+c.a,0).toFixed(2)})</div>
+    <div><strong>Active Spiffs:</strong> ${actSp().length}</div>
+    <div><strong>Store Assignments:</strong> ${Object.keys(assigns).length}</div>
+    <div><strong>Paid Weeks History:</strong> ${hist.length}</div>
+    <div><strong>Manager Records:</strong> ${mgrRecs.length}</div>
+    <div><strong>Coach Records:</strong> ${coachRecs.length}</div>
+    <div><strong>Dashboard Version:</strong> v5.0</div>
+    <div><strong>Last Updated:</strong> ${document.getElementById('lu')?.textContent||'—'}</div>
+  `;
+}
+
+// ── STORE ROSTER JS ──
+// ══════════════════════════════════════════════════════
+// STORE ROSTER BACKSHEET
+// Storage: wfo_store_roster = {storeName: {mgr, coach, tier, state, log:[]}}
+// ══════════════════════════════════════════════════════
+
+function getSR_BS(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('wfo_store_roster')||'null');
+    if(saved)return saved;
+    // Initialize from SR array
+    const init={};
+    SR.forEach(s=>{
+      init[s.s]={mgr:s.mgr==='TBD'?'':s.mgr,coach:s.c==='TBD'?'':s.c,tier:s.tier,me:s.me,state:s.s.split('-')[0],log:[]};
+    });
+    localStorage.setItem('wfo_store_roster',JSON.stringify(init));
+    return init;
+  }catch{return{};}
+}
+function saveSR_BS(data){localStorage.setItem('wfo_store_roster',JSON.stringify(data));}
+
+// Get current manager for a store
+function getStoreMgr(storeName){
+  const d=getSR_BS();return d[storeName]?.mgr||SR.find(s=>s.s===storeName)?.mgr||'TBD';
+}
+// Get current coach for a store
+function getStoreCoach(storeName){
+  const d=getSR_BS();return d[storeName]?.coach||SR.find(s=>s.s===storeName)?.c||'TBD';
+}
+// Update manager with log
+function updateStoreMgr(storeName,newMgr,changedBy){
+  const d=getSR_BS();
+  if(!d[storeName])d[storeName]={mgr:'',coach:'',log:[]};
+  const old=d[storeName].mgr||'—';
+  d[storeName].log.unshift({field:'Manager',old,new:newMgr,by:changedBy||'Admin',at:new Date().toLocaleString()});
+  d[storeName].mgr=newMgr;
+  saveSR_BS(d);
+}
+// Update coach with log
+function updateStoreCoach(storeName,newCoach,changedBy){
+  const d=getSR_BS();
+  if(!d[storeName])d[storeName]={mgr:'',coach:'',log:[]};
+  const old=d[storeName].coach||'—';
+  d[storeName].log.unshift({field:'Coach',old,new:newCoach,by:changedBy||'Admin',at:new Date().toLocaleString()});
+  d[storeName].coach=newCoach;
+  // Update all reps assigned to this store
+  reps.forEach(r=>{if(r.s===storeName)r.c=newCoach;});
+  saveSession();renR();
+  saveSR_BS(d);
+}
+
+// ── RENDER STORE ROSTER ADMIN PAGE ──
+function renStoreRoster(){
+  const body=document.getElementById('storeRosterBody');if(!body)return;
+  const d=getSR_BS();
+  const srch=(document.getElementById('srSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('srFState')?.value||'';
+  const fCoach=document.getElementById('srFCoach')?.value||'';
+
+  // Update summary
+  const coachCounts={};
+  SR.forEach(s=>{const c=d[s.s]?.coach||s.c||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  upd('srTotal',SR.length);
+  upd('srTBDCoach',SR.filter(s=>!d[s.s]?.coach||d[s.s]?.coach==='').length);
+  upd('srTBDMgr',SR.filter(s=>!d[s.s]?.mgr||d[s.s]?.mgr==='').length);
+  COACHES.forEach(c=>{const el=document.getElementById('srC_'+c.replace(/\s+/g,''));if(el)el.textContent=coachCounts[c]||0;});
+
+  const fil=SR.filter(s=>{
+    if(fState&&!s.s.startsWith(fState+'-'))return false;
+    if(fCoach&&(d[s.s]?.coach||s.c)!==fCoach)return false;
+    if(srch&&!s.s.toLowerCase().includes(srch)&&!(d[s.s]?.mgr||'').toLowerCase().includes(srch)&&!(d[s.s]?.coach||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+
+  body.innerHTML=fil.map((store,i)=>{
+    const sd=d[store.s]||{mgr:'',coach:'',log:[]};
+    const mgr=sd.mgr||'';
+    const coach=sd.coach||'';
+    const hasLog=sd.log&&sd.log.length>0;
+    const lastChange=hasLog?sd.log[0]:null;
+    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 12px;font-weight:700;color:var(--se);font-size:12px;white-space:nowrap">
+        ${X(store.s)}
+        <div style="display:flex;gap:4px;margin-top:3px">
+          <span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span>
+          <span class="bdg bt2">${store.s.split('-')[0]}</span>
+        </div>
+      </td>
+      <td style="padding:5px 10px;min-width:200px">
+        <input type="text" value="${X(mgr)}" placeholder="Enter manager name…"
+          style="width:100%;padding:6px 9px;border:2px solid ${mgr?'var(--bo)':'var(--wa)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;background:${mgr?'#fff':'#FFFBF0'}"
+          onchange="requirePin(()=>updStoreMgrInline('${store.s}',this.value))"
+          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${mgr?'var(--bo)':'var(--wa)'}'"/>
+        ${!mgr?`<div style="font-size:9px;color:var(--wa);font-weight:700;margin-top:2px">⚠ No manager assigned</div>`:''}
+      </td>
+      <td style="padding:5px 10px;min-width:200px">
+        <select style="width:100%;padding:6px 9px;border:2px solid ${coach?'var(--bo)':'var(--wa)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;background:${coach?'#fff':'#FFFBF0'}"
+          onchange="requirePin(()=>updStoreCoachInline('${store.s}',this.value))"
+          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${coach?'var(--bo)':'var(--wa)'}'">
+          <option value="">${coach||'— Assign Coach —'}</option>
+          ${[...COACHES,''].map(c=>c?`<option value="${c}"${coach===c?' selected':''}>${c}</option>`:'').join('')}
+        </select>
+        ${!coach?`<div style="font-size:9px;color:var(--wa);font-weight:700;margin-top:2px">⚠ No coach assigned</div>`:''}
+      </td>
+      <td style="padding:7px 10px;text-align:center">
+        ${hasLog?`<div style="font-size:10px;color:var(--mu)">${lastChange.field}: ${X(lastChange.old)} → <strong>${X(lastChange.new)}</strong></div><div style="font-size:9px;color:var(--mu)">${lastChange.by} · ${lastChange.at}</div>`:`<span style="font-size:10px;color:var(--mu)">No changes</span>`}
+      </td>
+      <td style="padding:7px 10px;text-align:center">
+        <button class="btn bo xs" onclick="showStoreLog('${store.s}')">📋 ${hasLog?sd.log.length+' changes':'Log'}</button>
+      </td>
+    </tr>`;
+  }).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--mu)">No stores match.</td></tr>`;
+}
+
+function updStoreMgrInline(store,val){
+  const by=prompt('Your name (for change log):','Admin')||'Admin';
+  updateStoreMgr(store,val.trim(),by);
+  renStoreRoster();tst2('Manager updated for '+store,'ok');
+}
+function updStoreCoachInline(store,val){
+  const by=prompt('Your name (for change log):','Admin')||'Admin';
+  updateStoreCoach(store,val,by);
+  renStoreRoster();renCoachSheet();tst2('Coach updated for '+store,'ok');
+}
+function showStoreLog(store){
+  const d=getSR_BS();const log=(d[store]?.log)||[];
+  if(!log.length){tst2('No changes logged for '+store,'wn');return;}
+  const html=`<div style="max-width:600px;margin:0 auto;padding:20px">
+    <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--se);margin-bottom:14px">📋 Change Log — ${store}</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:var(--thb)">
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">Field</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">From</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">To</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">By</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">When</th>
+      </tr></thead>
+      <tbody>${log.map((l,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+        <td style="padding:8px 12px"><span class="bdg ${l.field==='Coach'?'bt2':'bt1'}">${l.field}</span></td>
+        <td style="padding:8px 12px;color:var(--da)">${X(l.old||'—')}</td>
+        <td style="padding:8px 12px;font-weight:700;color:var(--ok)">${X(l.new||'—')}</td>
+        <td style="padding:8px 12px;color:var(--mu)">${X(l.by)}</td>
+        <td style="padding:8px 12px;color:var(--mu);font-size:11px">${l.at}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+  openPF(html,'Change Log — '+store);
+}
+function expStoreRoster(){
+  const d=getSR_BS();
+  const hd=['Store','State','Tier','Manager','Coach','Last Change','Changed By','Changed At'];
+  const rows=SR.map(s=>{
+    const sd=d[s.s]||{};const last=sd.log?.[0]||{};
+    return[s.s,s.s.split('-')[0],s.me,sd.mgr||'TBD',sd.coach||'TBD',last.field?last.field+': '+last.old+' → '+last.new:'',last.by||'',last.at||''];
+  });
+  dlC([hd,...rows],'WFO_StoreRoster.csv');tst2('Store roster exported.','ok');
+}
+
+// ── COACH PER STORE JS ──
 // ══════════════════════════════════════════════════════
 // COACH ONE-SHEET — PER STORE (1 door per store)
 // ══════════════════════════════════════════════════════
@@ -3100,723 +3907,387 @@ function expCoachSheet(){
   dlC([hd,...rows],'WFO_CoachActuals_'+mn+'.csv');tst2('Exported.','ok');
 }
 
-
-function printCoachSheet(){tst2('Use browser print — Ctrl+P','wn');}
-
+// ── EDIT PANEL JS ──
 // ══════════════════════════════════════════════════════
-// REP ROSTER PAGE — Admin Only
+// REP EDIT PANEL — click row to open
 // ══════════════════════════════════════════════════════
-
-// Get merged roster — REP_ROSTER + any overrides + uploaded rep data
-function getMergedRoster(){
-  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
-  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
-  // Start from REP_ROSTER as base
-  const merged=Object.entries(REP_ROSTER).map(([ntid,r])=>{
-    const ov=overrides[ntid]||null;
-    const asgn=assigns[ntid]||null;
-    const uploadedRep=reps.find(x=>x.ri===ntid);
-    return{
-      ntid,
-      first:r.first,
-      last:ov||r.last,
-      full:ov?(r.first+' '+ov).trim():r.full,
-      state:r.state,
-      coach:asgn?.c||r.coach,
-      store:asgn?.s||uploadedRep?.s||'',
-      inCSV:!!uploadedRep,
-      ppd:uploadedRep?.ta||0,
-      gross:uploadedRep?cRp(uploadedRep).gr:0,
-      source:'roster'
-    };
+function openRepPanel(idx){
+  if(!_pinUnlocked){tst2('Enter PIN in Admin Center to edit.','wn');return;}
+  if(wkLocked){tst2('Week is locked. Unlock in Admin Center.','wn');return;}
+  const r=reps[idx];if(!r)return;
+  const c=cRp(r);
+  // Create or reuse panel
+  let panel=document.getElementById('repEditPanel');
+  if(!panel){
+    panel=document.createElement('div');
+    panel.id='repEditPanel';
+    panel.style.cssText='position:fixed;top:0;right:0;width:420px;max-width:100vw;height:100vh;background:#fff;box-shadow:-6px 0 32px rgba(0,0,0,.18);z-index:800;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;overflow:hidden';
+    document.body.appendChild(panel);
+  }
+  const rInfo=REP_ROSTER[r.ri]||{};
+  panel.innerHTML=`
+    <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:16px 20px;flex-shrink:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:#fff">${X(dispName(r))}</div>
+        <button onclick="closeRepPanel()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:30px;height:30px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.65)">${r.ri||'No NTID'} · ${r.state||''} ${r.s||'No Store'} · ${r.c||'No Coach'}</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;flex:1;text-align:center">
+          <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase">Gross</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:#fff">$${c.gr.toFixed(2)}</div>
+        </div>
+        <div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;flex:1;text-align:center">
+          <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase">Net Owed</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:${c.nt<0?'#FFB3D1':'#fff'}">$${c.nt.toFixed(2)}</div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:18px 20px">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:var(--se);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--bo)">📊 Performance Data</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        ${[
+          ['Total PPD (totact)','ep_ta',r.ta||0,'number','Drives box tier','0','1'],
+          ['Acc Net Profit ($)','ep_ap',r.ap||0,'number','Drives accessory %','0','0.01'],
+          ['BTS (Tablet+Watch)','ep_bts',(r.tb||0)+(r.wt||0),'number','Tablet + Watch combined','0','1'],
+          ['HSI / Home Internet','ep_hs',r.hs||0,'number','$5 Power Up per unit','0','1'],
+          ['Affirm Sales','ep_af',r.af||0,'number','$5 Power Up per sale','0','1'],
+          ['Hours Worked','ep_hr',r.hr||0,'number','Used for per-hour metrics','0','0.01'],
+          ['MM BANs','ep_mb',r.mb||0,'number','MM account count','0','1'],
+          ['MIM Lines','ep_ml',r.ml||0,'number','MIM line count','0','1'],
+        ].map(([lbl,id,val,type,hint,min,step])=>`
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;font-weight:700;color:var(--mu)">${lbl}</label>
+            <input type="${type}" id="${id}" value="${val}" min="${min}" step="${step}"
+              style="padding:8px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;outline:none;transition:border-color .2s"
+              onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+            <span style="font-size:9px;color:var(--mu)">${hint}</span>
+          </div>`).join('')}
+      </div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:var(--se);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--bo)">👤 Rep Info</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:11px;font-weight:700;color:var(--mu)">First Name</label>
+          <input type="text" id="ep_first" value="${X(r.firstName||r.n||'')}" style="padding:8px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:11px;font-weight:700;color:var(--mu)">Last Name</label>
+          <input type="text" id="ep_last" value="${X(r.lastName||rInfo.last||'')}" style="padding:8px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:11px;font-weight:700;color:var(--mu)">Store</label>
+          <select id="ep_store" style="padding:8px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:12px;outline:none">
+            <option value="">${r.s||'— Unassigned —'}</option>
+            ${SR.map(s=>`<option value="${s.s}"${r.s===s.s?' selected':''}>${s.s}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:11px;font-weight:700;color:var(--mu)">Coach</label>
+          <select id="ep_coach" style="padding:8px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:12px;outline:none">
+            ${['Ambulai Sheku','Cheryl','Joel Montero','Manny','Mr. Watts','Rose Perez','TBD'].map(c=>`<option value="${c}"${r.c===c?' selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <!-- LIVE PREVIEW -->
+      <div style="background:linear-gradient(135deg,#F3E8FF,#FFF0F7);border:1px solid var(--ac);border-radius:10px;padding:12px 14px;margin-bottom:16px" id="ep_preview">
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:var(--se);margin-bottom:8px">Live Preview</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="ep_preview_vals">
+          <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Box $</div><div style="font-weight:800;color:var(--pr)">$${c.bx.toFixed(2)}</div></div>
+          <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Acc $</div><div style="font-weight:800;color:var(--se)">$${c.ac.toFixed(2)}</div></div>
+          <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Power Ups</div><div style="font-weight:800;color:#00897B">$${c.pu.t.toFixed(2)}</div></div>
+          <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">MIM $</div><div style="font-weight:800;color:var(--ok)">$${c.mi.p.toFixed(2)}</div></div>
+          <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Gross $</div><div style="font-weight:800;color:var(--pr)">$${c.gr.toFixed(2)}</div></div>
+          <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Net Owed</div><div style="font-weight:800;color:${c.nt<0?'var(--da)':'var(--dk)'}">$${c.nt.toFixed(2)}</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid var(--bo);background:#FAFAFA;flex-shrink:0;display:flex;gap:8px">
+      <button class="btn bp" style="flex:1" onclick="saveRepPanel(${idx})">💾 Save Changes</button>
+      <button class="btn bo" onclick="closeRepPanel()">Cancel</button>
+      <button class="btn bd sm" onclick="requirePin(()=>{if(confirm('Remove this rep?')){closeRepPanel();rmR(${idx});}})">✕ Remove</button>
+    </div>`;
+  // Show panel
+  requestAnimationFrame(()=>panel.style.transform='translateX(0)');
+  // Add backdrop
+  let bd=document.getElementById('repPanelBd');
+  if(!bd){bd=document.createElement('div');bd.id='repPanelBd';bd.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:799;backdrop-filter:blur(2px)';bd.onclick=closeRepPanel;document.body.appendChild(bd);}
+  bd.style.display='block';
+  // Live preview on input
+  ['ep_ta','ep_ap','ep_bts','ep_hs','ep_af','ep_mb','ep_ml'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',()=>updRepPreview(idx));
   });
-  // Add any uploaded reps not in REP_ROSTER
-  reps.forEach(r=>{
-    if(!r.ri||REP_ROSTER[r.ri])return;
-    const ov=overrides[r.ri]||overrides[r.n]||null;
-    merged.push({
-      ntid:r.ri||'',
-      first:r.firstName||r.n||'',
-      last:ov||r.lastName||'',
-      full:r.fullName||r.n||'',
-      state:r.state||'',
-      coach:r.c||'TBD',
-      store:r.s||'',
-      inCSV:true,
-      ppd:r.ta||0,
-      gross:cRp(r).gr,
-      source:'csv'
-    });
-  });
-  return merged;
 }
 
-function renRoster(){
-  if(!_pinUnlocked){
-    const body=document.getElementById('rosterBody');
-    if(body)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:8px">🔒</div><div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--se);margin-bottom:6px">Admin Access Required</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">Enter your PIN to view the rep roster</div><button class="btn bp" onclick="requirePin(renRoster)">Enter PIN</button></td></tr>`;
+function updRepPreview(idx){
+  const r=reps[idx];if(!r)return;
+  // Build temp rep with new values
+  const tmp={...r,
+    ta:+document.getElementById('ep_ta')?.value||0,
+    ap:+document.getElementById('ep_ap')?.value||0,
+    tb:+document.getElementById('ep_bts')?.value||0,
+    wt:0,
+    hs:+document.getElementById('ep_hs')?.value||0,
+    af:+document.getElementById('ep_af')?.value||0,
+    mb:+document.getElementById('ep_mb')?.value||0,
+    ml:+document.getElementById('ep_ml')?.value||0,
+  };
+  const c=cRp(tmp);
+  const pv=document.getElementById('ep_preview_vals');
+  if(pv)pv.innerHTML=`
+    <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Box $</div><div style="font-weight:800;color:var(--pr)">$${c.bx.toFixed(2)}</div></div>
+    <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Acc $</div><div style="font-weight:800;color:var(--se)">$${c.ac.toFixed(2)}</div></div>
+    <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Power Ups</div><div style="font-weight:800;color:#00897B">$${c.pu.t.toFixed(2)}</div></div>
+    <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">MIM $</div><div style="font-weight:800;color:var(--ok)">$${c.mi.p.toFixed(2)}</div></div>
+    <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Gross $</div><div style="font-weight:800;color:var(--pr)">$${c.gr.toFixed(2)}</div></div>
+    <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Net Owed</div><div style="font-weight:800;color:${c.nt<0?'var(--da)':'var(--dk)'}">$${c.nt.toFixed(2)}</div></div>`;
+}
+
+function saveRepPanel(idx){
+  const r=reps[idx];if(!r)return;
+  r.ta=+document.getElementById('ep_ta')?.value||0;
+  r.ap=+document.getElementById('ep_ap')?.value||0;
+  const bts=+document.getElementById('ep_bts')?.value||0;
+  r.tb=bts;r.wt=0;
+  r.hs=+document.getElementById('ep_hs')?.value||0;
+  r.af=+document.getElementById('ep_af')?.value||0;
+  r.hr=+document.getElementById('ep_hr')?.value||0;
+  r.mb=+document.getElementById('ep_mb')?.value||0;
+  r.ml=+document.getElementById('ep_ml')?.value||0;
+  // Name updates
+  const first=document.getElementById('ep_first')?.value.trim();
+  const last=document.getElementById('ep_last')?.value.trim();
+  if(first)r.firstName=first;
+  if(last){r.lastName=last;const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');overrides[r.ri||r.n]={first:first||r.firstName||'',last};localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));}
+  r.fullName=((r.firstName||r.n)+' '+(r.lastName||'')).trim();
+  // Store/coach
+  const store=document.getElementById('ep_store')?.value;
+  const coach=document.getElementById('ep_coach')?.value;
+  if(store){r.s=store;if(r.ri)setAssignment(r.ri,store);}
+  if(coach)r.c=coach;
+  saveSession();closeRepPanel();renR();tst2('Rep updated — '+dispName(r),'ok');
+}
+
+function closeRepPanel(){
+  const panel=document.getElementById('repEditPanel');
+  if(panel)panel.style.transform='translateX(100%)';
+  const bd=document.getElementById('repPanelBd');
+  if(bd)bd.style.display='none';
+}
+
+// ── UPLOAD PROMPT JS ──
+// ══════════════════════════════════════════════════════
+// UPLOAD REPLACE/MERGE PROMPT — for all 3 data types
+// ══════════════════════════════════════════════════════
+function showUploadPrompt(fn, src, content){
+  // Check if data already exists for this src
+  const hasReps = reps.length > 0;
+  const hasMgrSheet = Object.keys(mgrSheetData).length > 0;
+  const hasCoachSheet = Object.keys(coachSheetData).length > 0;
+  const isRepSrc = src === 'rtbdi' || src === 'metro';
+  const isMgrSrc = src === 'mgr_metro';
+  const isCoachSrc = src === 'coach_metro';
+  const hasData = (isRepSrc && hasReps) || (isMgrSrc && hasMgrSheet) || (isCoachSrc && hasCoachSheet);
+
+  if(!hasData){
+    // No existing data — just load
+    pC(content, src, fn);
     return;
   }
-  const srch=(document.getElementById('rosterSearch')?.value||'').toLowerCase();
-  const fState=document.getElementById('rosterFState')?.value||'';
-  const fCoach=document.getElementById('rosterFCoach')?.value||'';
-  const all=getMergedRoster();
 
-  // Update summary counts
-  const coachCounts={};
-  all.forEach(r=>{const c=r.coach||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
-  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  upd('rosterTotal',all.length);
-  upd('rosterRP',coachCounts['Rose Perez']||0);
-  upd('rosterMW',coachCounts['Mr. Watts']||0);
-  upd('rosterAS',coachCounts['Ambulai Sheku']||0);
-  upd('rosterJM',coachCounts['Joel Montero']||0);
-  upd('rosterMN',coachCounts['Manny']||0);
-  upd('rosterCH',coachCounts['Cheryl']||0);
-  upd('rosterTBD',coachCounts['TBD']||0);
+  // Create prompt modal
+  let modal = document.getElementById('uploadPromptModal');
+  if(modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'uploadPromptModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(74,26,107,.7);z-index:950;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  
+  const srcLabel = isRepSrc ? 'Rep data' : isMgrSrc ? 'Manager data' : 'Coach data';
+  const countLabel = isRepSrc ? reps.length + ' reps currently loaded' : isMgrSrc ? Object.keys(mgrSheetData).filter(k=>Object.keys(mgrSheetData[k]).length>0).length + ' stores with data' : Object.keys(coachSheetData).filter(k=>Object.keys(coachSheetData[k]).length>0).length + ' stores with data';
 
-  const fil=all.filter(r=>{
-    if(fState&&r.state!==fState)return false;
-    if(fCoach&&r.coach!==fCoach)return false;
-    if(srch&&!(r.full||'').toLowerCase().includes(srch)&&!(r.ntid||'').toLowerCase().includes(srch)&&!(r.coach||'').toLowerCase().includes(srch)&&!(r.state||'').toLowerCase().includes(srch))return false;
-    return true;
-  });
-
-  const lbl=document.getElementById('rosterCountLbl');
-  if(lbl)lbl.textContent=fil.length+' reps'+(srch||fState||fCoach?' (filtered)':'');
-
-  const body=document.getElementById('rosterBody');if(!body)return;
-  body.innerHTML=fil.map((r,i)=>{
-    const coachColors={'Rose Perez':'bt1','Mr. Watts':'bt3','Ambulai Sheku':'bt2','Joel Montero':'bt4','Manny':'bok2','Cheryl':'btop','TBD':'bno'};
-    const cc=coachColors[r.coach]||'bno';
-    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
-      <td style="padding:7px 10px;color:var(--mu);font-size:11px">${i+1}</td>
-      <td style="padding:7px 10px">
-        <div style="font-weight:700;color:var(--se);font-size:13px">${X(r.full||'—')}</div>
-        ${r.inCSV?`<span class="bdg bok2" style="font-size:8px">✓ In CSV</span>`:`<span class="bdg bno" style="font-size:8px">Not uploaded</span>`}
-      </td>
-      <td style="padding:7px 10px;font-family:monospace;font-size:12px;color:var(--mu)">${X(r.ntid||'—')}</td>
-      <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||'—'}</span></td>
-      <td style="padding:5px 8px">
-        <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterCoach('${r.ntid}',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">
-          ${['Ambulai Sheku','Cheryl','Joel Montero','Manny','Mr. Watts','Rose Perez','TBD'].map(c=>`<option value="${c}"${r.coach===c?' selected':''}>${c}</option>`).join('')}
-        </select>
-      </td>
-      <td style="padding:5px 8px">
-        <select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterStore('${r.ntid}',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">
-          <option value="">${r.store||'— Unassigned —'}</option>
-          ${SR.map(s=>`<option value="${s.s}"${r.store===s.s?' selected':''}>${s.s}</option>`).join('')}
-        </select>
-      </td>
-      <td style="padding:5px 8px">
-        <input type="text" value="${X(r.first||'')}" placeholder="First" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterName('${r.ntid}','first',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
-      </td>
-      <td style="padding:5px 8px">
-        <input type="text" value="${X(r.last||'')}" placeholder="Last" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="requirePin(()=>updRosterName('${r.ntid}','last',this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
-      </td>
-      <td style="padding:5px 8px;text-align:center">
-        ${r.ppd>0?`<div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;color:var(--pr)">$${r.gross.toFixed(0)}</div><div style="font-size:9px;color:var(--mu)">${r.ppd} PPD</div>`:'<span style="font-size:10px;color:var(--mu)">No data</span>'}
-      </td>
-    </tr>`;
-  }).join('');
-  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps match filter.</td></tr>`;
-}
-
-function updRosterCoach(ntid,coach){
-  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
-  if(!assigns[ntid])assigns[ntid]={};
-  assigns[ntid].c=coach;
-  localStorage.setItem('wfo_assign',JSON.stringify(assigns));
-  // Update in reps array
-  const rep=reps.find(r=>r.ri===ntid);if(rep)rep.c=coach;
-  saveSession();renRoster();renR();tst2('Coach updated.','ok');
-}
-function updRosterStore(ntid,store){
-  const coach=setAssignment(ntid,store);
-  const rep=reps.find(r=>r.ri===ntid);
-  if(rep){rep.s=store;rep.c=coach;}
-  saveSession();renRoster();renR();tst2('Store updated.','ok');
-}
-function updRosterName(ntid,field,val){
-  val=val.trim();
-  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
-  if(!overrides[ntid])overrides[ntid]={};
-  if(typeof overrides[ntid]==='string')overrides[ntid]={last:overrides[ntid]};
-  overrides[ntid][field]=val;
-  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
-  // Update rep in memory
-  const rep=reps.find(r=>r.ri===ntid);
-  if(rep){
-    if(field==='first')rep.firstName=val;
-    if(field==='last')rep.lastName=val;
-    rep.fullName=((rep.firstName||rep.n||'')+' '+(rep.lastName||'')).trim();
-  }
-  saveSession();renRoster();renR();tst2('Name updated.','ok');
-}
-function saveRosterAll(){tst2('All roster changes auto-save as you edit.','ok');}
-function addRosterRep(){
-  // Populate store dropdown
-  const s=document.getElementById('newRosterStore');
-  if(s&&s.options.length<=1){SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}
-  document.getElementById('addRosterForm').style.display='block';
-}
-function saveNewRosterRep(){
-  const ntid=document.getElementById('newNTID').value.trim();
-  const first=document.getElementById('newFirst').value.trim();
-  const last=document.getElementById('newLast').value.trim();
-  const state=document.getElementById('newState').value;
-  const coach=document.getElementById('newCoach').value;
-  const store=document.getElementById('newRosterStore').value;
-  if(!ntid){tst2('Enter NTID.','er');return;}
-  if(!first){tst2('Enter first name.','er');return;}
-  // Add to REP_ROSTER dynamically
-  REP_ROSTER[ntid]={coach,state,full:(first+' '+last).trim(),first,last};
-  // Save assignment
-  if(store)setAssignment(ntid,store);
-  // Save name override
-  const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
-  overrides[ntid]={first,last};
-  localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
-  // Clear form
-  ['newNTID','newFirst','newLast'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('newState').value='';
-  document.getElementById('newCoach').value='TBD';
-  document.getElementById('newRosterStore').value='';
-  document.getElementById('addRosterForm').style.display='none';
-  renRoster();tst2('Rep added to roster.','ok');
-}
-function expRosterCSV(){
-  const all=getMergedRoster();
-  const hd=['#','NTID','Full Name','First','Last','State','Coach','Store','In CSV','PPD','Gross $'];
-  const rows=all.map((r,i)=>[i+1,r.ntid,r.full,r.first,r.last,r.state,r.coach,r.store,r.inCSV?'Yes':'No',r.ppd,r.gross.toFixed(2)]);
-  dlC([hd,...rows],'WFO_RepRoster.csv');tst2('Roster exported.','ok');
-}
-
-// ══════════════════════════════════════════════════════
-// ADMIN CENTER
-// ══════════════════════════════════════════════════════
-let _adminPinEntry = '';
-let mgrPeriodLocked = false;
-let coachPeriodLocked = false;
-
-function adminPinKey(d){
-  if(_adminPinEntry.length>=4)return;
-  _adminPinEntry+=d;updAdminPinDots();
-  if(_adminPinEntry.length===4)setTimeout(adminPinSubmit,100);
-}
-function adminPinClear(){_adminPinEntry='';updAdminPinDots();document.getElementById('adminPinErr').textContent='';}
-function adminPinSubmit(){
-  if(_adminPinEntry===PIN){
-    _pinUnlocked=true;
-    document.getElementById('adminGate').style.display='none';
-    document.getElementById('adminContent').style.display='block';
-    _adminPinEntry='';updAdminPinDots();
-    initAdminCenter();
-    // Also update button in week bar
-    const ps=document.getElementById('pinStatus');
-    if(ps){ps.textContent='✅ Admin Mode — Editing ON';ps.style.background='var(--ok)';ps.style.color='#fff';ps.onclick=null;}
-    updSheetStatus();
-    clearTimeout(_renTimer);_renTimer=setTimeout(()=>renR(),80);
-  } else {
-    document.getElementById('adminPinErr').textContent='Incorrect PIN. Try again.';
-    document.getElementById('adminPinBox')?.classList.add('shake');
-    setTimeout(()=>document.getElementById('adminPinBox')?.classList.remove('shake'),350);
-    _adminPinEntry='';updAdminPinDots();
-  }
-}
-function updAdminPinDots(){
-  for(let i=0;i<4;i++){const d=document.getElementById('apd'+i);if(d)d.className='pin-dot'+(_adminPinEntry.length>i?' filled':'');}
-}
-function adminLockOut(){
-  _pinUnlocked=false;
-  document.getElementById('adminGate').style.display='flex';
-  document.getElementById('adminContent').style.display='none';
-  _adminPinEntry='';updAdminPinDots();
-  const ps=document.getElementById('pinStatus');
-  if(ps){ps.textContent='🔑 Click to Enable Editing';ps.style.background='var(--wa)';ps.style.color='#1A1A1A';}
-  updSheetStatus();renR();
-  goPage('pg-reps',document.querySelector('[data-page="pg-reps"]'));
-}
-function swAdmin(tab,btn){
-  document.querySelectorAll('#adminContent .sub-pane').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('#adminContent .sub-tab').forEach(b=>b.classList.remove('active'));
-  const p=document.getElementById('admin-'+tab);if(p)p.classList.add('active');
-  if(btn)btn.classList.add('active');
-  if(tab==='stores')renStoreRoster();
-  if(tab==='roster')renAdminRoster();
-  if(tab==='assignments')renAdminAssign();
-  if(tab==='tiers')initAdminTiers();
-  if(tab==='spiffs')renAdminSpiffs();
-  if(tab==='data')renAdminSysInfo();
-  if(tab==='backsheet'){const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
-}
-
-function initAdminCenter(){
-  // Set week display
-  const wkd=document.getElementById('wkb')?.textContent||'—';
-  const wd=document.getElementById('adminWkDisp');if(wd)wd.textContent=wkd;
-  // Rep count and gross
-  let tG=0;reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
-  const rc=document.getElementById('adminRepCount');if(rc)rc.textContent=reps.length;
-  const gr=document.getElementById('adminGross');if(gr)gr.textContent='$'+tG.toFixed(2);
-  // Lock status
-  updAdminLockUI();
-  // Month defaults
-  const n=new Date(),mn=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));
-  const aml=document.getElementById('adminMgrLockMonth');if(aml&&!aml.value)aml.value=mn;
-  const acl=document.getElementById('adminCoachLockMonth');if(acl&&!acl.value)acl.value=mn;
-  // Populate bulk assign store dropdown
-  const bs=document.getElementById('aBulkStore');
-  if(bs&&bs.options.length<=1)SR.forEach(r=>bs.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
-  // Populate new roster store dropdown
-  const ns=document.getElementById('newRosterStore');
-  if(ns&&ns.options.length<=1)SR.forEach(r=>ns.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
-  // Backsheet month default
-  const abm=document.getElementById('aBsMonth');if(abm&&!abm.value)abm.value=mn;
-  // Init spiff scope dropdowns
-  const aSpSV=document.getElementById('aSpSV');
-  if(aSpSV&&aSpSV.options.length<=1)SR.forEach(r=>aSpSV.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
-}
-function updAdminLockUI(){
-  const dot=document.getElementById('adminLkDot'),lbl=document.getElementById('adminLkLbl'),btn=document.getElementById('adminLkBtn');
-  if(dot)dot.className='lk-dot'+(wkLocked?' locked':' open');
-  if(lbl){lbl.className='lk-lbl'+(wkLocked?' locked':' open');lbl.textContent=wkLocked?'Locked — Paid':'Unlocked';}
-  if(btn){btn.textContent=wkLocked?'🔓 Unlock Week':'🔒 Lock & Mark Paid';btn.className=wkLocked?'btn bd':'btn bok';}
-  const md=document.getElementById('adminMgrDot'),ml=document.getElementById('adminMgrLbl'),mb=document.getElementById('adminMgrBtn');
-  if(md)md.className='lk-dot'+(mgrPeriodLocked?' locked':' open');
-  if(ml){ml.className='lk-lbl'+(mgrPeriodLocked?' locked':' open');ml.textContent=mgrPeriodLocked?'Locked':'Unlocked';}
-  if(mb){mb.textContent=mgrPeriodLocked?'🔓 Unlock Manager':'🔒 Lock Manager Period';mb.className=mgrPeriodLocked?'btn bd':'btn bok';}
-  const cd=document.getElementById('adminCoachDot'),cl=document.getElementById('adminCoachLbl'),cb=document.getElementById('adminCoachBtn');
-  if(cd)cd.className='lk-dot'+(coachPeriodLocked?' locked':' open');
-  if(cl){cl.className='lk-lbl'+(coachPeriodLocked?' locked':' open');cl.textContent=coachPeriodLocked?'Locked':'Unlocked';}
-  if(cb){cb.textContent=coachPeriodLocked?'🔓 Unlock Coach':'🔒 Lock Coach Period';cb.className=coachPeriodLocked?'btn bd':'btn bok';}
-}
-function adminToggleLock(){
-  if(wkLocked){if(!confirm('Unlock week for corrections?'))return;wkLocked=false;tst2('Week unlocked.','ok');}
-  else{if(!reps.length){tst2('No rep data to lock.','er');return;}if(!confirm('Lock & mark as paid?'))return;lockWk();}
-  updAdminLockUI();updLk();renR();
-}
-function adminToggleMgrLock(){
-  mgrPeriodLocked=!mgrPeriodLocked;
-  const mn=document.getElementById('adminMgrLockMonth')?.value||'';
-  tst2('Manager period '+(mgrPeriodLocked?'locked':'unlocked')+(mn?' — '+mn:'')+'.',mgrPeriodLocked?'ok':'wn');
-  updAdminLockUI();updSheetStatus();
-}
-function adminToggleCoachLock(){
-  coachPeriodLocked=!coachPeriodLocked;
-  const mn=document.getElementById('adminCoachLockMonth')?.value||'';
-  tst2('Coach period '+(coachPeriodLocked?'locked':'unlocked')+(mn?' — '+mn:'')+'.',coachPeriodLocked?'ok':'wn');
-  updAdminLockUI();updSheetStatus();
-}
-
-// ── ADMIN ROSTER ──
-function renAdminRoster(){
-  const srch=(document.getElementById('aRosterSearch')?.value||'').toLowerCase();
-  const fState=document.getElementById('aRosterFState')?.value||'';
-  const fCoach=document.getElementById('aRosterFCoach')?.value||'';
-  const all=getMergedRoster();
-  const coachCounts={};
-  all.forEach(r=>{const c=r.coach||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
-  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  upd('aRosterTotal',all.length);upd('aRosterRP',coachCounts['Rose Perez']||0);upd('aRosterMW',coachCounts['Mr. Watts']||0);
-  upd('aRosterAS',coachCounts['Ambulai Sheku']||0);upd('aRosterJM',coachCounts['Joel Montero']||0);
-  upd('aRosterMN',coachCounts['Manny']||0);upd('aRosterCH',coachCounts['Cheryl']||0);upd('aRosterTBD',coachCounts['TBD']||0);
-  const fil=all.filter(r=>{
-    if(fState&&r.state!==fState)return false;
-    if(fCoach&&r.coach!==fCoach)return false;
-    if(srch&&!(r.full||'').toLowerCase().includes(srch)&&!(r.ntid||'').toLowerCase().includes(srch)&&!(r.coach||'').toLowerCase().includes(srch))return false;
-    return true;
-  });
-  const lbl=document.getElementById('aRosterCount');if(lbl)lbl.textContent=fil.length+' reps';
-  const body=document.getElementById('aRosterBody');if(!body)return;
-  body.innerHTML=fil.map((r,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
-    <td style="padding:7px 10px;color:var(--mu);font-size:11px">${i+1}</td>
-    <td style="padding:7px 10px"><div style="font-weight:700;color:var(--se);font-size:13px">${X(r.full||'—')}</div>${r.inCSV?`<span class="bdg bok2" style="font-size:8px">✓ CSV</span>`:`<span class="bdg bno" style="font-size:8px">Not uploaded</span>`}</td>
-    <td style="padding:7px 10px;font-family:monospace;font-size:11px;color:var(--mu)">${r.ntid||'—'}</td>
-    <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||'—'}</span></td>
-    <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterCoach('${r.ntid}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">${['Ambulai Sheku','Cheryl','Joel Montero','Manny','Mr. Watts','Rose Perez','TBD'].map(c=>`<option value="${c}"${r.coach===c?' selected':''}>${c}</option>`).join('')}</select></td>
-    <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterStore('${r.ntid}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"><option value="">${r.store||'— Unassigned —'}</option>${SR.map(s=>`<option value="${s.s}"${r.store===s.s?' selected':''}>${s.s}</option>`).join('')}</select></td>
-    <td style="padding:5px 8px"><input type="text" value="${X(r.first||'')}" placeholder="First" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterName('${r.ntid}','first',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
-    <td style="padding:5px 8px"><input type="text" value="${X(r.last||'')}" placeholder="Last" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterName('${r.ntid}','last',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
-    <td style="padding:7px 10px;text-align:center">${r.ppd>0?`<div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;color:var(--pr)">$${r.gross.toFixed(0)}</div><div style="font-size:9px;color:var(--mu)">${r.ppd} PPD</div>`:'<span style="font-size:10px;color:var(--mu)">—</span>'}</td>
-  </tr>`).join('');
-  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps match.</td></tr>`;
-}
-
-// ── ADMIN ASSIGNMENTS ──
-function renAdminAssign(){
-  const srch=(document.getElementById('aAssignSearch')?.value||'').toLowerCase();
-  const fState=document.getElementById('aAssignFState')?.value||'';
-  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
-  const fil=reps.filter(r=>{
-    if(fState&&r.state!==fState)return false;
-    if(srch&&!(dispName(r)).toLowerCase().includes(srch)&&!(r.ri||'').toLowerCase().includes(srch))return false;
-    return true;
-  });
-  const lbl=document.getElementById('aAssignCount');if(lbl)lbl.textContent=fil.length+' reps';
-  const body=document.getElementById('aAssignBody');if(!body)return;
-  const rInfo=ri=>REP_ROSTER[ri]||{};
-  body.innerHTML=fil.map((r,i)=>{
-    const c=cRp(r),assigned=!!r.s,ri2=r.ri||r.n;
-    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
-      <td style="padding:7px 10px"><div style="font-weight:700;color:var(--se)">${X(dispName(r))}</div></td>
-      <td style="padding:7px 10px;font-family:monospace;font-size:11px;color:var(--mu)">${r.ri||'—'}</td>
-      <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||rInfo(r.ri)?.state||'—'}</span></td>
-      <td style="padding:5px 8px;background:#FFFBF0;border-left:2px solid var(--wa)"><input type="text" value="${X(r.lastName||rInfo(r.ri)?.last||'')}" placeholder="Last name" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRepLastName('${ri2}',this.value,${reps.indexOf(r)})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
-      <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="applyAssign('${ri2}',this.value,${reps.indexOf(r)})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"><option value="">${r.s||'— Unassigned —'}</option>${SR.map(s=>`<option value="${s.s}"${r.s===s.s?' selected':''}>${s.s}</option>`).join('')}</select></td>
-      <td style="padding:7px 10px;font-size:11px;color:var(--mu)">${r.c||'—'}</td>
-      <td style="text-align:center;font-weight:700;color:var(--se);padding:7px 10px">${r.ta||0}</td>
-      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr);padding:7px 10px">$${c.gr.toFixed(2)}</td>
-      <td style="padding:7px 10px">${assigned?`<span class="bdg bok2">✓</span>`:`<span class="bdg bfl">Unassigned</span>`}</td>
-    </tr>`;
-  }).join('');
-  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps yet — upload RTPOS CSV first.</td></tr>`;
-}
-function adminBulkAssign(){
-  const store=document.getElementById('aBulkStore')?.value;if(!store){tst2('Select a store.','er');return;}
-  const unassigned=reps.filter(r=>!r.s);if(!unassigned.length){tst2('No unassigned reps.','wn');return;}
-  unassigned.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
-  saveSession();renAdminAssign();renR();tst2(unassigned.length+' reps assigned to '+store,'ok');
-}
-function adminBulkAssignAll(){
-  const store=document.getElementById('aBulkStore')?.value;if(!store){tst2('Select a store.','er');return;}
-  const srch=(document.getElementById('aAssignSearch')?.value||'').toLowerCase();
-  const fState=document.getElementById('aAssignFState')?.value||'';
-  const fil=reps.filter(r=>(!srch||dispName(r).toLowerCase().includes(srch))&&(!fState||r.state===fState));
-  if(!confirm('Assign '+fil.length+' reps to '+store+'?'))return;
-  fil.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
-  saveSession();renAdminAssign();renR();tst2(fil.length+' reps assigned.','ok');
-}
-
-// ── ADMIN TIERS ──
-function initAdminTiers(){
-  // Rep tiers
-  const bxEl=document.getElementById('aBxR');
-  if(bxEl)bxEl.innerHTML=T.box.map((t,i)=>`<div class="tr2"><label>Tier ${i+1} min totact:</label><input type="number" id="aBM${i}" value="${t.mn}" min="0" style="width:75px"/><label style="min-width:auto;margin-left:8px">$/act:</label><input type="number" id="aBR${i}" value="${t.r}" min="0" step="0.5" style="width:70px"/></div>`).join('');
-  const acEl=document.getElementById('aAcR');
-  if(acEl)acEl.innerHTML=T.acc.map((t,i)=>`<div class="tr2"><label>Tier ${i+1} min $:</label><input type="number" id="aAM${i}" value="${t.mp}" min="0" style="width:80px"/><label style="min-width:auto;margin-left:8px">Payout %:</label><input type="number" id="aAP${i}" value="${t.p}" min="0" max="100" step="0.5" style="width:70px"/></div>`).join('');
-  document.getElementById('aTAf').value=T.af;
-  document.getElementById('aTHs').value=T.hs;
-  T.mi.forEach((v,i)=>{const el=document.getElementById('aTM'+(i+1));if(el)el.value=v;});
-  // Coach tiers
-  const ct=T.coach||DT.coach;
-  const cids={aCAt100:'at100',aCAt115:'at115',aCAt125:'at125',aCAtPen:'atPen',aCAc50:'ac50',aCAc60:'ac60',aCAc70:'ac70',aCAcElbDrop:'acElbDrop',aCSh1:'sh1',aCSh2:'sh2',aCKick1:'kick1',aCKick2:'kick2',aCMimRate:'mimRate'};
-  Object.entries(cids).forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)el.value=ct[key]??DT.coach[key];});
-  // Manager tiers
-  const mgr=T.mgr||DT.mgr;
-  const tn={1:'Tier 1 (High Volume)',2:'Tier 2 (2ME)',3:'Tier 3 (1ME)'};
-  const cn={acts:'New Voice Acts',hsi:'HSI',bts:'BTS',acc:'Accessories'};
-  const mgrEl=document.getElementById('aAdminMgrTiers');
-  if(mgrEl)mgrEl.innerHTML=[1,2,3].map(tier=>`<div style="margin-bottom:16px"><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:6px">${tn[tier]}</div>${Object.keys(cn).map(cat=>`<div class="tr2"><label>${cn[cat]}:</label><span style="font-size:11px;color:var(--mu);min-width:50px">Base $</span><input type="number" id="amte_${tier}_${cat}_b" value="${mgr[tier]?.cats[cat]?.base||DT.mgr[tier].cats[cat].base}" min="0" step="0.25" style="width:85px"/><span style="font-size:11px;color:var(--mu);min-width:55px">Up $</span><input type="number" id="amte_${tier}_${cat}_u" value="${mgr[tier]?.cats[cat]?.up||DT.mgr[tier].cats[cat].up}" min="0" step="0.25" style="width:85px"/></div>`).join('')}</div>`).join('<hr style="border:1px solid var(--bo);margin:10px 0"/>');
-}
-function saveAdminTiers(){
-  T.box.forEach((t,i)=>{t.mn=+document.getElementById('aBM'+i)?.value||t.mn;t.r=+document.getElementById('aBR'+i)?.value||t.r;});
-  for(let i=0;i<T.box.length-1;i++)T.box[i].mx=T.box[i+1].mn-1;
-  T.acc.forEach((t,i)=>{t.mp=+document.getElementById('aAM'+i)?.value||t.mp;t.p=+document.getElementById('aAP'+i)?.value||t.p;});
-  for(let i=0;i<T.acc.length-1;i++)T.acc[i].xp=T.acc[i+1].mp-1;
-  T.af=+document.getElementById('aTAf').value||5;T.hs=+document.getElementById('aTHs').value||5;
-  T.mi=T.mi.map((_,i)=>+document.getElementById('aTM'+(i+1))?.value||_);
-  localStorage.setItem('wfo_tiers',JSON.stringify(T));localStorage.setItem('wfo_ts',new Date().toISOString());
-  renR();tst2('Rep tiers saved!','ok');
-}
-function saveAdminCoachTiers(){
-  if(!T.coach)T.coach=JSON.parse(JSON.stringify(DT.coach));
-  const cids={aCAt100:'at100',aCAt115:'at115',aCAt125:'at125',aCAtPen:'atPen',aCAc50:'ac50',aCAc60:'ac60',aCAc70:'ac70',aCAcElbDrop:'acElbDrop',aCSh1:'sh1',aCSh2:'sh2',aCKick1:'kick1',aCKick2:'kick2',aCMimRate:'mimRate'};
-  Object.entries(cids).forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)T.coach[key]=+el.value||DT.coach[key];});
-  localStorage.setItem('wfo_tiers',JSON.stringify(T));
-  tst2('Coach tiers saved!','ok');
-}
-function saveAdminMgrTiers(){
-  if(!T.mgr)T.mgr=JSON.parse(JSON.stringify(DT.mgr));
-  [1,2,3].forEach(tier=>{['acts','hsi','bts','acc'].forEach(cat=>{const b=document.getElementById('amte_'+tier+'_'+cat+'_b');const u=document.getElementById('amte_'+tier+'_'+cat+'_u');if(b&&u){T.mgr[tier].cats[cat].base=+b.value||T.mgr[tier].cats[cat].base;T.mgr[tier].cats[cat].up=+u.value||T.mgr[tier].cats[cat].up;}});T.mgr[tier].baseMax=Object.values(T.mgr[tier].cats).reduce((s,c)=>s+c.base,0);T.mgr[tier].upMax=Object.values(T.mgr[tier].cats).reduce((s,c)=>s+c.up,0);});
-  localStorage.setItem('wfo_tiers',JSON.stringify(T));
-  tst2('Manager tiers saved!','ok');
-}
-
-// ── ADMIN BACKSHEET ──
-function loadAdminBsMonth(){
-  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
-  const bs=getOrCreateBs(month);
-  document.getElementById('aBsElbCut').value=bs.qualifiers.elbCutoff;
-  document.getElementById('aBsAttachCut').value=bs.qualifiers.attachCutoff;
-  document.getElementById('aBsAttachPen').value=bs.qualifiers.attachPenalty;
-  const lockEl=document.getElementById('aBsLockStatus');
-  if(lockEl)lockEl.innerHTML=bs.locked?`<span style="color:var(--da);font-weight:700;font-size:12px">🔒 Locked</span><button class="btn bo sm" onclick="unlockAdminBs()">Unlock</button>`:`<span style="color:var(--ok);font-weight:700;font-size:12px">🟢 Open</span><button class="btn bd sm" onclick="lockAdminBs()">🔒 Lock</button>`;
-  renAdminBsCats(bs);renAdminBsGrid(bs);
-}
-function renAdminBsCats(bs){
-  const body=document.getElementById('aBsCatBody');if(!body)return;
-  body.innerHTML=bs.categories.map((cat,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
-    <td style="padding:5px 8px"><input style="width:180px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none" value="${X(cat.name)}" onchange="updAdminBsCat('${cat.id}','name',this.value)"/></td>
-    <td style="padding:5px 8px;text-align:center"><input type="number" style="width:60px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.baseThresh}" onchange="updAdminBsCat('${cat.id}','baseThresh',+this.value)"/>%</td>
-    <td style="padding:5px 8px;text-align:center"><input type="number" style="width:60px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.upThresh}" onchange="updAdminBsCat('${cat.id}','upThresh',+this.value)"/>%</td>
-    <td style="padding:5px 8px;text-align:center;background:#F5FBF5"><input type="number" style="width:62px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t1base}" onchange="updAdminBsCat('${cat.id}','t1base',+this.value)"/>$</td>
-    <td style="padding:5px 8px;text-align:center;background:#F5FBF5"><input type="number" style="width:62px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t1up}" onchange="updAdminBsCat('${cat.id}','t1up',+this.value)"/>$</td>
-    <td style="padding:5px 8px;text-align:center;background:#FFF8FC"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t2base}" onchange="updAdminBsCat('${cat.id}','t2base',+this.value)"/>$</td>
-    <td style="padding:5px 8px;text-align:center;background:#FFF8FC"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t2up}" onchange="updAdminBsCat('${cat.id}','t2up',+this.value)"/>$</td>
-    <td style="padding:5px 8px;text-align:center;background:#F8F5FF"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t3base}" onchange="updAdminBsCat('${cat.id}','t3base',+this.value)"/>$</td>
-    <td style="padding:5px 8px;text-align:center;background:#F8F5FF"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t3up}" onchange="updAdminBsCat('${cat.id}','t3up',+this.value)"/>$</td>
-    <td style="padding:5px 8px"><button class="btn bd xs" onclick="rmAdminBsCat('${cat.id}')">✕</button></td>
-  </tr>`).join('');
-}
-function renAdminBsGrid(bs){
-  const hdr=document.getElementById('aBsTgtHdr'),body=document.getElementById('aBsTgtBody');if(!hdr||!body)return;
-  hdr.innerHTML=`<th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);white-space:nowrap;position:sticky;left:0;background:var(--thb)">Store</th><th style="padding:7px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Tier</th><th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Mgr</th>`+bs.categories.map(cat=>`<th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);white-space:nowrap">${X(cat.name)}</th>`).join('');
-  body.innerHTML=SR.map((store,si)=>{
-    const tgts=bs.targets[store.s]||{};
-    return`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}"><td style="padding:5px 10px;font-weight:700;color:var(--se);font-size:11px;white-space:nowrap;position:sticky;left:0;background:inherit">${X(store.s)}</td><td style="padding:5px 8px;text-align:center"><span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span></td><td style="padding:5px 10px;font-size:10px;color:var(--mu);white-space:nowrap">${X(store.mgr==='TBD'?'—':store.mgr)}</td>${bs.categories.map(cat=>`<td style="padding:3px 6px;text-align:center"><input type="number" min="0" step="0.01" value="${tgts[cat.id]||''}" placeholder="0" style="width:80px;padding:4px 7px;border:1px solid var(--bo);border-radius:6px;font-size:11px;font-family:'Nunito',sans-serif;outline:none;text-align:center" onchange="setAdminBsTgt('${store.s}','${cat.id}',+this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>`).join('')}</tr>`;
-  }).join('');
-}
-function updAdminBsCat(id,field,val){
-  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
-  const bs=getOrCreateBs(month);const cat=bs.categories.find(c=>c.id===id);if(cat)cat[field]=val;
-  saveBs(bs);if(field==='name')renAdminBsGrid(bs);
-}
-function setAdminBsTgt(store,catId,val){
-  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
-  const bs=getOrCreateBs(month);if(!bs.targets[store])bs.targets[store]={};bs.targets[store][catId]=val;saveBs(bs);
-}
-function addAdminBsCat(){
-  const month=document.getElementById('aBsMonth')?.value;if(!month){tst2('Select a month first.','er');return;}
-  const bs=getOrCreateBs(month);const id='cat_'+Date.now();
-  bs.categories.push({id,name:'New Category',t1base:0,t1up:0,t2base:0,t2up:0,t3base:0,t3up:0,baseThresh:100,upThresh:125});
-  saveBs(bs);renAdminBsCats(bs);renAdminBsGrid(bs);
-}
-function rmAdminBsCat(id){
-  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
-  const bs=getOrCreateBs(month);bs.categories=bs.categories.filter(c=>c.id!==id);saveBs(bs);renAdminBsCats(bs);renAdminBsGrid(bs);
-}
-function saveAdminBsAll(){
-  const month=document.getElementById('aBsMonth')?.value;if(!month){tst2('Select a month.','er');return;}
-  const bs=getOrCreateBs(month);
-  bs.qualifiers.elbCutoff=+document.getElementById('aBsElbCut').value||3368;
-  bs.qualifiers.attachCutoff=+document.getElementById('aBsAttachCut').value||60;
-  bs.qualifiers.attachPenalty=+document.getElementById('aBsAttachPen').value||25;
-  saveBs(bs);updBsBanner();tst2('Backsheet saved!','ok');
-}
-function lockAdminBs(){
-  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
-  if(!confirm('Lock '+month+'? Rules will be frozen.'))return;
-  const bs=getOrCreateBs(month);bs.locked=true;saveBs(bs);loadAdminBsMonth();tst2('Backsheet locked.','ok');
-}
-function unlockAdminBs(){
-  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
-  const bs=getOrCreateBs(month);bs.locked=false;saveBs(bs);loadAdminBsMonth();tst2('Backsheet unlocked.','ok');
-}
-function addAdminDecelerator(){
-  const el=document.getElementById('aExtraDecels');if(!el)return;
-  const div=document.createElement('div');
-  div.style.cssText='display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap';
-  div.innerHTML=`<input type="text" placeholder="Name" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:150px;font-family:'Nunito',sans-serif;outline:none"/><input type="text" placeholder="Rule" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:200px;font-family:'Nunito',sans-serif;outline:none"/><input type="number" placeholder="Penalty %" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:80px;font-family:'Nunito',sans-serif;outline:none"/><button class="btn bd xs" onclick="this.parentElement.remove()">✕</button>`;
-  el.appendChild(div);
-}
-
-// ── ADMIN SPIFFS ──
-function renAdminSpiffs(){
-  const el=document.getElementById('aSpiffList');if(!el)return;
-  if(!sps.length){el.innerHTML="<p style='font-size:13px;color:var(--mu)'>No spiffs yet.</p>";return;}
-  const td=new Date();
-  el.innerHTML=sps.map(s=>{const st=new Date(s.sd+'T12:00:00'),en=s.ed?new Date(s.ed+'T12:00:00'):null,exp=en&&td>en;const cl=!s.on?'off':exp?'exp':'',sl=!s.on?'Inactive':exp?'Expired':'Active',sc=!s.on?'off':exp?'ex':'on';const tl={flat_per_rep:'$/rep/week',flat_per_unit:'$/unit',pct_gross:'% of gross'};return`<div class="spiff-item ${cl}" style="margin-bottom:8px"><div class="spiff-ih"><div class="spiff-name">⚡ ${X(s.nm)}</div><div style="display:flex;gap:6px;align-items:center"><span class="ss-dot ${sc}">${sl}</span><button class="btn bo xs" onclick="tgSp(${s.id});renAdminSpiffs()">${s.on?'Pause':'Activate'}</button><button class="btn bd xs" onclick="rmSp(${s.id});renAdminSpiffs()">✕</button></div></div><div class="spiff-meta"><span>$${s.a} ${tl[s.ty]||s.ty}</span><span>${s.sd}${s.ed?' → '+s.ed:''}</span><span>${s.sc==='all'?'All Reps':s.sc+': '+s.sv}</span></div></div>`;}).join('');
-}
-function onAdminSS(){
-  const v=document.getElementById('aSpSc').value,w=document.getElementById('aSpSW'),l=document.getElementById('aSpSL'),s=document.getElementById('aSpSV');
-  if(v==='all'){w.style.display='none';return;}
-  w.style.display='block';
-  if(v==='store'){l.textContent='Store';s.innerHTML='<option value="">Select...</option>';SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}
-  else{l.textContent='Coach';s.innerHTML='<option value="">Select...</option>';COACHES.sort().forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);}
-}
-function addAdminSp(){
-  const nm=document.getElementById('aSpN').value.trim(),ty=document.getElementById('aSpT').value,a=+document.getElementById('aSpA').value||0;
-  const sc=document.getElementById('aSpSc').value,sv=document.getElementById('aSpSV').value;
-  const sd=document.getElementById('aSpSd').value,ed=document.getElementById('aSpEd').value,nt=document.getElementById('aSpNt').value.trim();
-  if(!nm){tst2('Enter a name.','er');return;}if(a<=0){tst2('Enter amount.','er');return;}if(!sd){tst2('Enter start date.','er');return;}
-  sps.push({id:Date.now(),nm,ty,a,sc,sv,sd,ed,nt,on:true});
-  savSp();renSB();renR();renAdminSpiffs();
-  ['aSpN','aSpA','aSpSd','aSpEd','aSpNt'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('aSpSc').value='all';document.getElementById('aSpSW').style.display='none';
-  tst2('Spiff added!','ok');
-}
-
-// ── DATA MANAGEMENT ──
-function renAdminSysInfo(){
-  const el=document.getElementById('adminSysInfo');if(!el)return;
-  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
-  const hist=JSON.parse(localStorage.getItem('wfo_wk_hist')||'[]');
-  const mgrRecs=JSON.parse(localStorage.getItem('wfo_mgr_recs')||'[]');
-  const coachRecs=JSON.parse(localStorage.getItem('wfo_coach_recs')||'[]');
-  let tG=0;reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
-  el.innerHTML=`
-    <div><strong>Reps loaded:</strong> ${reps.length}</div>
-    <div><strong>Week:</strong> ${document.getElementById('wkb')?.textContent||'—'}</div>
-    <div><strong>Rep Gross:</strong> $${tG.toFixed(2)}</div>
-    <div><strong>Chargebacks:</strong> ${CBs.length} ($${CBs.reduce((s,c)=>s+c.a,0).toFixed(2)})</div>
-    <div><strong>Active Spiffs:</strong> ${actSp().length}</div>
-    <div><strong>Store Assignments:</strong> ${Object.keys(assigns).length}</div>
-    <div><strong>Paid Weeks History:</strong> ${hist.length}</div>
-    <div><strong>Manager Records:</strong> ${mgrRecs.length}</div>
-    <div><strong>Coach Records:</strong> ${coachRecs.length}</div>
-    <div><strong>Dashboard Version:</strong> v5.0</div>
-    <div><strong>Last Updated:</strong> ${document.getElementById('lu')?.textContent||'—'}</div>
-  `;
-}
-
-// ══════════════════════════════════════════════════════
-// STORE ROSTER BACKSHEET
-// Storage: wfo_store_roster = {storeName: {mgr, coach, tier, state, log:[]}}
-// ══════════════════════════════════════════════════════
-
-function getSR_BS(){
-  try{
-    const saved=JSON.parse(localStorage.getItem('wfo_store_roster')||'null');
-    if(saved)return saved;
-    // Initialize from SR array
-    const init={};
-    SR.forEach(s=>{
-      init[s.s]={mgr:s.mgr==='TBD'?'':s.mgr,coach:s.c==='TBD'?'':s.c,tier:s.tier,me:s.me,state:s.s.split('-')[0],log:[]};
-    });
-    localStorage.setItem('wfo_store_roster',JSON.stringify(init));
-    return init;
-  }catch{return{};}
-}
-function saveSR_BS(data){localStorage.setItem('wfo_store_roster',JSON.stringify(data));}
-
-// Get current manager for a store
-function getStoreMgr(storeName){
-  const d=getSR_BS();return d[storeName]?.mgr||SR.find(s=>s.s===storeName)?.mgr||'TBD';
-}
-// Get current coach for a store
-function getStoreCoach(storeName){
-  const d=getSR_BS();return d[storeName]?.coach||SR.find(s=>s.s===storeName)?.c||'TBD';
-}
-// Update manager with log
-function updateStoreMgr(storeName,newMgr,changedBy){
-  const d=getSR_BS();
-  if(!d[storeName])d[storeName]={mgr:'',coach:'',log:[]};
-  const old=d[storeName].mgr||'—';
-  d[storeName].log.unshift({field:'Manager',old,new:newMgr,by:changedBy||'Admin',at:new Date().toLocaleString()});
-  d[storeName].mgr=newMgr;
-  saveSR_BS(d);
-}
-// Update coach with log
-function updateStoreCoach(storeName,newCoach,changedBy){
-  const d=getSR_BS();
-  if(!d[storeName])d[storeName]={mgr:'',coach:'',log:[]};
-  const old=d[storeName].coach||'—';
-  d[storeName].log.unshift({field:'Coach',old,new:newCoach,by:changedBy||'Admin',at:new Date().toLocaleString()});
-  d[storeName].coach=newCoach;
-  // Update all reps assigned to this store
-  reps.forEach(r=>{if(r.s===storeName)r.c=newCoach;});
-  saveSession();renR();
-  saveSR_BS(d);
-}
-
-// ── RENDER STORE ROSTER ADMIN PAGE ──
-function renStoreRoster(){
-  const body=document.getElementById('storeRosterBody');if(!body)return;
-  const d=getSR_BS();
-  const srch=(document.getElementById('srSearch')?.value||'').toLowerCase();
-  const fState=document.getElementById('srFState')?.value||'';
-  const fCoach=document.getElementById('srFCoach')?.value||'';
-
-  // Update summary
-  const coachCounts={};
-  SR.forEach(s=>{const c=d[s.s]?.coach||s.c||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
-  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  upd('srTotal',SR.length);
-  upd('srTBDCoach',SR.filter(s=>!d[s.s]?.coach||d[s.s]?.coach==='').length);
-  upd('srTBDMgr',SR.filter(s=>!d[s.s]?.mgr||d[s.s]?.mgr==='').length);
-  COACHES.forEach(c=>{const el=document.getElementById('srC_'+c.replace(/\s+/g,''));if(el)el.textContent=coachCounts[c]||0;});
-
-  const fil=SR.filter(s=>{
-    if(fState&&!s.s.startsWith(fState+'-'))return false;
-    if(fCoach&&(d[s.s]?.coach||s.c)!==fCoach)return false;
-    if(srch&&!s.s.toLowerCase().includes(srch)&&!(d[s.s]?.mgr||'').toLowerCase().includes(srch)&&!(d[s.s]?.coach||'').toLowerCase().includes(srch))return false;
-    return true;
-  });
-
-  body.innerHTML=fil.map((store,i)=>{
-    const sd=d[store.s]||{mgr:'',coach:'',log:[]};
-    const mgr=sd.mgr||'';
-    const coach=sd.coach||'';
-    const hasLog=sd.log&&sd.log.length>0;
-    const lastChange=hasLog?sd.log[0]:null;
-    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
-      <td style="padding:7px 12px;font-weight:700;color:var(--se);font-size:12px;white-space:nowrap">
-        ${X(store.s)}
-        <div style="display:flex;gap:4px;margin-top:3px">
-          <span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span>
-          <span class="bdg bt2">${store.s.split('-')[0]}</span>
-        </div>
-      </td>
-      <td style="padding:5px 10px;min-width:200px">
-        <input type="text" value="${X(mgr)}" placeholder="Enter manager name…"
-          style="width:100%;padding:6px 9px;border:2px solid ${mgr?'var(--bo)':'var(--wa)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;background:${mgr?'#fff':'#FFFBF0'}"
-          onchange="requirePin(()=>updStoreMgrInline('${store.s}',this.value))"
-          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${mgr?'var(--bo)':'var(--wa)'}'"/>
-        ${!mgr?`<div style="font-size:9px;color:var(--wa);font-weight:700;margin-top:2px">⚠ No manager assigned</div>`:''}
-      </td>
-      <td style="padding:5px 10px;min-width:200px">
-        <select style="width:100%;padding:6px 9px;border:2px solid ${coach?'var(--bo)':'var(--wa)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;background:${coach?'#fff':'#FFFBF0'}"
-          onchange="requirePin(()=>updStoreCoachInline('${store.s}',this.value))"
-          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${coach?'var(--bo)':'var(--wa)'}'">
-          <option value="">${coach||'— Assign Coach —'}</option>
-          ${[...COACHES,''].map(c=>c?`<option value="${c}"${coach===c?' selected':''}>${c}</option>`:'').join('')}
-        </select>
-        ${!coach?`<div style="font-size:9px;color:var(--wa);font-weight:700;margin-top:2px">⚠ No coach assigned</div>`:''}
-      </td>
-      <td style="padding:7px 10px;text-align:center">
-        ${hasLog?`<div style="font-size:10px;color:var(--mu)">${lastChange.field}: ${X(lastChange.old)} → <strong>${X(lastChange.new)}</strong></div><div style="font-size:9px;color:var(--mu)">${lastChange.by} · ${lastChange.at}</div>`:`<span style="font-size:10px;color:var(--mu)">No changes</span>`}
-      </td>
-      <td style="padding:7px 10px;text-align:center">
-        <button class="btn bo xs" onclick="showStoreLog('${store.s}')">📋 ${hasLog?sd.log.length+' changes':'Log'}</button>
-      </td>
-    </tr>`;
-  }).join('');
-  if(!fil.length)body.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--mu)">No stores match.</td></tr>`;
-}
-
-function updStoreMgrInline(store,val){
-  const by=prompt('Your name (for change log):','Admin')||'Admin';
-  updateStoreMgr(store,val.trim(),by);
-  renStoreRoster();tst2('Manager updated for '+store,'ok');
-}
-function updStoreCoachInline(store,val){
-  const by=prompt('Your name (for change log):','Admin')||'Admin';
-  updateStoreCoach(store,val,by);
-  renStoreRoster();renCoachSheet();tst2('Coach updated for '+store,'ok');
-}
-function showStoreLog(store){
-  const d=getSR_BS();const log=(d[store]?.log)||[];
-  if(!log.length){tst2('No changes logged for '+store,'wn');return;}
-  const html=`<div style="max-width:600px;margin:0 auto;padding:20px">
-    <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--se);margin-bottom:14px">📋 Change Log — ${store}</div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="background:var(--thb)">
-        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">Field</th>
-        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">From</th>
-        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">To</th>
-        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">By</th>
-        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">When</th>
-      </tr></thead>
-      <tbody>${log.map((l,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
-        <td style="padding:8px 12px"><span class="bdg ${l.field==='Coach'?'bt2':'bt1'}">${l.field}</span></td>
-        <td style="padding:8px 12px;color:var(--da)">${X(l.old||'—')}</td>
-        <td style="padding:8px 12px;font-weight:700;color:var(--ok)">${X(l.new||'—')}</td>
-        <td style="padding:8px 12px;color:var(--mu)">${X(l.by)}</td>
-        <td style="padding:8px 12px;color:var(--mu);font-size:11px">${l.at}</td>
-      </tr>`).join('')}</tbody>
-    </table>
+  modal.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:460px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.2)">
+    <div style="font-size:32px;text-align:center;margin-bottom:8px">📂</div>
+    <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:18px;color:var(--se);text-align:center;margin-bottom:4px">New File Detected</div>
+    <div style="font-size:12px;color:var(--mu);text-align:center;margin-bottom:20px">${fn}</div>
+    <div style="background:var(--thb);border-radius:10px;padding:11px 14px;margin-bottom:20px;font-size:12px;color:var(--se)">
+      ⚠️ <strong>${srcLabel}</strong> already loaded — ${countLabel}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+      <button onclick="doUpload('replace','${src}');document.getElementById('uploadPromptModal').remove()" 
+        style="padding:14px 18px;background:linear-gradient(135deg,var(--da),#B71C1C);color:#fff;border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px">
+        <span style="font-size:22px">🗑</span>
+        <div><div>Replace All</div><div style="font-size:11px;font-weight:400;opacity:.8">Clear existing data and load fresh from this file</div></div>
+      </button>
+      <button onclick="doUpload('merge','${src}');document.getElementById('uploadPromptModal').remove()"
+        style="padding:14px 18px;background:linear-gradient(135deg,var(--ok),#00796B);color:#fff;border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px">
+        <span style="font-size:22px">🔄</span>
+        <div><div>Merge / Update</div><div style="font-size:11px;font-weight:400;opacity:.8">Match by NTID — update numbers, keep assignments and arcade logs</div></div>
+      </button>
+    </div>
+    <button onclick="document.getElementById('uploadPromptModal').remove()" style="width:100%;padding:10px;background:transparent;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;cursor:pointer;color:var(--mu)">Cancel</button>
   </div>`;
-  openPF(html,'Change Log — '+store);
+  document.body.appendChild(modal);
+
+  // Store the content for when they choose
+  window._pendingUpload = {content, src, fn};
 }
-function expStoreRoster(){
-  const d=getSR_BS();
-  const hd=['Store','State','Tier','Manager','Coach','Last Change','Changed By','Changed At'];
-  const rows=SR.map(s=>{
-    const sd=d[s.s]||{};const last=sd.log?.[0]||{};
-    return[s.s,s.s.split('-')[0],s.me,sd.mgr||'TBD',sd.coach||'TBD',last.field?last.field+': '+last.old+' → '+last.new:'',last.by||'',last.at||''];
+
+function doUpload(mode, src){
+  const {content, fn} = window._pendingUpload || {};
+  if(!content){tst2('Upload data lost — try again.','er');return;}
+  if(mode === 'replace'){
+    // Clear relevant data
+    if(src === 'rtbdi' || src === 'metro'){
+      reps = [];
+      CBs = [];
+      saveSession();
+      tst2('Existing rep data cleared — loading new file...','wn');
+    } else if(src === 'mgr_metro'){
+      mgrSheetData = {};
+      tst2('Existing manager data cleared — loading new file...','wn');
+    } else if(src === 'coach_metro'){
+      coachSheetData = {};
+      tst2('Existing coach data cleared — loading new file...','wn');
+    }
+  }
+  // Now parse
+  pC(content, src, fn);
+  window._pendingUpload = null;
+}
+
+// ── CLEAR DATA FUNCTIONS (for Admin Center Data Management) ──
+function clearRepData(){
+  if(!confirm('Clear ALL rep data? This removes all ' + reps.length + ' reps and their arcade logs. Chargebacks will also be cleared. Cannot be undone.'))return;
+  reps=[];CBs=[];saveSession();renR();renCBL();upK();tst2('All rep data cleared.','ok');
+}
+function clearMgrData(){
+  if(!confirm('Clear all manager actuals? Cannot be undone.'))return;
+  mgrSheetData={};renMgrSheet();tst2('Manager data cleared.','ok');
+}
+function clearCoachData(){
+  if(!confirm('Clear all coach actuals? Cannot be undone.'))return;
+  coachSheetData={};renCoachSheet();tst2('Coach data cleared.','ok');
+}
+function clearAllData(){
+  if(!confirm('Clear ALL data — reps, managers, coaches, and chargebacks? Cannot be undone.'))return;
+  reps=[];CBs=[];mgrSheetData={};coachSheetData={};
+  saveSession();renR();renCBL();renMgrSheet();renCoachSheet();upK();
+  tst2('All data cleared.','ok');
+}
+
+// ══════════════════════════════════════════════════════
+// AUTO-ADD NEW REPS TO ROSTER ON UPLOAD
+// ══════════════════════════════════════════════════════
+
+// Track newly added reps this session
+let _newRepsThisUpload = [];
+
+function autoAddToRoster(ntid, csvName, state){
+  // Already in roster?
+  if(REP_ROSTER[ntid]) return false;
+  
+  // Split name into first/last (best effort)
+  const parts = (csvName||'').trim().split(/\s+/);
+  const first = parts[0] ? (parts[0].charAt(0).toUpperCase()+parts[0].slice(1).toLowerCase()) : '';
+  const last = parts.slice(1).map(p=>p.charAt(0).toUpperCase()+p.slice(1).toLowerCase()).join(' ');
+  const full = (first+' '+last).trim() || csvName;
+
+  // Add to REP_ROSTER in memory
+  REP_ROSTER[ntid] = {
+    coach: 'TBD',
+    state: state||'',
+    full,
+    first,
+    last,
+    isNew: true,  // flag for badge
+    addedAt: new Date().toLocaleString()
+  };
+
+  // Persist new rep to localStorage so it survives refresh
+  const customRoster = JSON.parse(localStorage.getItem('wfo_custom_roster')||'{}');
+  customRoster[ntid] = REP_ROSTER[ntid];
+  localStorage.setItem('wfo_custom_roster', JSON.stringify(customRoster));
+
+  _newRepsThisUpload.push({ntid, full, state:state||''});
+  return true;
+}
+
+// Load custom roster additions on startup
+function loadCustomRoster(){
+  try{
+    const custom = JSON.parse(localStorage.getItem('wfo_custom_roster')||'{}');
+    Object.entries(custom).forEach(([ntid,r])=>{
+      if(!REP_ROSTER[ntid]) REP_ROSTER[ntid] = r;
+    });
+  }catch{}
+}
+
+// Show new reps banner after upload
+function showNewRepsBanner(newReps){
+  if(!newReps.length) return;
+  const ex = document.getElementById('newRepsBanner');if(ex)ex.remove();
+  const div = document.createElement('div');
+  div.id = 'newRepsBanner';
+  div.style.cssText = 'background:linear-gradient(135deg,#FFF0F7,#F3E8FF);border:2px solid var(--pr);border-radius:10px;padding:11px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px';
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:22px">🆕</span>
+      <div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--pr)">${newReps.length} New Rep${newReps.length!==1?'s':''} Auto-Added to Roster</div>
+        <div style="font-size:12px;color:var(--mu)">${newReps.map(r=>r.full||(r.ntid)).join(', ')}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn bp sm" onclick="viewNewReps()">👥 Assign Stores</button>
+      <button class="btn bo sm" onclick="this.closest('#newRepsBanner').remove()">✕</button>
+    </div>`;
+  const stb = document.getElementById('stb');
+  if(stb&&stb.parentNode) stb.parentNode.insertBefore(div, stb.nextSibling);
+}
+
+function viewNewReps(){
+  // Go to admin roster filtered to new reps
+  goPage('pg-admin', document.querySelector('[data-page="pg-admin"]'));
+  setTimeout(()=>{
+    swAdmin('roster', document.querySelector('#adminContent .sub-tab:nth-child(2)'));
+    // Filter to show only new reps
+    const search = document.getElementById('aRosterSearch');
+    if(search){
+      // Set filter to show new reps by searching for their names
+      search.value = '';
+    }
+    // Set a flag to show only new reps
+    window._filterNewOnly = true;
+    renAdminRoster();
+    window._filterNewOnly = false;
+    tst2('Showing new reps — assign their stores and coaches', 'ok');
+  }, 300);
+}
+
+// Hook into pC — call after parsing to check for new NTIDs
+function checkAndAutoAddNewReps(parsedReps){
+  _newRepsThisUpload = [];
+  parsedReps.forEach(r=>{
+    if(!r.ri) return;
+    const wasAdded = autoAddToRoster(r.ri, r.n, r.state||'');
+    if(wasAdded){
+      // Apply roster data back to this rep
+      applyRosterToRep(r);
+    }
   });
-  dlC([hd,...rows],'WFO_StoreRoster.csv');tst2('Store roster exported.','ok');
+  if(_newRepsThisUpload.length){
+    showNewRepsBanner(_newRepsThisUpload);
+  }
+  return _newRepsThisUpload.length;
+}
+
+// State pre-filter for new rep store dropdown
+// When assigning store to a new rep, pre-filter by state
+function getStoresForState(state){
+  if(!state) return SR;
+  const stateMap = {TN:'TN-',MA:'MA-',RI:'RI-',CT:'CT-',AR:'AR-'};
+  const prefix = stateMap[state];
+  return prefix ? SR.filter(s=>s.s.startsWith(prefix)) : SR;
 }
 
 </script>
