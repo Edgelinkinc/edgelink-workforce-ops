@@ -6,10 +6,12 @@
 <title>Incentive Pay — Work Force Ops</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
+html,body{background:#F8F8F8;color:#1A1A1A;min-height:100%;overflow-x:hidden}
 :root{--bg:#F8F8F8;--sf:#fff;--pr:#E20074;--se:#6E2B8B;--dk:#4A1A6B;--ac:#FF69B4;--tx:#1A1A1A;--mu:#666;--bo:#E8E8E8;--ok:#00A651;--wa:#FFB300;--da:#D32F2F;--thb:#FFF0F7;--tht:#E20074;--ra:12px;--sh:0 2px 12px rgba(0,0,0,.07);--shm:0 6px 28px rgba(0,0,0,.15)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
-.topbar{background:var(--sf);border-bottom:3px solid var(--pr);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
+.tb-logo{width:32px;height:32px;background:var(--pr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:900;font-size:10px;color:#fff;flex-shrink:0}
+.topbar{background:var(--sf);border-bottom:3px solid var(--pr);padding:0 16px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--sh)}
 .tb-title{font-family:"Poppins",sans-serif;font-weight:800;font-size:16px;color:var(--se)}
 .tb-sub{font-size:11px;color:var(--mu)}
 .tb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -24,17 +26,17 @@ body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--tx);min-he
 .bghost{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff}.bghost:hover{background:rgba(255,255,255,.25)}
 .sm{padding:5px 12px;font-size:12px}
 .xs{padding:3px 8px;font-size:11px;border-radius:6px}
-.layout{display:flex;min-height:calc(100vh - 60px)}
+.layout{display:flex;min-height:calc(100vh - 60px);background:var(--bg)}
 .sidebar{width:220px;background:var(--dk);position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;flex-shrink:0;padding:12px 0}
 .sg{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:10px 18px 4px}
 .si{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:13px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;transition:all .2s;border-left:3px solid transparent;user-select:none}
 .si:hover{background:rgba(255,255,255,.07);color:#fff}
 .si.active{background:rgba(226,0,116,.2);color:#fff;border-left-color:var(--pr)}
 .si .ic{font-size:15px;width:20px;text-align:center}
-.content{flex:1;padding:22px;min-width:0}
-.page{display:none}.page.active{display:block}
+.content{flex:1;padding:22px;min-width:0;background:var(--bg)}
+.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%}
 .sub-tabs{display:flex;gap:8px;margin-bottom:16px}
-.sub-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--bo);background:var(--sf);color:var(--mu);cursor:pointer;transition:all .2s}
+.sub-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--bo);background:var(--sf);color:var(--mu);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
 .sub-tab:hover{border-color:var(--se);color:var(--se)}.sub-tab.active{background:var(--se);color:#fff;border-color:var(--se)}
 .sub-pane{display:none}.sub-pane.active{display:block}
 .kstrip{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:18px}
@@ -236,6 +238,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .pin-err{color:var(--da);font-size:12px;font-weight:700;height:18px;margin-bottom:4px}
 .pin-cancel{font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;margin-top:4px;text-decoration:underline}
 body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{display:none!important;}
+body.page-pg-home .week-bar,body.page-pg-home .stbar{display:none!important;}
 body.admin-active .content{padding:0!important;}
 body:not(.page-pg-reps):not(.page-pg-chargebacks) .week-bar{display:none!important;}
 body.page-pg-managers .week-bar,body.page-pg-coaches .week-bar,
@@ -252,41 +255,436 @@ body.page-pg-assign .week-bar{display:none!important;}
 #pf{display:none;position:fixed;inset:0;background:#fff;z-index:9999;overflow-y:auto}
 @keyframes su{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media print{body>*:not(#pf){display:none!important}#pf{display:block!important;position:absolute!important;inset:0!important}}
-@media(max-width:900px){.sidebar{display:none}.dz-row{grid-template-columns:1fr}.kstrip{grid-template-columns:1fr 1fr}.cat-hdr,.cat-row{grid-template-columns:1.5fr 1fr 1fr 80px 100px}.fg.fc5{grid-template-columns:1fr 1fr}.result-stats{grid-template-columns:1fr 1fr}.content{padding:14px}}
+
+/* ── BOTTOM NAV ── */
+.bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--dk);border-top:1px solid rgba(255,255,255,.1);z-index:600;flex-direction:row;align-items:center;justify-content:space-around}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;padding:6px 0;gap:2px;transition:color .2s;height:100%}
+.bn.active,.bn:active{color:var(--pr)}
+.bn-ic{font-size:22px;line-height:1}
+.bn-lbl{font-size:9px;font-family:'Nunito',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+@media(max-width:430px){
+  .topbar{height:50px;padding:0 12px}
+  .tb-sub-hide{display:none}
+  .tb-updated{display:none}
+  .tb-title{font-size:14px}
+  .tb-logo{width:28px;height:28px;font-size:9px}
+  .layout{min-height:calc(100vh - 50px)}
+  .card{border-radius:8px}.card-hdr{padding:10px 14px}.card-body{padding:12px 14px}
+  .kc{padding:10px 12px}.kv{font-size:20px}
+  .bn-lbl{display:none}.bn-ic{font-size:24px}.bnav{height:52px}}
+@media(min-width:431px) and (max-width:900px){.bn-ic{font-size:20px}.bn-lbl{font-size:8px}}
+.mobile-more{display:none;position:fixed;inset:0;background:var(--dk);z-index:700;flex-direction:column}
+.mobile-more.open{display:flex}
+.mm-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.1);font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;color:#fff}
+.mm-items{display:flex;flex-direction:column;padding:16px}
+.mm-item{background:rgba(255,255,255,.08);border:none;border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;padding:16px 20px;margin-bottom:10px;text-align:left;cursor:pointer}
+.mm-item:active{background:var(--pr)}
+
+@media(max-width:900px){
+  .sidebar-toggle{display:none!important}
+  .sidebar{display:none!important;width:0!important}
+  .bnav{display:flex}
+  .content{padding:14px;padding-bottom:74px;width:100%!important;max-width:100vw}
+  .dz-row{grid-template-columns:1fr}
+  .kstrip{grid-template-columns:1fr 1fr}
+  .cat-hdr,.cat-row{grid-template-columns:1.5fr 1fr 1fr 80px 100px}
+  .fg.fc5{grid-template-columns:1fr 1fr}
+  .result-stats{grid-template-columns:1fr 1fr}
+  .week-bar{flex-wrap:wrap;gap:6px;padding:10px 12px}
+  .week-bar label{font-size:11px}
+  .wkbdg{font-size:11px;padding:4px 8px}
+  #wkHistSel{max-width:150px;font-size:11px}
+  /* Tables scroll horizontally */
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:600px}
+  /* Coach sheet table */
+  #coachSheetSections .tw table{min-width:800px}
+  /* Sub tabs scroll */
+  .sub-tabs{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+  .sub-tab{white-space:nowrap;flex-shrink:0;padding:10px 16px;font-size:13px;min-height:42px}
+  /* Cards */
+  .card{border-radius:10px}
+  .card-hdr{flex-wrap:wrap;gap:8px}
+  /* Edit panel full screen on mobile */
+  #repEditPanel{width:100vw!important}
+  /* Modals full width */
+  #uploadPromptModal > div,#wkConfirmModal > div{max-width:95vw;padding:20px}
+  /* Admin center */
+  #adminContent{padding:14px!important}
+  .sub-tabs button.sub-tab{font-size:11px;padding:7px 10px}
+  /* KPI strip */
+  .kc{padding:12px}
+  .kv{font-size:22px}
+}
+
+@media(max-width:430px){
+  .sidebar{display:none!important;width:0!important}
+  .bnav{display:flex!important}
+  .content{width:100%!important;padding:12px!important;padding-bottom:74px!important}
+}
+@media(max-width:500px){
+  .kstrip{grid-template-columns:1fr 1fr}
+  .kv{font-size:20px}
+  .content{padding:10px;padding-bottom:74px}
+  table{min-width:500px}
+  #coachSheetSections .tw table{min-width:900px}
+  .week-bar{padding:8px 10px}
+  /* Stack lock controls */
+  .lk-dot{width:8px;height:8px}
+  .lk-lbl{font-size:11px}
+  /* Edit panel */
+  #repEditPanel > div:first-child{padding:12px 14px}
+  /* PIN pad */
+  .pin-btn{width:64px;height:64px;font-size:22px}
+}
 @media(max-width:500px){.kstrip{grid-template-columns:1fr}}
+/* ── COLLAPSIBLE SIDEBAR ── */
+.sidebar{width:220px;background:var(--dk);display:flex;flex-direction:column;padding:0;position:relative;transition:width .25s ease;overflow:hidden;flex-shrink:0}
+.sidebar.collapsed{width:56px}
+.sidebar-toggle{position:absolute;top:50%;right:-12px;transform:translateY(-50%);width:24px;height:48px;background:var(--se);border-radius:0 8px 8px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;color:#fff;font-size:11px;transition:background .2s}
+.sidebar-toggle:hover{background:var(--pr)}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.sb-logo-icon{width:32px;height:32px;background:var(--pr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:900;font-size:10px;color:#fff;flex-shrink:0}
+.sb-logo-text{font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;color:#fff;white-space:nowrap;transition:opacity .2s}
+.sidebar.collapsed .sb-logo-text{opacity:0;width:0;overflow:hidden}
+.sidebar.collapsed .sidebar-toggle span{transform:rotate(180deg);display:inline-block}
+
+/* Sidebar groups */
+.sg-wrap{margin:2px 0}
+.sg-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px;cursor:pointer;user-select:none}
+.sg-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;transition:opacity .2s}
+.sidebar.collapsed .sg-label{opacity:0}
+.sg-arrow{font-size:10px;color:rgba(255,255,255,.4);transition:transform .2s;flex-shrink:0}
+.sg-arrow.closed{transform:rotate(-90deg)}
+.sidebar.collapsed .sg-arrow{opacity:0}
+.sg-items{overflow:hidden;transition:max-height .2s ease}
+.sg-items.closed{max-height:0!important}
+
+/* Sidebar items */
+.si{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-radius:0;transition:background .15s;color:rgba(255,255,255,.7);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;white-space:nowrap}
+.si:hover{background:rgba(255,255,255,.08);color:#fff}
+.si.active{background:var(--pr);color:#fff}
+.si-solo{margin:4px 0}
+.si .ic{font-size:15px;flex-shrink:0;width:20px;text-align:center}
+.si-label{transition:opacity .2s;white-space:nowrap}
+.sidebar.collapsed .si-label{opacity:0;width:0;overflow:hidden}
+.sidebar.collapsed .si{padding:9px 0;justify-content:center}
+.sidebar.collapsed .si .ic{width:auto}
+.sidebar.collapsed .sg-hdr{padding:8px 0;justify-content:center}
+
+/* Tooltip on collapsed */
+.sidebar.collapsed .si{position:relative}
+.sidebar.collapsed .si:hover::after{content:attr(data-tooltip);position:absolute;left:100%;top:50%;transform:translateY(-50%);background:var(--se);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;white-space:nowrap;z-index:100;margin-left:8px;pointer-events:none}
+
+
+/* ── FLYER STYLES ── */
+.flyer-pane{display:none}.flyer-pane.active{display:block}
+.flyer-card{background:#fff;border-radius:16px;box-shadow:var(--shm);overflow:hidden;border:1px solid var(--bo);max-width:700px;margin:0 auto}
+.flyer-hdr{background:linear-gradient(135deg,var(--pr),var(--se));padding:24px 28px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.flyer-co{font-size:10px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.flyer-title{font-family:'Poppins',sans-serif;font-weight:900;font-size:22px}
+.flyer-sub{font-size:12px;opacity:.75;margin-top:2px}
+.flyer-badge{background:rgba(255,255,255,.2);border-radius:10px;padding:8px 14px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px}
+.flyer-body{padding:20px 24px}
+.flyer-note{background:#F3E8FF;border-left:4px solid var(--se);border-radius:0 8px 8px 0;padding:8px 14px;font-size:12px;color:var(--se);font-weight:600;margin-bottom:14px}
+.flyer-section{margin-bottom:20px}
+.flyer-sec-hdr{font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px;padding-bottom:6px;border-bottom:2px solid var(--bo)}
+.flyer-sec-sub{font-size:11px;color:var(--mu);margin-bottom:10px}
+.flyer-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.flyer-tier{background:#F8F8F8;border:1px solid var(--bo);border-radius:10px;padding:10px 12px;position:relative}
+.flyer-tier-top{background:linear-gradient(135deg,#FFF0F7,#F3E8FF);border-color:var(--pr)}
+.ft-range{font-size:11px;color:var(--mu);margin-bottom:4px}
+.ft-dollar{font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--pr)}
+.ft-unit{font-size:10px;color:var(--mu);margin-left:3px}
+.ft-example{font-size:10px;color:var(--ok);margin-top:4px}
+.ft-badge{font-size:9px;font-weight:700;color:var(--pr);text-transform:uppercase;margin-top:4px}
+.flyer-pu{display:flex;align-items:center;gap:12px;background:#F8F8F8;border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.pu-ic{font-size:22px;flex-shrink:0}
+.pu-name{font-weight:700;font-size:13px;color:var(--se)}
+.pu-detail{font-size:11px;color:var(--mu)}
+.pu-amt{font-family:'Poppins',sans-serif;font-weight:900;font-size:20px;color:var(--ok);margin-left:auto;white-space:nowrap}
+.flyer-mim-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
+.flyer-mim-row{background:#F8F8F8;border-radius:8px;padding:8px 10px;text-align:center}
+.fm-label{font-size:10px;color:var(--mu);margin-bottom:3px}
+.fm-add{font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--pr)}
+.fm-total{font-size:10px;color:var(--ok);font-weight:700;margin-top:2px}
+.flyer-guard{display:flex;align-items:flex-start;gap:10px;background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.flyer-guard-red{background:#FFEBEE;border-color:var(--da)}
+.fg-ic{font-size:18px;flex-shrink:0}
+.flyer-guard strong{font-size:12px;color:var(--se);display:block}
+.flyer-guard div{font-size:11px;color:var(--mu);margin-top:2px}
+.flyer-guard-red strong{color:var(--da)}
+.flyer-footer{background:var(--thb);padding:10px 24px;font-size:10px;color:var(--mu);text-align:center;border-top:1px solid var(--bo)}
+@media print{
+  .sidebar,.bnav,.week-bar,.topbar,.sub-tabs,.btn,.flyer-footer{display:none!important}
+  .flyer-card{box-shadow:none;border:none;max-width:100%}
+  .content{padding:0}
+  .page{display:block!important}
+  .flyer-pane{display:none!important}
+  .flyer-pane.active{display:block!important}
+}
+
+/* ── HOME PAGE ── */
+.home-nav-btn{background:#F8F8F8;border:2px solid var(--bo);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif}
+.home-nav-btn:hover{background:var(--thb);border-color:var(--pr);transform:translateY(-2px);box-shadow:0 4px 12px rgba(226,0,116,.15)}
+.home-nav-admin{border-color:var(--dk)!important}
+.home-nav-admin:hover{border-color:var(--pr)!important}
+.hnb-label{font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)}
+.hnb-sub{font-size:10px;color:var(--mu);text-align:center}
+@media(max-width:900px){
+  #pg-home>div:nth-child(2){grid-template-columns:1fr!important}
+  #pg-home>div:last-of-type{grid-template-columns:1fr!important}
+  #pg-home .home-nav-btn{padding:12px 8px}
+}
+
+/* ── MOBILE CRITICAL OVERRIDES ── */
+@media(max-width:900px){
+  .layout{flex-direction:column}
+  .sidebar,.sidebar-toggle{display:none!important;width:0!important;min-width:0!important;flex:none!important}
+  .content{width:100%!important;max-width:100vw!important;padding:14px!important;padding-bottom:74px!important;background:#F8F8F8!important;min-height:calc(100vh - 60px);overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+  .page.active{background:#F8F8F8!important}
+}
 </style>
 </head>
 <body>
 <header class="topbar">
-  <div style="display:flex;align-items:center;gap:12px">
-    <div><div class="tb-title">⚡ Incentive Pay Dashboard</div><div class="tb-sub">Reps · Managers · Coaches · Chargebacks · Spiffs · Leaderboard</div></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="tb-logo">WFO</div>
+    <div class="tb-title-wrap">
+      <div class="tb-title">Work Force Ops</div>
+      <div class="tb-sub tb-sub-hide">Edgelink Inc · Incentive Pay</div>
+    </div>
   </div>
   <div class="tb-right">
-    <span style="font-size:11px;color:var(--mu)" id="lu">—</span>
-    <button class="btn bo sm" onclick="requirePin(()=>openAdm('rep-tiers'))">⚙️ Tiers</button>
-    <button class="btn bs sm" onclick="requirePin(()=>openAdm('spiffs'))">⚡ Spiffs</button>
-    <button class="btn bp sm" onclick="doExp()">⬇ Payroll CSV</button>
+    <span class="tb-updated" id="lu">—</span>
+    <div id="pinStatus" class="btn bw sm" onclick="goPage('pg-admin',document.querySelector('[data-page=\'pg-admin\']'))" style="font-size:11px;font-weight:700;cursor:pointer">🔐 Admin</div>
   </div>
 </header>
 <div class="layout">
-<nav class="sidebar">
-  <div class="sg">Admin</div>
-  <div class="si" data-page="pg-admin" onclick="goPage('pg-admin',this)"><span class="ic">🔐</span>Admin Center</div>
-  <div class="sg">Bonuses</div>
-  <div class="si active" data-page="pg-reps" onclick="goPage('pg-reps',this)"><span class="ic">👤</span>Reps</div>
-  <div class="si" data-page="pg-managers" onclick="goPage('pg-managers',this)"><span class="ic">🏢</span>Managers</div>
-  <div class="si" data-page="pg-coaches" onclick="goPage('pg-coaches',this)"><span class="ic">🎯</span>Coaches</div>
-  <div class="si" data-page="pg-chargebacks" onclick="goPage('pg-chargebacks',this)"><span class="ic">⚠️</span>Chargebacks</div>
-  <div class="sg">Analytics</div>
-  <div class="si" data-page="pg-leaderboard" onclick="goPage('pg-leaderboard',this)"><span class="ic">🏆</span>Leaderboard</div>
-  <div class="si" data-page="pg-summary" onclick="goPage('pg-summary',this)"><span class="ic">📊</span>Summary</div>
-  <div class="si" data-page="pg-history" onclick="goPage('pg-history',this)"><span class="ic">📋</span>History</div>
-  <div class="sg">Navigation</div>
-  <div class="si" onclick="location.href='index.html'"><span class="ic">🏠</span>Command Center</div>
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="bnav" id="bnav">
+    <button class="bn" onclick="goPage('pg-home',this)" data-page="pg-home"><span class="bn-ic">🏠</span><span class="bn-lbl">Home</span></button>
+    <button class="bn" onclick="goPage('pg-reps',this)" data-page="pg-reps"><span class="bn-ic">👤</span><span class="bn-lbl">Reps</span></button>
+    <button class="bn" onclick="goPage('pg-managers',this)" data-page="pg-managers"><span class="bn-ic">🏢</span><span class="bn-lbl">Mgrs</span></button>
+    <button class="bn" onclick="goPage('pg-coaches',this)" data-page="pg-coaches"><span class="bn-ic">🎯</span><span class="bn-lbl">Coaches</span></button>
+    <button class="bn" onclick="goPage('pg-summary',this)" data-page="pg-summary"><span class="bn-ic">📊</span><span class="bn-lbl">Summary</span></button>
+    <button class="bn" onclick="toggleMobileMenu()" id="moreBtn"><span class="bn-ic">☰</span><span class="bn-lbl">More</span></button>
+  </nav>
+  <!-- MOBILE MORE MENU -->
+  <div class="mobile-more" id="mobileMore" style="display:none">
+    <div class="mm-hdr"><span>Work Force Ops</span><button onclick="toggleMobileMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">✕</button></div>
+    <div class="mm-items">
+      <button class="mm-item" onclick="goPage('pg-admin',document.querySelector('[data-page=\'pg-admin\']'));toggleMobileMenu()">🔐 Admin Center</button>
+      <button class="mm-item" onclick="requirePin(()=>{goPage('pg-chargebacks',this);});toggleMobileMenu()">⚡ Chargebacks (Admin)</button>
+      <button class="mm-item" onclick="goPage('pg-leaderboard',this);toggleMobileMenu()">🏆 Leaderboard</button>
+      <button class="mm-item" onclick="goPage('pg-summary',this);toggleMobileMenu()">📊 Summary</button>
+      <button class="mm-item" onclick="goPage('pg-history',this);toggleMobileMenu()">📋 History</button>
+    </div>
+  </div>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-toggle" onclick="toggleSidebar()" id="sidebarToggle" title="Collapse sidebar">
+    <span id="toggleIcon">◀</span>
+  </div>
+  <div class="sb-logo">
+    <div class="sb-logo-icon">WFO</div>
+    <div class="sb-logo-text">Work Force Ops</div>
+  </div>
+
+  <!-- HOME -->
+  <div class="sg-wrap">
+    <div class="si si-solo active" data-page="pg-home" onclick="goPage('pg-home',this)"><span class="ic">🏠</span><span class="si-label">Home</span></div>
+  </div>
+
+  <!-- BONUSES GROUP -->
+  <div class="sg-wrap">
+    <div class="sg-hdr" onclick="toggleSG('sg-bonuses')">
+      <span class="sg-label">Bonuses</span>
+      <span class="sg-arrow" id="sg-bonuses-arrow">▾</span>
+    </div>
+    <div class="sg-items" id="sg-bonuses">
+      <div class="si" data-page="pg-reps" onclick="goPage('pg-reps',this)"><span class="ic">👤</span><span class="si-label">Reps</span></div>
+      <div class="si" data-page="pg-managers" onclick="goPage('pg-managers',this)"><span class="ic">🏢</span><span class="si-label">Managers</span></div>
+      <div class="si" data-page="pg-coaches" onclick="goPage('pg-coaches',this)"><span class="ic">🎯</span><span class="si-label">Coaches</span></div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS GROUP -->
+  <div class="sg-wrap">
+    <div class="sg-hdr" onclick="toggleSG('sg-analytics')">
+      <span class="sg-label">Analytics</span>
+      <span class="sg-arrow" id="sg-analytics-arrow">▾</span>
+    </div>
+    <div class="sg-items" id="sg-analytics">
+      <div class="si" data-page="pg-leaderboard" onclick="goPage('pg-leaderboard',this)"><span class="ic">🏆</span><span class="si-label">Leaderboard</span></div>
+      <div class="si" data-page="pg-summary" onclick="goPage('pg-summary',this)"><span class="ic">📊</span><span class="si-label">Summary</span></div>
+      <div class="si" data-page="pg-history" onclick="goPage('pg-history',this)"><span class="ic">📋</span><span class="si-label">History</span></div>
+    </div>
+  </div>
+
+
+
+  <!-- EMPLOYEE VIEW — no group, standalone -->
+  <div class="sg-wrap">
+    <div class="si si-solo" data-page="pg-employee" onclick="goPage('pg-employee',this)"><span class="ic">💵</span><span class="si-label">My Bonus</span></div>
+  </div>
+
+  <!-- ADMIN — standalone -->
+  <div class="sg-wrap">
+    <div class="si si-solo" data-page="pg-admin" onclick="goPage('pg-admin',this)"><span class="ic">🔐</span><span class="si-label">Admin Center</span></div>
+  </div>
 </nav>
+
 <main class="content">
   <div class="stbar" id="stb"></div>
-  <div class="week-bar">
+
+  
+  <div class="page active" id="pg-reps">
+    
+
+  <div class="page active" id="pg-home" style="background:#F8F8F8;overflow-y:auto;padding-bottom:80px">
+
+  <!-- WELCOME -->
+  <div style="background:linear-gradient(135deg,#4A1A6B,#6E2B8B);border-radius:12px;padding:20px;margin-bottom:12px;color:#fff">
+    <div style="font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:.08em">Edgelink Inc · Work Force Ops</div>
+    <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;margin:4px 0">Welcome 👋</div>
+    <div style="font-size:12px;opacity:.7" id="homeDateTime">Loading date…</div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <div style="background:rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;min-width:120px">
+        <div style="font-size:9px;opacity:.6;text-transform:uppercase;font-weight:700">Current Week</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px" id="homeWeek">Loading…</div>
+      </div>
+      <div id="homeLockBadge" style="background:rgba(226,0,116,.25);border:1px solid rgba(226,0,116,.5);border-radius:8px;padding:8px 14px">
+        <div style="font-size:9px;opacity:.6;text-transform:uppercase;font-weight:700">Status</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px" id="homeLockStatus">Unlocked</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK NAV - static buttons, always visible -->
+  <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
+    <div style="background:#6E2B8B;padding:11px 16px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">🧭 Quick Navigation</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr)">
+      <button onclick="goPage('pg-reps',document.querySelector('[data-page=\'pg-reps\']'))" style="background:#fff;border:none;border-right:1px solid #E8E8E8;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">👤</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Reps</span>
+      </button>
+      <button onclick="goPage('pg-managers',document.querySelector('[data-page=\'pg-managers\']'))" style="background:#fff;border:none;border-right:1px solid #E8E8E8;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">🏢</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Managers</span>
+      </button>
+      <button onclick="goPage('pg-coaches',document.querySelector('[data-page=\'pg-coaches\']'))" style="background:#fff;border:none;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">🎯</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Coaches</span>
+      </button>
+      <button onclick="goPage('pg-employee',document.querySelector('[data-page=\'pg-employee\']'))" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">💵</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">My Bonus</span>
+      </button>
+      <button onclick="goPage('pg-flyers',document.querySelector('[data-page=\'pg-flyers\']'));swFlyer('rep')" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">📋</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Structure</span>
+      </button>
+      <button onclick="goPage('pg-admin',document.querySelector('[data-page=\'pg-admin\']'))" style="background:#fff;border:none;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">🔐</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#E20074">Admin</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PENDING ACTIONS -->
+  <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
+    <div style="background:#FFB300;padding:11px 16px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#1A1A1A">⚠️ Pending Actions</div>
+    <div id="homePending" style="padding:12px 16px">
+      <div style="color:#666;font-size:13px">Checking for pending actions…</div>
+    </div>
+  </div>
+
+  <!-- SYSTEM STATUS -->
+  <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
+    <div style="background:#6E2B8B;padding:11px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">⚡ System Status</span>
+      <button onclick="refreshHomeStatus()" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer">↺</button>
+    </div>
+    <div id="homeStatusList" style="padding:12px 16px">
+      <div style="color:#666;font-size:13px">Loading status…</div>
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENTS -->
+  <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
+    <div style="background:#E20074;padding:11px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">📢 Announcements</span>
+      <button onclick="requirePin(()=>openAddAnnouncement())" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">+ Post</button>
+    </div>
+    <div id="homeAnnouncements" style="padding:12px 16px">
+      <div style="color:#666;font-size:13px;text-align:center;padding:8px 0">No announcements yet</div>
+    </div>
+  </div>
+
+  <!-- IMPORTANT DATES -->
+  <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
+    <div style="background:#4A1A6B;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleHomeSection('homeDates','homeDateArrow')">
+      <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">📅 Important Dates <span id="homeDateArrow" style="font-size:10px;opacity:.7">▾</span></span>
+      <button onclick="event.stopPropagation();requirePin(()=>openAddDate())" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">+ Add</button>
+    </div>
+    <div id="homeDates" style="padding:12px 16px">
+      <div style="color:#666;font-size:13px;text-align:center;padding:8px 0">No dates added yet</div>
+    </div>
+  </div>
+
+  <!-- CONTACTS -->
+  <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
+    <div style="background:#4A1A6B;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleHomeSection('homeContacts','homeContactArrow')">
+      <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">📞 Contacts <span id="homeContactArrow" style="font-size:10px;opacity:.7">▾</span></span>
+      <button onclick="event.stopPropagation();requirePin(()=>editContacts())" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">✎ Edit</button>
+    </div>
+    <div id="homeContacts" style="padding:12px 16px">
+      <div style="color:#666;font-size:13px;text-align:center;padding:8px 0">No contacts added yet</div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div id="announcementModal" style="display:none;position:fixed;inset:0;background:rgba(74,26,107,.8);z-index:950;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:22px;max-width:460px;width:92%;max-height:90vh;overflow-y:auto">
+      <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:#6E2B8B;margin-bottom:14px">📢 Post Announcement</div>
+      <div class="fi" style="margin-bottom:10px"><label>Title</label><input type="text" id="annTitle" placeholder="e.g. April Incentive Update"/></div>
+      <div class="fi" style="margin-bottom:10px"><label>Message</label><textarea id="annMsg" placeholder="Enter your announcement…" style="height:80px;resize:vertical"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="fi"><label>Type</label><select id="annType"><option value="info">ℹ️ Info</option><option value="important">⚠️ Important</option><option value="success">✅ Good News</option><option value="urgent">🚨 Urgent</option></select></div>
+        <div class="fi"><label>Expires</label><input type="date" id="annExpiry"/></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn bp" style="flex:1" onclick="saveAnnouncement()">📢 Post</button>
+        <button class="btn bo" onclick="document.getElementById('announcementModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div id="dateModal" style="display:none;position:fixed;inset:0;background:rgba(74,26,107,.8);z-index:950;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:22px;max-width:400px;width:92%">
+      <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:#6E2B8B;margin-bottom:14px">📅 Add Date</div>
+      <div class="fi" style="margin-bottom:10px"><label>Date</label><input type="date" id="newDateVal"/></div>
+      <div class="fi" style="margin-bottom:14px"><label>Label</label><input type="text" id="newDateLabel" placeholder="e.g. Payroll Cutoff"/></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn bp" style="flex:1" onclick="saveImportantDate()">+ Add</button>
+        <button class="btn bo" onclick="document.getElementById('dateModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div id="contactsModal" style="display:none;position:fixed;inset:0;background:rgba(74,26,107,.8);z-index:950;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:22px;max-width:500px;width:92%;max-height:85vh;overflow-y:auto">
+      <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:#6E2B8B;margin-bottom:14px">📞 Edit Contacts</div>
+      <div id="contactEditList"></div>
+      <button class="btn bghost sm" onclick="addContactRow()" style="margin-bottom:14px">+ Add Contact</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn bp" style="flex:1" onclick="saveContacts()">💾 Save</button>
+        <button class="btn bo" onclick="document.getElementById('contactsModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <!-- PAGE: REPS -->
+    <div class="sub-tabs">
+      <button class="sub-tab" onclick="swSub('reps','payouts',this)">💵 Breakdown &amp; Payouts</button>
+      <button class="sub-tab" onclick="swSub('reps','mim',this)">📱 MIM Spiffs</button>
+      <button class="sub-tab" onclick="swSub('reps','structure',this)">📋 Bonus Structure</button>
+    </div>
+    <div class="week-bar">
     <label>Week of:</label>
     <input type="date" id="wks" onchange="onWC()"/>
     <span class="wkbdg" id="wkb">—</span>
@@ -306,8 +704,6 @@ body.page-pg-assign .week-bar{display:none!important;}
     </div>
     <button class="btn bok sm" id="lkBtn" onclick="requirePin(lockWk)">🔒 Lock &amp; Mark Paid</button>
   </div>
-  
-  <div class="page active" id="pg-reps">
     <div class="kstrip">
     <div class="kc"><div class="kl">Total Reps</div><div class="kv" id="kR">—</div><div class="ks">this week</div></div>
     <div class="kc kcg"><div class="kl">Rep Gross</div><div class="kv" id="kG">$—</div><div class="ks">before deductions</div></div>
@@ -318,11 +714,6 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="kc kcw"><div class="kl">Top Earner Zone</div><div class="kv" id="kT">—</div><div class="ks">25+ PPD</div></div>
   </div>
 
-  <!-- PAGE: REPS -->
-    <div class="sub-tabs">
-      <button class="sub-tab" onclick="swSub('reps','payouts',this)">💵 Breakdown &amp; Payouts</button>
-      <button class="sub-tab" onclick="swSub('reps','mim',this)">📱 MIM Spiffs</button>
-    </div>
     <div class="sub-pane" id="reps-overview">
       <div class="card"><div class="card-hdr"><div class="card-title">👤 Rep Overview</div></div>
         <div class="card-body">
@@ -419,6 +810,9 @@ body.page-pg-assign .week-bar{display:none!important;}
         </div>
       </div></div>
     </div>
+    <div class="sub-pane" id="reps-structure">
+      <div id="repFlyerInline"></div>
+    </div>
     <div class="sub-pane" id="reps-mim">
       <div class="card"><div class="card-hdr"><div class="card-title">📱 Rep MIM Spiffs</div><button class="btn bghost sm" onclick="doMimExp('rep')">⬇ CSV</button></div>
         <div class="card-body">
@@ -437,6 +831,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <button class="sub-tab active" onclick="swSub('mgr','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('mgr','calc',this)">🏢 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('mgr','mim',this)">📱 MIM Spiffs</button>
+      <button class="sub-tab" onclick="swSub('mgr','structure',this)">📋 Bonus Structure</button>
     </div>
     <!-- MANAGER ONE-SHEET replaces mgr-overview sub-pane -->
 <div class="sub-pane active" id="mgr-overview">
@@ -526,6 +921,9 @@ body.page-pg-assign .week-bar{display:none!important;}
       </div></div>
     </div>
     
+    <div class="sub-pane" id="mgr-structure">
+      <div id="mgrFlyerInline"></div>
+    </div>
     <div class="sub-pane" id="mgr-mim">
       <div class="card"><div class="card-hdr"><div class="card-title">📱 Manager MIM Spiffs</div><button class="btn bghost sm" onclick="doMimExp('mgr')">⬇ CSV</button></div>
         <div class="card-body">
@@ -545,6 +943,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('coach','mim',this)">📱 MIM Spiffs</button>
+      <button class="sub-tab" onclick="swSub('coach','structure',this)">📋 Bonus Structure</button>
     </div>
     <div class="sub-pane active" id="coach-overview">
       <div class="card"><div class="card-hdr"><div class="card-title">🎯 Coach Bonus Overview</div></div>
@@ -591,6 +990,9 @@ body.page-pg-assign .week-bar{display:none!important;}
         </div>
         <div id="coachSheetSections"></div>
       </div></div>
+    </div>
+    <div class="sub-pane" id="coach-structure">
+      <div id="coachFlyerInline"></div>
     </div>
     <div class="sub-pane" id="coach-mim">
       <div class="card"><div class="card-hdr"><div class="card-title">📱 Coach MIM Spiffs</div><button class="btn bghost sm" onclick="doMimExp('coach')">⬇ CSV</button></div>
@@ -1211,6 +1613,219 @@ body.page-pg-assign .week-bar{display:none!important;}
   </div>
 
 
+
+
+  <div class="page" id="pg-flyers">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px;color:var(--se)">📋 Bonus Structure</div>
+      <div style="font-size:12px;color:var(--mu)" id="flyerEffDate">Effective — current tiers</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn bp sm" onclick="printFlyer()">🖨 Print Flyer</button>
+      <button class="btn bghost sm" onclick="printAllFlyers()">🖨 Print All 3</button>
+    </div>
+  </div>
+  <div class="sub-tabs" style="margin-bottom:16px">
+    <button class="sub-tab active" id="ft-rep" onclick="swFlyer('rep',this)">👤 Rep</button>
+    <button class="sub-tab" id="ft-coach" onclick="swFlyer('coach',this)">🎯 Coach</button>
+    <button class="sub-tab" id="ft-mgr" onclick="swFlyer('mgr',this)">🏢 Manager</button>
+  </div>
+
+  <!-- REP FLYER -->
+  <div id="flyer-rep" class="flyer-pane active">
+    <div class="flyer-card" id="printRepFlyer">
+      <div class="flyer-hdr">
+        <div>
+          <div class="flyer-co">EDGELINK INC</div>
+          <div class="flyer-title">Retail Sales Representative</div><div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:600">Bonus Structure</div>
+          <div class="flyer-sub" id="repFlyerDate">Effective April 2026</div>
+        </div>
+        <div class="flyer-badge" style="font-size:11px">👤 RSR</div>
+      </div>
+      <div class="flyer-body">
+        <!-- BOX TIERS -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">📦 Box Level Ups — Per Activation</div>
+          <div class="flyer-sec-sub">Paid on EVERY activation once tier threshold is hit</div>
+          <div class="flyer-tiers" id="repBoxTiers"></div>
+        </div>
+        <!-- ACCESSORY -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">🛍️ Accessory Levels — Weekly % of Net Profit</div>
+          <div class="flyer-sec-sub">Exact payout = your tier % × your accessory net profit</div>
+          <div class="flyer-tiers" id="repAccTiers"></div>
+        </div>
+        <!-- POWER UPS -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">⚡ Power Ups — Stack on Everything</div>
+          <div class="flyer-powerups" id="repPowerUps"></div>
+        </div>
+        <!-- MIM -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">📱 MIM Payout — Minimum 6 MM BANs to qualify</div>
+          <div class="flyer-mim" id="repMimTiers"></div>
+          <div style="font-size:11px;color:var(--da);margin-top:6px;font-weight:700">⚠ Must hit 6 MM BANs minimum — paid via Arcade by your coach</div>
+        </div>
+      </div>
+      <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops</div>
+    </div>
+  </div>
+
+  <!-- COACH FLYER -->
+  <div id="flyer-coach" class="flyer-pane">
+    <div class="flyer-card" id="printCoachFlyer">
+      <div class="flyer-hdr" style="background:linear-gradient(135deg,var(--dk),var(--se))">
+        <div>
+          <div class="flyer-co">EDGELINK INC</div>
+          <div class="flyer-title">Coach Bonus Structure</div>
+          <div class="flyer-sub" id="coachFlyerDate">Effective April 2026</div>
+        </div>
+        <div class="flyer-badge">🎯 COACH</div>
+      </div>
+      <div class="flyer-body">
+        <div class="flyer-note">All bonuses calculated per store. Coach total = sum of all assigned stores.</div>
+        <!-- ACTIVATION -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">🎯 Activation Bonus — Per Door (1 door per store)</div>
+          <div class="flyer-sec-sub">$0 if under 100% — no partial payout</div>
+          <div class="flyer-tiers" id="coachActTiers"></div>
+        </div>
+        <!-- ACCESSORY -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">🛍️ Accessory Bonus — Per Box</div>
+          <div class="flyer-sec-sub">Calculated: Acc Total $ ÷ Total Activations = $/Box → determines tier</div>
+          <div class="flyer-tiers" id="coachAccTiers"></div>
+          <div style="font-size:11px;color:var(--mu);margin-top:6px">$0 if under $50/box baseline</div>
+        </div>
+        <!-- GUARDRAILS -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">⚠️ Guardrails</div>
+          <div class="flyer-guardrails" id="coachGuardrails"></div>
+        </div>
+        <!-- KICKER -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">🚀 Company Kicker — Stacks on Everything</div>
+          <div class="flyer-tiers" id="coachKickers"></div>
+        </div>
+        <!-- MIM -->
+        <div class="flyer-section">
+          <div class="flyer-sec-hdr">📱 Coach MIM Spiff</div>
+          <div class="flyer-tiers" id="coachMimFlyer"></div>
+        </div>
+      </div>
+      <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops</div>
+    </div>
+  </div>
+
+<!-- MANAGER FLYER -->
+  <div id="flyer-mgr" class="flyer-pane">
+    <!-- Tier sub-tabs -->
+    <div class="sub-tabs" style="margin-bottom:16px">
+      <button class="sub-tab active" id="mft-1" onclick="swMgrTierFlyer(1,this)">🥇 Tier 1 — High Volume</button>
+      <button class="sub-tab" id="mft-2" onclick="swMgrTierFlyer(2,this)">🥈 Tier 2 — 2ME</button>
+      <button class="sub-tab" id="mft-3" onclick="swMgrTierFlyer(3,this)">🥉 Tier 3 — 1ME</button>
+    </div>
+    <div id="mgrTierFlyerWrap"></div>
+  </div>
+</div>
+
+  <div class="page" id="pg-employee">
+  <div style="text-align:center;padding:20px 0 10px">
+    <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--se)">💵 My Bonus</div>
+    <div style="font-size:13px;color:var(--mu)">Select your name to see your current week breakdown</div>
+  </div>
+
+  <!-- NAME SELECTOR -->
+  <div style="max-width:420px;margin:0 auto 20px;padding:0 16px">
+    <div class="fi">
+      <label style="font-size:13px;font-weight:700;color:var(--se)">Select Your Name</label>
+      <select id="empSelect" onchange="loadEmpBonus()"
+        style="width:100%;padding:12px 14px;border:2px solid var(--bo);border-radius:10px;font-family:'Nunito',sans-serif;font-size:15px;outline:none;background:#fff">
+        <option value="">— Choose your name —</option>
+      </select>
+    </div>
+    <div style="font-size:11px;color:var(--mu);margin-top:6px;text-align:center" id="empWeekLabel"></div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div id="emp-empty" style="text-align:center;padding:60px 20px">
+    <div style="font-size:48px;margin-bottom:12px">💵</div>
+    <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:var(--se);margin-bottom:6px">Select your name above</div>
+    <div style="font-size:13px;color:var(--mu)">Your bonus breakdown for the current week will appear here</div>
+  </div>
+
+  <!-- BONUS CARD -->
+  <div id="emp-card" style="display:none;max-width:600px;margin:0 auto;padding:0 16px 40px" id="printEmpBonus">
+    <!-- HEADER -->
+    <div style="background:linear-gradient(135deg,var(--dk),var(--pr));border-radius:16px;padding:20px 24px;margin-bottom:16px;color:#fff">
+      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em">Edgelink Inc — Work Force Ops</div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;margin:4px 0" id="empName">—</div>
+      <div style="font-size:12px;opacity:.75" id="empInfo">—</div>
+      <div style="font-size:12px;opacity:.75;margin-top:2px" id="empWeekDisp">Week of —</div>
+    </div>
+
+    <!-- BREAKDOWN CARDS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="kc" style="border-left:4px solid var(--pr)">
+        <div class="kl">Box Bonus</div>
+        <div class="kv" id="empBx" style="color:var(--pr)">$—</div>
+        <div class="ks" id="empBxDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--se)">
+        <div class="kl">Accessory Bonus</div>
+        <div class="kv" id="empAc" style="color:var(--se)">$—</div>
+        <div class="ks" id="empAcDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid #00897B">
+        <div class="kl">Power Ups</div>
+        <div class="kv" id="empPu" style="color:#00897B">$—</div>
+        <div class="ks" id="empPuDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--ok)">
+        <div class="kl">MIM Spiff</div>
+        <div class="kv" id="empMim" style="color:var(--ok)">$—</div>
+        <div class="ks" id="empMimDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--ac)">
+        <div class="kl">Spiffs</div>
+        <div class="kv" id="empSp" style="color:var(--ac)">$—</div>
+        <div class="ks" id="empSpDetail">0 active</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--da)">
+        <div class="kl">Arcade (MIM paid)</div>
+        <div class="kv" id="empArc" style="color:var(--da)">-$—</div>
+        <div class="ks">coach-paid</div>
+      </div>
+    </div>
+
+    <!-- CHARGEBACKS -->
+    <div id="empCbSection" style="display:none;background:#FFEBEE;border:1px solid var(--da);border-radius:10px;padding:12px 16px;margin-bottom:14px">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--da);margin-bottom:8px">⚡ Chargebacks This Week</div>
+      <div id="empCbList"></div>
+    </div>
+
+    <!-- NET OWED -->
+    <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:14px;padding:18px 22px;color:#fff;text-align:center;margin-bottom:16px">
+      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Net Owed This Week</div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:36px" id="empNet">$—</div>
+      <div style="font-size:11px;opacity:.7;margin-top:4px">Gross $<span id="empGross">—</span> − Arcade $<span id="empArcAmt">—</span> − CB $<span id="empCbAmt">—</span></div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn bp" onclick="printEmpBonus()">🖨 Print My Bonus Slip</button>
+      <button class="btn bghost" onclick="document.getElementById('empSelect').value='';loadEmpBonus()">✕ Clear</button>
+    </div>
+
+    <!-- FINE PRINT -->
+    <div style="font-size:10px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.6">
+      Questions about your bonus? See your manager or coach.<br>
+      CONFIDENTIAL — Edgelink Inc Internal Use Only
+    </div>
+  </div>
+</div>
+
 </main></div>
 <div id="pf"></div>
 
@@ -1493,7 +2108,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   const mn=document.getElementById("mgrMonth");if(mn){const n=new Date();mn.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
   const cm=document.getElementById("coachMonth");if(cm){const n=new Date();cm.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
   loadCustomRoster();
+  initSidebar();
   updSheetStatus();
+  initHomePage();
   // Load current week data from storage
   if(wk) loadWeek(wk);
   // Build week history selector
@@ -1502,7 +2119,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const _n=new Date(),_mn=_n.getFullYear()+'-'+(String(_n.getMonth()+1).padStart(2,'0'));
   const csm=document.getElementById('coachSheetMonth');if(csm&&!csm.value)csm.value=_mn;
   const msm=document.getElementById('mgrSheetMonthIn');if(msm&&!msm.value)msm.value=_mn;
-  const last=sessionStorage.getItem("wfo_page")||"pg-reps";
+  const last=sessionStorage.getItem("wfo_page")||"pg-home";
   // Set initial body page class
   document.body.classList.add('page-'+last);
   goPage(last,document.querySelector('[data-page="'+last+'"]'));
@@ -1543,6 +2160,8 @@ function updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+
 function goPage(id,el){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".si").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".bn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(`.bn[data-page="${id}"]`).forEach(b=>b.classList.add("active"));
   // Set body page class for CSS targeting
   document.body.className=document.body.className.replace(/\bpage-\S+/g,'').trim();
   document.body.classList.add('page-'+id);
@@ -1553,8 +2172,11 @@ function goPage(id,el){
   if(id==="pg-leaderboard")renLB();
   if(id==="pg-summary")renSum();
   if(id==="pg-managers")renMgrOverview();
-  if(id==="pg-coaches"){renCoachOv();}
+  if(id==="pg-coaches"){renCoachOv();renCoachMim();}
+  if(id==="pg-home")initHomePage();
   if(id==="pg-roster")renRoster();
+  if(id==="pg-flyers"){renRepFlyer();}
+  if(id==="pg-employee"){initEmpView();}
   if(id==="pg-admin"){
     document.body.classList.add("admin-active");
     if(_pinUnlocked){document.getElementById("adminGate").style.display="none";document.getElementById("adminContent").style.display="block";initAdminCenter();}
@@ -1573,6 +2195,23 @@ function swSub(prefix,id,btn){
   if(id==="overview"&&prefix==="reps")renRepOv();
   if(id==="overview"&&prefix==="coach")renCoachOv();
   if(id==="calc"&&prefix==="coach")renCoachSheet();
+  if(id==="structure"&&prefix==="reps"){renRepFlyer();const el=document.getElementById('repFlyerInline');const src=document.getElementById('printRepFlyer');if(el&&src)el.innerHTML=src.outerHTML;}
+  if(id==="structure"&&prefix==="mgr"){
+    const el=document.getElementById('mgrFlyerInline');
+    if(el){
+      el.innerHTML=`<div style="margin-bottom:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="sub-tab active" id="mft-inline-1" onclick="swMgrInlineFlyer(1,this)">🥇 Tier 1</button>
+          <button class="sub-tab" id="mft-inline-2" onclick="swMgrInlineFlyer(2,this)">🥈 Tier 2</button>
+          <button class="sub-tab" id="mft-inline-3" onclick="swMgrInlineFlyer(3,this)">🥉 Tier 3</button>
+        </div>
+        <div id="mgrInlineFlyerContent"></div>
+      </div>`;
+      swMgrInlineFlyer(1, document.getElementById('mft-inline-1'));
+    }
+  }
+  if(id==="structure"&&prefix==="coach"){renCoachFlyer();const el=document.getElementById('coachFlyerInline');const src=document.getElementById('printCoachFlyer');if(el&&src)el.innerHTML=src.outerHTML;}
+  if(id==="mim"&&prefix==="coach")renCoachMim();
 }
 
 // ── WEEK ──
@@ -1718,6 +2357,41 @@ function renMimTables(){
 }
 
 // ── COACH OVERVIEW ──
+// Coach MIM
+function renCoachMim(){
+  const cb=document.getElementById('mim-coach-body');if(!cb)return;
+  const ct=T.coach||DT.coach;
+  const rate=ct.mimRate||10;
+  // Update rate display
+  const rd=document.getElementById('coachMimRateDisp');if(rd)rd.textContent=rate;
+  if(!COACHES.length){cb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--mu)">No coach data</td></tr>';return;}
+  cb.innerHTML=COACHES.map(coach=>{
+    const stores=SR.filter(s=>s.c===coach);
+    const coachReps=reps.filter(r=>r.c===coach);
+    const totalBans=coachReps.reduce((s,r)=>s+(r.mb||0),0);
+    const mimSpiff=totalBans*rate;
+    // Override field stored per coach
+    const ovKey='coachMimOv_'+coach.replace(/\s+/g,'_');
+    const override=+localStorage.getItem(ovKey)||0;
+    const final=override||mimSpiff;
+    const hasOv=override>0&&override!==mimSpiff;
+    return`<tr>
+      <td style="font-weight:700;color:var(--se)">${coach}</td>
+      <td style="font-size:11px;color:var(--mu)">${stores.length} stores</td>
+      <td style="text-align:center;font-weight:700;font-size:16px">${totalBans}</td>
+      <td style="text-align:center">$${rate}/BAN</td>
+      <td style="font-weight:700;color:var(--ok)">$${mimSpiff.toFixed(2)}</td>
+      <td style="padding:4px 8px">
+        <input type="number" value="${override||''}" placeholder="Override $" min="0" step="0.01"
+          style="width:100px;padding:5px 8px;border:2px solid ${hasOv?'var(--wa)':'var(--bo)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none"
+          onchange="requirePin(()=>{localStorage.setItem('coachMimOv_'+\`${coach.replace(/\s+/g,'_')}\`,this.value||0);renCoachMim();})"
+          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${hasOv?'var(--wa)':'var(--bo)'}'"/>
+        ${hasOv?`<div style="font-size:9px;color:var(--wa)">⚠ Overridden</div>`:''}
+      </td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${final.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+}
 function renCoachOv(){
   const body=document.getElementById('coach-ov-body');if(!body)return;
   const srBs=getSR_BS();
@@ -2801,6 +3475,12 @@ function renMgrSheet(){
     if(bonus===0&&hasData)zeroCount++;
     const tierMax=cats.reduce((s,c)=>s+(c[uKey]||0),0);
     if(bonus>=tierMax&&tierMax>0)maxCount++;
+    // ── GUARANTEE CHECK ──
+    const guarPayout=getStoreMgrGuaranteePayout(store.s);
+    const guarStatus=getMgrGuaranteeStatus(store.s);
+    const isGuar=guarPayout>0;
+    const earnedBonus=bonus;
+    if(isGuar){bonus=guarPayout;hasData=true;}
     totalPool+=bonus;
     const rowBg=si%2===0?'#fff':'#FAFAFA';
     return`<tr style="border-bottom:1px solid var(--bo);background:${rowBg}">
@@ -2819,8 +3499,11 @@ function renMgrSheet(){
           ${tgt?`<div style="font-size:8px;color:var(--mu);margin-top:1px">tgt: ${tgt}</div>`:''}
         </td>`;
       }).join('')}
-      <td style="padding:5px 10px;text-align:center;background:${bonus>0?'#F0FBF4':'#FFF5F5'}"><strong style="font-family:'Poppins',sans-serif;font-size:13px;color:${bonus>0?'var(--ok)':'var(--mu)'}">$${bonus.toFixed(2)}</strong></td>
-      <td style="padding:5px 8px;text-align:center">${elbFail?`<span class="bdg bfl">ELB DQ</span>`:attachFail?`<span class="bdg bwa">Attach Pen</span>`:bonus>0?`<span class="bdg bok2">✓</span>`:`<span class="bdg bno">${hasData?'$0':'—'}</span>`}</td>
+      <td style="padding:5px 10px;text-align:center;background:${bonus>0?'#F0FBF4':'#FFF5F5'}"><strong style="font-family:'Poppins',sans-serif;font-size:13px;color:${isGuar?'var(--pr)':bonus>0?'var(--ok)':'var(--mu)'}">$${bonus.toFixed(2)}</strong>
+        ${isGuar?`<div style="font-size:9px;font-weight:700;color:var(--pr)">🛡 GUARANTEED</div><div style="font-size:9px;color:var(--mu)">Earned: $${earnedBonus.toFixed(2)}</div>`:''}
+        ${isGuar&&guarStatus.expiry?`<div style="font-size:9px;color:var(--mu)">Until ${guarStatus.expiry}</div>`:''}
+        </td>
+      <td style="padding:5px 8px;text-align:center">${isGuar?`<span class="bdg" style="background:var(--pr);color:#fff;font-size:9px">🛡 Guar</span>`:elbFail?`<span class="bdg bfl">ELB DQ</span>`:attachFail?`<span class="bdg bwa">Attach Pen</span>`:bonus>0?`<span class="bdg bok2">✓</span>`:`<span class="bdg bno">${hasData?'$0':'—'}</span>`}</td>
     </tr>`;
   }).join('');
 
@@ -2990,6 +3673,8 @@ function renCoachSheet(){
   u('cSheetKick','$'+totalKick.toFixed(2));
 }
 function setCoachSheet(coach,field,val){
+  if(!_pinUnlocked){tst2('Enter PIN in Admin Center to edit.','wn');return;}
+  if(wkLocked){tst2('Period is locked.','wn');return;}
   if(!coachSheetData[coach])coachSheetData[coach]={};
   coachSheetData[coach][field]=val;
   clearTimeout(window._coachSheetTimer);
@@ -3007,7 +3692,7 @@ function saveCoachSheet(){
     const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
     const mimSpiff=mimBans*ct.mimRate;
     const doors=+sd.doors||stores.length;
-    const actPct=+sd.actPct||0,accPerBox=+sd.accPerBox||0,shrinkPct=+sd.shrinkPct||0,elbPctile=+sd.elbPctile||0,totalBoxes=+sd.totalBoxes||0;
+    const actPct=+sd.actPct||0,accTotal=+sd.accTotal||0,totalBoxes=+sd.totalBoxes||0,accPerBox=totalBoxes>0?(accTotal/totalBoxes):0,shrinkPct=+sd.shrinkPct||0,elbRank=+sd.elbRank||0;
     const elbBottom40=elbPctile>60;
     let actBonus=0,accBonus=0,kicker=0;const guardrails=[];
     if(actPct>=100){let rate=actPct>=125?ct.at125:actPct>=115?ct.at115:ct.at100;if(elbBottom40){rate*=(1-ct.atPen/100);guardrails.push('ELB −'+ct.atPen+'%');}actBonus=rate*doors;}
@@ -3265,6 +3950,13 @@ function adminPinSubmit(){
 function updAdminPinDots(){
   for(let i=0;i<4;i++){const d=document.getElementById('apd'+i);if(d)d.className='pin-dot'+(_adminPinEntry.length>i?' filled':'');}
 }
+function toggleMobileMenu(){
+  const m=document.getElementById('mobileMore');
+  if(!m)return;
+  m.classList.toggle('open');
+  m.style.display=m.classList.contains('open')?'flex':'none';
+}
+
 function adminLockOut(){
   _pinUnlocked=false;
   document.getElementById('adminGate').style.display='flex';
@@ -3767,13 +4459,15 @@ function expStoreRoster(){
 
 function calcStoreCoachBonus(storeName, sd){
   const ct=T.coach||DT.coach;
-  const elbBottom40=(+sd.elbPctile||0)>60;
+  const elbRank=+sd.elbRank||0;
+  const elbBottom40=elbRank>0&&elbRank>=3368;
   let actBonus=0, accBonus=0;
   const guardrails=[];
   const actPct=+sd.actPct||0;
-  const accPerBox=+sd.accPerBox||0;
-  const shrinkPct=+sd.shrinkPct||0;
   const totalBoxes=+sd.totalBoxes||0;
+  const accTotal=+sd.accTotal||0;
+  const accPerBox=totalBoxes>0?(accTotal/totalBoxes):0;
+  const shrinkPct=+sd.shrinkPct||0;
 
   // ACTIVATION — 1 door per store, 0 if under 100%
   if(actPct>=100){
@@ -3799,7 +4493,7 @@ function calcStoreCoachBonus(storeName, sd){
     accBonus=accRate*totalBoxes*shrinkMult;
   }
 
-  return{actBonus,accBonus,total:actBonus+accBonus,guardrails,actPct,accPerBox,shrinkPct};
+  return{actBonus,accBonus,total:actBonus+accBonus,guardrails,actPct,accPerBox,shrinkPct,elbRank};
 }
 
 function renCoachSheet(){
@@ -3863,10 +4557,10 @@ function renCoachSheet(){
             <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Tier</th>
             <th style="padding:6px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Manager</th>
             <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Act % ✎</th>
-            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Acc/Box $ ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Acc Total $ ✎</th>
             <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Shrink % ✎</th>
-            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">ELB Pctile ✎</th>
-            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Boxes ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">ELB Rank ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Total Acts ✎</th>
             <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#E8F5E9">Act $</th>
             <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#E8F5E9">Acc $</th>
             <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:#fff;text-transform:uppercase;border-bottom:2px solid var(--pr);background:var(--dk)">Store Total</th>
@@ -3883,27 +4577,22 @@ function renCoachSheet(){
               <td style="padding:5px 8px;text-align:center"><span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span></td>
               <td style="padding:5px 10px;font-size:10px;color:var(--mu);white-space:nowrap">${X(storeMgr==='TBD'?'—':storeMgr)}</td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                ${disabled?`<strong style="color:${res.actPct>=100?'var(--ok)':'var(--da)'}">${sd.actPct||'—'}${sd.actPct?'%':''}</strong>`:
-                `<input type="number" value="${sd.actPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.actPct>=100?'#F0FBF4':+sd.actPct>0?'#FFF5F5':'#fff'}" onchange="setCoachSheet('${store.s}','actPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+                <input type="number"  value="${sd.actPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.actPct>=100?'#F0FBF4':+sd.actPct>0?'#FFF5F5':'#fff'}" onchange="setCoachSheet('${store.s}','actPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                ${disabled?`<strong>${sd.accPerBox||'—'}${sd.accPerBox?'$':''}</strong>`:
-                `<input type="number" value="${sd.accPerBox||''}" placeholder="$" min="0" step="0.01" style="${inpStyle}" onchange="setCoachSheet('${store.s}','accPerBox',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+                <input type="number"  value="${sd.accTotal||''}" placeholder="Acc $ Total" min="0" step="0.01" style="${inpStyle}" onchange="setCoachSheet('${store.s}','accTotal',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                ${disabled?`<strong style="color:${+sd.shrinkPct>5?'var(--da)':+sd.shrinkPct>2?'var(--wa)':'var(--ok)'}">${sd.shrinkPct||'—'}${sd.shrinkPct?'%':''}</strong>`:
-                `<input type="number" value="${sd.shrinkPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.shrinkPct>5?'#FFEBEE':+sd.shrinkPct>2?'#FFF8E1':'#fff'}" onchange="setCoachSheet('${store.s}','shrinkPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+                <input type="number"  value="${sd.shrinkPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.shrinkPct>5?'#FFEBEE':+sd.shrinkPct>2?'#FFF8E1':'#fff'}" onchange="setCoachSheet('${store.s}','shrinkPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                ${disabled?`<strong>${sd.elbPctile||'—'}${sd.elbPctile?'%':''}</strong>`:
-                `<input type="number" value="${sd.elbPctile||''}" placeholder="%" min="0" max="100" step="0.1" style="${inpStyle};background:${+sd.elbPctile>60?'#FFF8E1':'#fff'}" onchange="setCoachSheet('${store.s}','elbPctile',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+                <input type="number"  value="${sd.elbRank||''}" placeholder="ELB Rank" min="1" style="${inpStyle};background:${+sd.elbRank>=3368?'#FFEBEE':'#fff'}" onchange="setCoachSheet('${store.s}','elbRank',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                ${disabled?`<strong>${sd.totalBoxes||'—'}</strong>`:
-                `<input type="number" value="${sd.totalBoxes||''}" placeholder="0" min="0" style="${inpStyle}" onchange="setCoachSheet('${store.s}','totalBoxes',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+                <input type="number"  value="${sd.totalBoxes||''}" placeholder="0" min="0" style="${inpStyle}" onchange="setCoachSheet('${store.s}','totalBoxes',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
               </td>
               <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--ok)">$${res.actBonus.toFixed(2)}</strong>${res.actPct>0&&res.actPct<100?`<div style="font-size:8px;color:var(--da)">Under 100%</div>`:''}</td>
-              <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--se)">$${res.accBonus.toFixed(2)}</strong></td>
+              <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--se)">$${res.accBonus.toFixed(2)}</strong><div style="font-size:8px;color:var(--mu)">${res.accPerBox>0?'$'+res.accPerBox.toFixed(2)+'/box':''}</div></td>
               <td style="padding:5px 10px;text-align:center;background:#F3E8FF"><strong style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${res.total.toFixed(2)}</strong></td>
               <td style="padding:5px 8px;text-align:center">${res.guardrails.length?res.guardrails.map(g=>`<span class="bdg bfl" style="font-size:8px;display:block;margin:1px 0">${g}</span>`).join(''):'<span class="bdg bok2" style="font-size:8px">✓</span>'}</td>
             </tr>`;
@@ -3964,7 +4653,7 @@ function expCoachSheet(){
     stores.forEach(store=>{
       const sd=coachSheetData[store.s]||{};
       const res=calcStoreCoachBonus(store.s,sd);
-      rows.push([coach,store.s,store.me,srBs[store.s]?.mgr||store.mgr,sd.actPct||'',sd.accPerBox||'',sd.shrinkPct||'',sd.elbPctile||'',sd.totalBoxes||'',res.actBonus.toFixed(2),res.accBonus.toFixed(2),res.total.toFixed(2),res.guardrails.join('; ')]);
+      rows.push([coach,store.s,store.me,srBs[store.s]?.mgr||store.mgr,sd.actPct||'',sd.accTotal||'',res.accPerBox>0?res.accPerBox.toFixed(2):'',sd.shrinkPct||'',sd.elbRank||'',sd.totalBoxes||'',res.actBonus.toFixed(2),res.accBonus.toFixed(2),res.total.toFixed(2),res.guardrails.join('; ')]);
     });
   });
   dlC([hd,...rows],'WFO_CoachActuals_'+mn+'.csv');tst2('Exported.','ok');
@@ -4638,6 +5327,684 @@ function renCBL(){
   upK();
 }
 
+// ══════════════════════════════════════════════════════
+// COLLAPSIBLE SIDEBAR
+// ══════════════════════════════════════════════════════
+function toggleHomeSection(contentId, arrowId){
+  const el=document.getElementById(contentId);
+  const ar=document.getElementById(arrowId);
+  if(!el)return;
+  const collapsed=el.style.display==='none';
+  el.style.display=collapsed?'block':'none';
+  if(ar)ar.textContent=collapsed?'▾':'▸';
+}
+
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  sb.classList.toggle('collapsed');
+  localStorage.setItem('wfo_sb_collapsed',sb.classList.contains('collapsed')?'1':'0');
+}
+function toggleSG(id){
+  const el=document.getElementById(id);
+  const arrow=document.getElementById(id+'-arrow');
+  if(!el)return;
+  el.classList.toggle('closed');
+  if(arrow)arrow.classList.toggle('closed');
+  // Save state
+  const state=JSON.parse(localStorage.getItem('wfo_sg_state')||'{}');
+  state[id]=el.classList.contains('closed');
+  localStorage.setItem('wfo_sg_state',JSON.stringify(state));
+}
+function checkSidebarMobile(){
+  const sb=document.getElementById('sidebar');
+  const bn=document.getElementById('bnav');
+  if(!sb)return;
+  const w=window.innerWidth||document.documentElement.clientWidth;
+  if(w<=900){
+    sb.style.display='none';
+    sb.style.width='0';
+    if(bn)bn.style.display='flex';
+  } else {
+    sb.style.display='';
+    sb.style.width='';
+    if(bn)bn.style.display='none';
+  }
+}
+
+function initSidebar(){
+  checkSidebarMobile();
+  window.addEventListener('resize',checkSidebarMobile);
+  // Restore collapsed state
+  if(localStorage.getItem('wfo_sb_collapsed')==='1'){
+    document.getElementById('sidebar')?.classList.add('collapsed');
+  }
+  // Restore group states
+  const state=JSON.parse(localStorage.getItem('wfo_sg_state')||'{}');
+  Object.entries(state).forEach(([id,closed])=>{
+    if(closed){
+      document.getElementById(id)?.classList.add('closed');
+      document.getElementById(id+'-arrow')?.classList.add('closed');
+    }
+  });
+  // Add tooltips to sidebar items for collapsed mode
+  document.querySelectorAll('.si').forEach(si=>{
+    const label=si.querySelector('.si-label');
+    if(label)si.setAttribute('data-tooltip',label.textContent.trim());
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// BONUS STRUCTURE FLYERS
+// ══════════════════════════════════════════════════════
+function swFlyer(tab,btn){
+  document.querySelectorAll('.flyer-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sub-tab[id^="ft-"]').forEach(b=>b.classList.remove('active'));
+  const pane=document.getElementById('flyer-'+tab);
+  if(pane)pane.classList.add('active');
+  const tabBtn=btn||document.getElementById('ft-'+tab);
+  if(tabBtn)tabBtn.classList.add('active');
+  // Render the selected flyer
+  if(tab==='rep')renRepFlyer();
+  if(tab==='coach')renCoachFlyer();
+  if(tab==='mgr')renMgrFlyer();
+  // Update sidebar active state
+  document.querySelectorAll('.si[data-tab]').forEach(si=>{
+    si.classList.toggle('active',si.dataset.tab===tab&&si.dataset.page==='pg-flyers');
+  });
+}
+
+function renRepFlyer(){
+  const n=new Date();
+  const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  ['repFlyerDate','flyerEffDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='Effective '+mo;});
+
+  // Box tiers
+  const bxEl=document.getElementById('repBoxTiers');
+  if(bxEl)bxEl.innerHTML=T.box.map((t,i)=>{
+    const isTop=i===T.box.length-1;
+    const range=isTop?t.mn+'+':(t.mn+' – '+t.mx)+' activations';
+    return`<div class="flyer-tier ${isTop?'flyer-tier-top':''}">
+      <div class="ft-range">${range}</div>
+      <div class="ft-rate"><span class="ft-dollar">$${t.r}</span><span class="ft-unit">/activation</span></div>
+      ${isTop?'<div class="ft-badge">⭐ TOP EARNER</div>':''}
+    </div>`;
+  }).join('');
+
+  // Acc tiers
+  const acEl=document.getElementById('repAccTiers');
+  if(acEl)acEl.innerHTML=T.acc.map((t,i)=>{
+    const isTop=i===T.acc.length-1;
+    const range=isTop?'$'+t.mp.toLocaleString()+'+':'$'+t.mp.toLocaleString()+' – $'+(t.xp||'').toLocaleString();
+    const example=Math.round((t.mp+(t.xp?t.xp:t.mp*1.5))/2);
+    return`<div class="flyer-tier ${isTop?'flyer-tier-top':''}">
+      <div class="ft-range">${range} net profit</div>
+      <div class="ft-rate"><span class="ft-dollar">${t.p}%</span><span class="ft-unit">of net profit</span></div>
+      <div class="ft-example">e.g. $${example.toLocaleString()} net = $${(example*t.p/100).toFixed(0)} payout</div>
+    </div>`;
+  }).join('');
+
+  // Power ups
+  const puEl=document.getElementById('repPowerUps');
+  if(puEl)puEl.innerHTML=`
+    <div class="flyer-pu"><span class="pu-ic">💳</span><div><div class="pu-name">Affirm Sale</div><div class="pu-detail">+$${T.af} per sale — stacks on Box + Accessory bonus</div></div><div class="pu-amt">+$${T.af}</div></div>
+    <div class="flyer-pu"><span class="pu-ic">📶</span><div><div class="pu-name">WiFi / Home Internet Unit</div><div class="pu-detail">+$${T.hs} per unit — stacks on Box + Accessory bonus</div></div><div class="pu-amt">+$${T.hs}</div></div>`;
+
+  // MIM
+  const mimEl=document.getElementById('repMimTiers');
+  if(mimEl){
+    const labels=['1st account','2nd line','3rd line','4th line','5th line','6th line'];
+    const cumulative=T.mi.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
+    mimEl.innerHTML=`<div class="flyer-mim-grid">`+T.mi.map((v,i)=>`
+      <div class="flyer-mim-row">
+        <div class="fm-label">${labels[i]}</div>
+        <div class="fm-add">+$${v}</div>
+        <div class="fm-total">Total: $${cumulative[i]}</div>
+      </div>`).join('')+`</div>`;
+  }
+}
+
+function renCoachFlyer(){
+  const ct=T.coach||DT.coach;
+  const n=new Date();
+  const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const el=document.getElementById('coachFlyerDate');if(el)el.textContent='Effective '+mo;
+
+  // Activation tiers
+  const actEl=document.getElementById('coachActTiers');
+  if(actEl)actEl.innerHTML=[
+    {range:'100% – 114% to goal',rate:ct.at100,label:''},
+    {range:'115% – 124% to goal',rate:ct.at115,label:''},
+    {range:'125%+ to goal',rate:ct.at125,label:'⭐ TOP'},
+  ].map(t=>`<div class="flyer-tier ${t.label?'flyer-tier-top':''}">
+    <div class="ft-range">${t.range}</div>
+    <div class="ft-rate"><span class="ft-dollar">$${t.rate}</span><span class="ft-unit">/door</span></div>
+    ${t.label?`<div class="ft-badge">${t.label}</div>`:''}
+  </div>`).join('');
+
+  // Acc tiers
+  const accEl=document.getElementById('coachAccTiers');
+  if(accEl)accEl.innerHTML=[
+    {range:'$50 – $59.99/box',rate:ct.ac50},
+    {range:'$60 – $69.99/box',rate:ct.ac60},
+    {range:'$70+/box',rate:ct.ac70},
+  ].map((t,i)=>`<div class="flyer-tier ${i===2?'flyer-tier-top':''}">
+    <div class="ft-range">${t.range}</div>
+    <div class="ft-rate"><span class="ft-dollar">$${t.rate}</span><span class="ft-unit">/box</span></div>
+  </div>`).join('');
+
+  // Guardrails
+  const grEl=document.getElementById('coachGuardrails');
+  if(grEl)grEl.innerHTML=`
+    <div class="flyer-guard"><span class="fg-ic">📉</span><div><strong>ELB Bottom 40% (Rank ≥ 3,368)</strong><div>Activation −${ct.atPen}% · Accessory drops ${ct.acElbDrop} tier</div></div></div>
+    <div class="flyer-guard"><span class="fg-ic">📦</span><div><strong>Shrink 2.1% – 3%</strong><div>Accessory −${ct.sh1}%</div></div></div>
+    <div class="flyer-guard"><span class="fg-ic">📦</span><div><strong>Shrink 3.1% – 5%</strong><div>Accessory −${ct.sh2}%</div></div></div>
+    <div class="flyer-guard flyer-guard-red"><span class="fg-ic">🚫</span><div><strong>Shrink &gt; 5%</strong><div>Accessory bonus = $0</div></div></div>`;
+
+  // Kickers
+  const kkEl=document.getElementById('coachKickers');
+  if(kkEl)kkEl.innerHTML=`
+    <div class="flyer-tier"><div class="ft-range">Company Acc ≥ $300,000</div><div class="ft-rate"><span class="ft-dollar">$${ct.kick1}</span><span class="ft-unit">bonus</span></div></div>
+    <div class="flyer-tier flyer-tier-top"><div class="ft-range">Company Acc ≥ $350,000</div><div class="ft-rate"><span class="ft-dollar">$${ct.kick2}</span><span class="ft-unit">bonus</span></div></div>`;
+
+  // MIM
+  const mimEl=document.getElementById('coachMimFlyer');
+  if(mimEl)mimEl.innerHTML=`<div class="flyer-tier flyer-tier-top"><div class="ft-range">Per MM BAN (account)</div><div class="ft-rate"><span class="ft-dollar">$${ct.mimRate}</span><span class="ft-unit">/BAN — stacks on everything</span></div></div>`;
+}
+
+function renMgrFlyer(){
+  swMgrTierFlyer(1, document.getElementById('mft-1'));
+}
+
+function swMgrInlineFlyer(tier, btn){
+  // Update inline sub-tab active states
+  [1,2,3].forEach(t=>{
+    const b=document.getElementById('mft-inline-'+t);
+    if(b)b.classList.toggle('active',t===tier);
+  });
+  const wrap=document.getElementById('mgrInlineFlyerContent');
+  if(!wrap){swMgrTierFlyer(tier,btn);return;}
+  // Temporarily point mgrTierFlyerWrap to inline target
+  const orig=document.getElementById('mgrTierFlyerWrap');
+  if(orig){
+    const origParent=orig.parentNode;
+    const origNext=orig.nextSibling;
+    // Render into inline div
+    swMgrTierFlyer(tier,btn);
+    wrap.innerHTML=orig.innerHTML;
+  }
+}
+
+function swMgrTierFlyer(tier, btn){
+  // Update sub-tab active state
+  [1,2,3].forEach(t=>{
+    const b=document.getElementById('mft-'+t);
+    if(b)b.classList.toggle('active',t===tier);
+  });
+  const wrap=document.getElementById('mgrTierFlyerWrap');
+  if(!wrap)return;
+
+  const mgr=T.mgr||DT.mgr;
+  const cats={acts:'New Voice Activations',hsi:'HSI / Home Internet',bts:'Tablet (BTS) Sales',acc:'Accessories Target'};
+  const tierLabels={1:'Tier 1 — High Volume',2:'Tier 2 — 2ME',3:'Tier 3 — 1ME'};
+  const tierColors={1:'#00A651',2:'#6E2B8B',3:'#E20074'};
+  const tierEmojis={1:'🥇',2:'🥈',3:'🥉'};
+  const n=new Date();
+  const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const bs=typeof getOrCreateBs==='function'?getOrCreateBs(n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'))):null;
+  const elbCut=bs?.qualifiers?.elbCutoff||3368;
+  const attachCut=bs?.qualifiers?.attachCutoff||60;
+  const attachPen=bs?.qualifiers?.attachPenalty||25;
+  const td=mgr[tier]||DT.mgr[tier];
+
+  wrap.innerHTML=`<div class="flyer-card" id="printMgrFlyer">
+    <div class="flyer-hdr" style="background:linear-gradient(135deg,#1A1A2E,${tierColors[tier]})">
+      <div>
+        <div class="flyer-co">EDGELINK INC</div>
+        <div class="flyer-title">${tierEmojis[tier]} ${tierLabels[tier]}</div>
+        <div class="flyer-sub">Manager Bonus Structure · Effective ${mo}</div>
+      </div>
+      <div class="flyer-badge" style="background:rgba(255,255,255,.2)">🏢 MANAGER</div>
+    </div>
+    <div class="flyer-body">
+      <div class="flyer-note">Monthly bonus. $0 per category if under 100% of goal. Upside unlocks at 125%+.</div>
+    <div style="background:#FFF0F7;border-left:4px solid var(--pr);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:14px">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--pr);margin-bottom:3px">🛡 New Manager Guarantee</div>
+      <div style="font-size:11px;color:var(--se)">New managers receive guaranteed base payout for <strong>months 1 and 2</strong> of their tenure — regardless of performance. Guarantee = full tier base max. Set in Admin → Store Roster.</div>
+    </div>
+
+      <!-- PAYOUT CATEGORIES -->
+      <div class="flyer-section">
+        <div class="flyer-sec-hdr" style="color:${tierColors[tier]}">💰 Payout by Category</div>
+        <div class="flyer-sec-sub">Hit 100% = Base payout · Hit 125%+ = Upside payout · Under 100% = $0</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px">
+          ${Object.entries(cats).map(([key,name])=>`
+          <div style="background:#F8F8F8;border:2px solid ${tierColors[tier]}22;border-radius:12px;padding:14px;text-align:center;position:relative;overflow:hidden">
+            <div style="font-size:11px;color:var(--mu);margin-bottom:8px;font-weight:600">${name}</div>
+            <div style="display:flex;justify-content:center;gap:16px;align-items:center">
+              <div>
+                <div style="font-size:9px;color:var(--mu);text-transform:uppercase;font-weight:700">Base (100%)</div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:${tierColors[tier]}">$${td.cats[key]?.base||0}</div>
+              </div>
+              <div style="width:1px;height:36px;background:var(--bo)"></div>
+              <div>
+                <div style="font-size:9px;color:var(--ok);text-transform:uppercase;font-weight:700">Upside (125%+)</div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--ok)">$${td.cats[key]?.up||0}</div>
+              </div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- TOTALS -->
+      <div class="flyer-section">
+        <div class="flyer-sec-hdr" style="color:${tierColors[tier]}">🏆 Total Potential</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:linear-gradient(135deg,${tierColors[tier]}22,${tierColors[tier]}11);border:2px solid ${tierColors[tier]};border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:11px;color:${tierColors[tier]};font-weight:700;text-transform:uppercase;margin-bottom:6px">Max at 100%</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:30px;color:${tierColors[tier]}">$${td.baseMax||Object.values(td.cats).reduce((s,c)=>s+(c.base||0),0)}</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:4px">All categories at 100%+</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#E8F5E911,#E8F5E922);border:2px solid var(--ok);border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:11px;color:var(--ok);font-weight:700;text-transform:uppercase;margin-bottom:6px">Max at 125%+</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:30px;color:var(--ok)">$${td.upMax||Object.values(td.cats).reduce((s,c)=>s+(c.up||0),0)}</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:4px">All categories at 125%+</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUALIFYING RULES -->
+      <div class="flyer-section">
+        <div class="flyer-sec-hdr">⚠️ Qualifying Rules — Apply to All Tiers</div>
+        <div class="flyer-guard flyer-guard-red">
+          <span class="fg-ic">🚫</span>
+          <div><strong>ELB Rank ≥ ${elbCut.toLocaleString()} (Bottom 40%)</strong><div>Store-wide bonus = $0 for the month</div></div>
+        </div>
+        <div class="flyer-guard">
+          <span class="fg-ic">🛡️</span>
+          <div><strong>Metro Protection Attach &lt; ${attachCut}%</strong><div>All category payouts reduced by ${attachPen}%</div></div>
+        </div>
+        <div class="flyer-guard">
+          <span class="fg-ic">📊</span>
+          <div><strong>Each Category is Independent</strong><div>Missing one category doesn't affect others — but that category pays $0 if under 100%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${mo}</div>
+  </div>`;
+}
+
+function printFlyer(){
+  const active=document.querySelector('.flyer-pane.active');
+  if(!active){tst2('No flyer selected.','er');return;}
+  window.print();
+}
+function printAllFlyers(){
+  // Switch to each, print, come back
+  ['rep','coach','mgr'].forEach((tab,i)=>setTimeout(()=>{swFlyer(tab);window.print();},i*500));
+}
+
+// ══════════════════════════════════════════════════════
+// EMPLOYEE BONUS VIEW
+// ══════════════════════════════════════════════════════
+function initEmpView(){
+  const sel=document.getElementById('empSelect');if(!sel)return;
+  sel.innerHTML='<option value="">— Choose your name —</option>';
+  const sorted=[...reps].sort((a,b)=>(dispName(a)).localeCompare(dispName(b)));
+  sorted.forEach(r=>{
+    const opt=document.createElement('option');
+    opt.value=r.ri||r.n;
+    opt.textContent=dispName(r)+(r.s?' ('+r.s+')':'');
+    sel.appendChild(opt);
+  });
+  // Week label
+  const wl=document.getElementById('empWeekLabel');
+  if(wl)wl.textContent='Week of '+(document.getElementById('wkb')?.textContent||'—');
+}
+
+function loadEmpBonus(){
+  const sel=document.getElementById('empSelect');
+  const val=sel?.value;
+  const empCard=document.getElementById('emp-card');
+  const empEmpty=document.getElementById('emp-empty');
+  if(!val){
+    if(empCard)empCard.style.display='none';
+    if(empEmpty)empEmpty.style.display='block';
+    return;
+  }
+  const r=reps.find(x=>(x.ri||x.n)===val);
+  if(!r){tst2('Rep not found in this week\'s data.','wn');return;}
+
+  const c=cRp(r);
+  const arc=arcT(r);
+  const cbTotal=CBs.filter(cb=>cb.rp===r.n||cb.rp===r.ri).reduce((s,cb)=>s+cb.a,0);
+  const net=c.gr-arc-cbTotal;
+  const spTotal=c.sp?.tot||0;
+
+  // Show card
+  if(empCard)empCard.style.display='block';
+  if(empEmpty)empEmpty.style.display='none';
+
+  // Populate
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const bxTier=bBd(r.ta||0);
+  const acTier=aBd(r.ap||0);
+
+  s('empName',dispName(r));
+  s('empInfo',(r.s||'No Store')+' · '+(r.c||'No Coach'));
+  s('empWeekDisp','Week of '+(document.getElementById('wkb')?.textContent||'—'));
+  s('empBx','$'+c.bx.toFixed(2));
+  s('empBxDetail',(r.ta||0)+' PPD · '+bxTier.l+' tier · $'+bxTier.r+'/act');
+  s('empAc','$'+c.ac.toFixed(2));
+  s('empAcDetail','$'+(r.ap||0).toFixed(2)+' net · '+acTier.l+' · '+acTier.p+'%');
+  s('empPu','$'+c.pu.t.toFixed(2));
+  s('empPuDetail',(r.af||0)+' Affirm ($'+(c.pu.a||0).toFixed(0)+') · '+(r.hs||0)+' HSI ($'+(c.pu.h||0).toFixed(0)+')');
+  s('empMim','$'+c.mi.p.toFixed(2));
+  const mimQual=r.mb>=6;
+  s('empMimDetail',(r.mb||0)+' BANs · '+(r.ml||0)+' lines'+(mimQual?'':' ⚠ Need 6 BANs'));
+  s('empSp','$'+spTotal.toFixed(2));
+  s('empSpDetail',c.sp?.list?.length?c.sp.list.map(sp=>sp.nm).join(', '):'No active spiffs');
+  s('empArc','-$'+arc.toFixed(2));
+  s('empNet','$'+net.toFixed(2));
+  s('empGross',c.gr.toFixed(2));
+  s('empArcAmt',arc.toFixed(2));
+  s('empCbAmt',cbTotal.toFixed(2));
+
+  // Chargebacks
+  const myCBs=CBs.filter(cb=>cb.rp===r.n||cb.rp===r.ri);
+  const cbSection=document.getElementById('empCbSection');
+  const cbList=document.getElementById('empCbList');
+  if(cbSection)cbSection.style.display=myCBs.length?'block':'none';
+  if(cbList)cbList.innerHTML=myCBs.map(cb=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(211,47,47,.2);font-size:12px">
+    <span>${cb.tp}${cb.rf?' — '+cb.rf:''}</span>
+    <strong style="color:var(--da)">-$${cb.a.toFixed(2)}</strong>
+  </div>`).join('');
+}
+
+function printEmpBonus(){
+  window.print();
+}
+
+// ══════════════════════════════════════════════════════
+// HOME PAGE
+// ══════════════════════════════════════════════════════
+
+function initHomePage(){
+  // Date/time
+  const el=document.getElementById('homeDateTime');
+  if(el){
+    const n=new Date();
+    el.textContent=n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+' · '+n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  }
+  // Week
+  const wk=document.getElementById('homeWeek');
+  const wkb=document.getElementById('wkb');
+  if(wk&&wkb)wk.textContent=wkb.textContent||'—';
+  // Lock status
+  const ls=document.getElementById('homeLockStatus');
+  const lb=document.getElementById('homeLockBadge');
+  if(ls){ls.textContent=wkLocked?'Locked — Paid':'Unlocked — Open';}
+  if(lb){lb.style.background=wkLocked?'rgba(0,166,81,.25)':'rgba(226,0,116,.2)';lb.style.borderColor=wkLocked?'rgba(0,166,81,.5)':'rgba(226,0,116,.4)';}
+  refreshHomeStatus();
+  renAnnouncements();
+  renImportantDates();
+  renContacts();
+  renPendingActions();
+}
+
+function refreshHomeStatus(){
+  const el=document.getElementById('homeStatusList');if(!el)return;
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  const unassigned=reps.filter(r=>!r.s).length;
+  const newReps=Object.values(REP_ROSTER).filter(r=>r.isNew).length;
+  const cbQueue=getCBQueue?.().filter(c=>!c.appliedTo).length||0;
+  const weekIdx=getWeekIndex?.()?.length||0;
+  const items=[
+    {icon:'👤',label:'Reps loaded this week',val:reps.length||'None',ok:reps.length>0,action:reps.length?null:'Upload RTPOS CSV'},
+    {icon:'🏪',label:'Unassigned reps',val:unassigned||'All assigned',ok:unassigned===0,action:unassigned?'Go to Store Assignments':null},
+    {icon:'🆕',label:'New reps pending assignment',val:newReps||'None',ok:newReps===0,action:newReps?'Go to Rep Roster':null},
+    {icon:'⚡',label:'Chargebacks in queue',val:cbQueue||'None pending',ok:cbQueue===0,action:cbQueue?'Go to Chargebacks':null},
+    {icon:'📋',label:'Weeks in history',val:weekIdx,ok:true,action:null},
+    {icon:'🔒',label:'Current week',val:wkLocked?'Locked & Paid':'Open — not paid',ok:!wkLocked,action:null},
+  ];
+  el.innerHTML=items.map(item=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bo)">
+      <span style="font-size:18px;flex-shrink:0">${item.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--mu)">${item.label}</div>
+        <div style="font-size:13px;font-weight:700;color:${item.ok?'var(--se)':'var(--wa)'}">${item.val}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${item.action?`<button class="btn bghost sm" style="font-size:10px;white-space:nowrap" onclick="${item.action.includes('CSV')?'goPage(\'pg-reps\',document.querySelector(\'[data-page="pg-reps"]\'))':item.action.includes('Assignments')?'goPage(\'pg-admin\',document.querySelector(\'[data-page="pg-admin"]\'));setTimeout(()=>swAdmin(\'assignments\',null),300)':item.action.includes('Roster')?'goPage(\'pg-admin\',document.querySelector(\'[data-page="pg-admin"]\'));setTimeout(()=>swAdmin(\'roster\',null),300)':item.action.includes('Charge')?'requirePin(()=>goPage(\'pg-chargebacks\',null))':''}">${item.action}</button>`:''}
+        <div style="width:8px;height:8px;border-radius:50%;background:${item.ok?'var(--ok)':'var(--wa)'}"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renPendingActions(){
+  const el=document.getElementById('homePending');if(!el)return;
+  const actions=[];
+  const unassigned=reps.filter(r=>!r.s).length;
+  const newReps=Object.values(REP_ROSTER).filter(r=>r.isNew).length;
+  const cbQueue=getCBQueue?.().filter(c=>!c.appliedTo).length||0;
+  if(!reps.length)actions.push({icon:'📂',msg:'No rep data loaded for this week',action:'Upload RTPOS CSV',color:'var(--mu)',fn:"goPage('pg-reps',document.querySelector('[data-page=\"pg-reps\"]'))"});
+  if(unassigned>0)actions.push({icon:'🏪',msg:unassigned+' rep'+(unassigned>1?'s':'')+' not assigned to a store',action:'Assign Now',color:'var(--wa)',fn:"requirePin(()=>{goPage('pg-admin',document.querySelector('[data-page=\"pg-admin\"]'));setTimeout(()=>swAdmin('assignments',null),300);})"});
+  if(newReps>0)actions.push({icon:'🆕',msg:newReps+' new rep'+(newReps>1?'s':'')+' need store assignment',action:'View New Reps',color:'var(--pr)',fn:"viewNewReps()"});
+  if(cbQueue>0)actions.push({icon:'⚡',msg:cbQueue+' chargeback'+(cbQueue>1?'s':'')+' queued for next pay period',action:'View CBs',color:'var(--da)',fn:"requirePin(()=>goPage('pg-chargebacks',null))"});
+  if(!wkLocked&&reps.length>0)actions.push({icon:'✅',msg:'Week is open — remember to lock when payroll is processed',action:'Lock Week',color:'var(--ok)',fn:"requirePin(adminToggleLock)"});
+  if(!actions.length){
+    el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--ok)"><div style="font-size:28px;margin-bottom:6px">✅</div><div style="font-weight:700;font-size:13px">All clear — no pending actions</div></div>`;
+    return;
+  }
+  el.innerHTML=actions.map(a=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bo)">
+      <span style="font-size:18px">${a.icon}</span>
+      <div style="flex:1;font-size:12px;color:var(--se)">${a.msg}</div>
+      <button class="btn sm" style="background:${a.color};color:#fff;border:none;white-space:nowrap;font-size:11px" onclick="${a.fn}">${a.action}</button>
+    </div>`).join('');
+}
+
+// ── ANNOUNCEMENTS ──
+function getAnnouncements(){try{return JSON.parse(localStorage.getItem('wfo_announcements')||'[]');}catch{return[];}}
+function saveAnnouncements(a){localStorage.setItem('wfo_announcements',JSON.stringify(a));}
+
+function renAnnouncements(){
+  const el=document.getElementById('homeAnnouncements');if(!el)return;
+  const all=getAnnouncements();
+  const now=new Date();
+  const active=all.filter(a=>!a.expiry||new Date(a.expiry+'T23:59:59')>=now);
+  if(!active.length){
+    el.innerHTML=`<div style="text-align:center;padding:24px;color:var(--mu)"><div style="font-size:28px;margin-bottom:8px">📢</div><div style="font-size:13px">No announcements</div><div style="font-size:11px;margin-top:4px">Admin can post announcements here</div></div>`;
+    return;
+  }
+  const typeStyles={info:{bg:'#E3F2FD',border:'#1976D2',ic:'ℹ️'},important:{bg:'#FFF8E1',border:'var(--wa)',ic:'⚠️'},success:{bg:'#E8F5E9',border:'var(--ok)',ic:'✅'},urgent:{bg:'#FFEBEE',border:'var(--da)',ic:'🚨'}};
+  el.innerHTML=active.map((a,i)=>{
+    const s=typeStyles[a.type]||typeStyles.info;
+    return`<div style="background:${s.bg};border-left:4px solid ${s.border};border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div style="display:flex;gap:8px;align-items:flex-start;flex:1">
+          <span style="font-size:18px;flex-shrink:0">${s.ic}</span>
+          <div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);margin-bottom:3px">${X(a.title)}</div>
+            <div style="font-size:12px;color:var(--tx);line-height:1.5">${X(a.msg)}</div>
+            <div style="font-size:10px;color:var(--mu);margin-top:5px">Posted ${a.at}${a.expiry?' · Expires '+a.expiry:''}</div>
+          </div>
+        </div>
+        ${_pinUnlocked?`<button onclick="requirePin(()=>deleteAnnouncement(${i}))" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;flex-shrink:0;padding:0">✕</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddAnnouncement(){
+  document.getElementById('annTitle').value='';
+  document.getElementById('annMsg').value='';
+  document.getElementById('annType').value='info';
+  document.getElementById('annExpiry').value='';
+  const m=document.getElementById('announcementModal');
+  if(m){m.style.display='flex';}
+}
+function saveAnnouncement(){
+  const title=document.getElementById('annTitle')?.value.trim();
+  const msg=document.getElementById('annMsg')?.value.trim();
+  const type=document.getElementById('annType')?.value||'info';
+  const expiry=document.getElementById('annExpiry')?.value||'';
+  if(!title){tst2('Enter a title.','er');return;}
+  if(!msg){tst2('Enter a message.','er');return;}
+  const all=getAnnouncements();
+  all.unshift({title,msg,type,expiry,at:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});
+  saveAnnouncements(all);
+  document.getElementById('announcementModal').style.display='none';
+  renAnnouncements();tst2('Announcement posted!','ok');
+}
+function deleteAnnouncement(i){
+  const all=getAnnouncements();all.splice(i,1);saveAnnouncements(all);renAnnouncements();tst2('Removed.','ok');
+}
+
+// ── IMPORTANT DATES ──
+function getImportantDates(){try{return JSON.parse(localStorage.getItem('wfo_dates')||'[]');}catch{return[];}}
+function saveImportantDates(d){localStorage.setItem('wfo_dates',JSON.stringify(d));}
+
+function renImportantDates(){
+  const el=document.getElementById('homeDates');if(!el)return;
+  const all=getImportantDates().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!all.length){el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--mu);font-size:13px">No dates added yet</div>`;return;}
+  const now=new Date();now.setHours(0,0,0,0);
+  el.innerHTML=all.map((d,i)=>{
+    const dt=new Date(d.date+'T12:00:00');
+    const diff=Math.round((dt-now)/(1000*60*60*24));
+    const past=diff<0;
+    const soon=diff>=0&&diff<=7;
+    const color=past?'var(--mu)':soon?'var(--da)':'var(--se)';
+    const badge=past?'Past':soon?diff===0?'Today!':diff===1?'Tomorrow':'In '+diff+' days':'In '+diff+' days';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bo);${past?'opacity:.5':''}">
+      <div style="background:${soon&&!past?'#FFEBEE':past?'#F5F5F5':'#F3E8FF'};border-radius:8px;padding:6px 10px;text-align:center;min-width:54px">
+        <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:${color}">${dt.getDate()}</div>
+        <div style="font-size:9px;color:var(--mu);font-weight:700">${dt.toLocaleDateString('en-US',{month:'short'}).toUpperCase()}</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--se)">${X(d.label)}</div>
+        <div style="font-size:10px;font-weight:700;color:${soon&&!past?'var(--da)':'var(--mu)'}">${badge}</div>
+      </div>
+      ${_pinUnlocked?`<button onclick="requirePin(()=>deleteDate(${i}))" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px">✕</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openAddDate(){
+  document.getElementById('newDateVal').value='';
+  document.getElementById('newDateLabel').value='';
+  const m=document.getElementById('dateModal');if(m)m.style.display='flex';
+}
+function saveImportantDate(){
+  const date=document.getElementById('newDateVal')?.value;
+  const label=document.getElementById('newDateLabel')?.value.trim();
+  if(!date){tst2('Select a date.','er');return;}
+  if(!label){tst2('Enter a label.','er');return;}
+  const all=getImportantDates();
+  all.push({date,label});
+  saveImportantDates(all);
+  document.getElementById('dateModal').style.display='none';
+  renImportantDates();tst2('Date added!','ok');
+}
+function deleteDate(i){
+  const all=getImportantDates();all.splice(i,1);saveImportantDates(all);renImportantDates();tst2('Removed.','ok');
+}
+
+// ── CONTACTS ──
+function getContacts(){
+  try{return JSON.parse(localStorage.getItem('wfo_contacts')||'null');}catch{return null;}
+}
+function getDefaultContacts(){
+  return[
+    {role:'HR / Payroll',name:'',phone:'',email:''},
+    {role:'Owner',name:'',phone:'',email:''},
+    {role:'IT / Dashboard Support',name:'',phone:'',email:''},
+  ];
+}
+function renContacts(){
+  const el=document.getElementById('homeContacts');if(!el)return;
+  const contacts=getContacts()||getDefaultContacts();
+  const filled=contacts.filter(c=>c.name||c.phone||c.email);
+  if(!filled.length){
+    el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--mu);font-size:13px">No contacts added yet<br><button class="btn bghost sm" style="margin-top:8px" onclick="requirePin(()=>editContacts())">+ Add Contacts</button></div>`;
+    return;
+  }
+  el.innerHTML=filled.map(c=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--bo)">
+      <div style="width:36px;height:36px;background:var(--thb);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👤</div>
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--mu);text-transform:uppercase;font-weight:700;letter-spacing:.05em">${X(c.role)}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--se)">${X(c.name||'—')}</div>
+        ${c.phone?`<div style="font-size:11px;color:var(--mu)">📞 ${X(c.phone)}</div>`:''}
+        ${c.email?`<div style="font-size:11px;color:var(--pr)"><a href="mailto:${X(c.email)}" style="color:var(--pr);text-decoration:none">✉ ${X(c.email)}</a></div>`:''}
+      </div>
+    </div>`).join('');
+}
+function editContacts(){
+  const contacts=getContacts()||getDefaultContacts();
+  const el=document.getElementById('contactEditList');if(!el)return;
+  el.innerHTML=contacts.map((c,i)=>`
+    <div style="background:#F8F8F8;border-radius:8px;padding:12px;margin-bottom:10px">
+      <div class="fg" style="grid-template-columns:1fr 1fr;gap:8px">
+        <div class="fi"><label>Role</label><input type="text" id="cr_${i}" value="${X(c.role)}" placeholder="e.g. HR / Payroll"/></div>
+        <div class="fi"><label>Name</label><input type="text" id="cn_${i}" value="${X(c.name)}" placeholder="Full name"/></div>
+        <div class="fi"><label>Phone</label><input type="tel" id="cp_${i}" value="${X(c.phone)}" placeholder="(555) 000-0000"/></div>
+        <div class="fi"><label>Email</label><input type="email" id="ce_${i}" value="${X(c.email)}" placeholder="email@edgelink.com"/></div>
+      </div>
+      <button onclick="removeContactRow(${i})" style="background:none;border:none;color:var(--da);cursor:pointer;font-size:11px;margin-top:4px">✕ Remove</button>
+    </div>`).join('');
+  window._editContactCount=contacts.length;
+  document.getElementById('contactsModal').style.display='flex';
+}
+function addContactRow(){
+  const i=window._editContactCount||0;
+  window._editContactCount=(window._editContactCount||0)+1;
+  const el=document.getElementById('contactEditList');if(!el)return;
+  el.innerHTML+=`<div id="newcr_${i}" style="background:#F8F8F8;border-radius:8px;padding:12px;margin-bottom:10px">
+    <div class="fg" style="grid-template-columns:1fr 1fr;gap:8px">
+      <div class="fi"><label>Role</label><input type="text" id="cr_${i}" placeholder="e.g. Coach"/></div>
+      <div class="fi"><label>Name</label><input type="text" id="cn_${i}" placeholder="Full name"/></div>
+      <div class="fi"><label>Phone</label><input type="tel" id="cp_${i}" placeholder="(555) 000-0000"/></div>
+      <div class="fi"><label>Email</label><input type="email" id="ce_${i}" placeholder="email@edgelink.com"/></div>
+    </div>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--da);cursor:pointer;font-size:11px;margin-top:4px">✕ Remove</button>
+  </div>`;
+}
+function removeContactRow(i){
+  const existing=getContacts()||getDefaultContacts();
+  existing.splice(i,1);
+  localStorage.setItem('wfo_contacts',JSON.stringify(existing));
+  editContacts();
+}
+function saveContacts(){
+  const count=window._editContactCount||3;
+  const contacts=[];
+  for(let i=0;i<count+5;i++){
+    const r=document.getElementById('cr_'+i)?.value.trim();
+    const n=document.getElementById('cn_'+i)?.value.trim();
+    const p=document.getElementById('cp_'+i)?.value.trim();
+    const e=document.getElementById('ce_'+i)?.value.trim();
+    if(r||n||p||e)contacts.push({role:r||'',name:n||'',phone:p||'',email:e||''});
+  }
+  localStorage.setItem('wfo_contacts',JSON.stringify(contacts));
+  document.getElementById('contactsModal').style.display='none';
+  renContacts();tst2('Contacts saved!','ok');
+}
+
 </script>
+
+<style>
+/* EMERGENCY MOBILE FIX */
+@media(max-width:1024px){
+  html{background:#F8F8F8!important}
+  body{background:#F8F8F8!important;overflow-x:hidden!important}
+  .layout{display:block!important;background:#F8F8F8!important}
+  .sidebar{display:none!important;width:0!important;height:0!important;overflow:hidden!important;position:absolute!important;left:-9999px!important}
+  .content{display:block!important;width:100%!important;max-width:100vw!important;min-height:50vh!important;padding:14px!important;padding-bottom:80px!important;background:#F8F8F8!important;overflow:visible!important;box-sizing:border-box!important}
+  .page{display:none!important}
+  .page.active{display:block!important;width:100%!important;min-height:50vh!important;background:#F8F8F8!important;overflow:visible!important}
+  .bnav{display:flex!important;position:fixed!important;bottom:0!important;left:0!important;right:0!important;z-index:999!important}
+}
+</style>
 </body>
 </html>
