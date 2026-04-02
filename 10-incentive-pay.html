@@ -239,7 +239,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .pin-cancel{font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;margin-top:4px;text-decoration:underline}
 body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{display:none!important;}
 body.page-pg-home .week-bar,body.page-pg-home .stbar,body.page-pg-home .kstrip{display:none!important;}
-body.admin-active .content{padding:0!important;}
+body.admin-active .content{padding:0!important;}body.admin-active #pg-admin{margin:0;width:100%;}
 body:not(.page-pg-reps):not(.page-pg-chargebacks) .week-bar{display:none!important;}
 body.page-pg-managers .week-bar,body.page-pg-coaches .week-bar,
 body.page-pg-leaderboard .week-bar,body.page-pg-summary .week-bar,
@@ -572,9 +572,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <button onclick="goPage('pg-flyers',document.querySelector('[data-page=\'pg-flyers\']'));swFlyer('rep')" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
         <span style="font-size:24px">📋</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Structure</span>
       </button>
-      <button onclick="goPage('pg-admin',document.querySelector('[data-page=\'pg-admin\']'))" style="background:#fff;border:none;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
-        <span style="font-size:24px">🔐</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#E20074">Admin</span>
-      </button>
+
     </div>
   </div>
 
@@ -1081,7 +1079,7 @@ body.page-pg-assign .week-bar{display:none!important;}
     </div>
   </div>
 
-<div class="page" id="pg-admin" style="margin:-22px;min-height:calc(100vh - 60px);">
+<div class="page" id="pg-admin" style="min-height:100vh;">
     <!-- PIN GATE -->
     <div id="adminGate" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);text-align:center;padding:40px">
       <div style="background:var(--sf);border-radius:18px;padding:40px 36px;box-shadow:var(--shm);border:1px solid var(--bo);max-width:340px;width:100%">
