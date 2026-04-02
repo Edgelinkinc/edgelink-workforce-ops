@@ -235,7 +235,13 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .pin-enter{background:var(--pr);border-color:var(--pr);color:#fff;font-size:13px}
 .pin-err{color:var(--da);font-size:12px;font-weight:700;height:18px;margin-bottom:4px}
 .pin-cancel{font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;margin-top:4px;text-decoration:underline}
-body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{display:none!important;}body.admin-active .content{padding:0!important;}
+body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{display:none!important;}
+body.admin-active .content{padding:0!important;}
+body:not(.page-pg-reps):not(.page-pg-chargebacks) .week-bar{display:none!important;}
+body.page-pg-managers .week-bar,body.page-pg-coaches .week-bar,
+body.page-pg-leaderboard .week-bar,body.page-pg-summary .week-bar,
+body.page-pg-history .week-bar,body.page-pg-roster .week-bar,
+body.page-pg-assign .week-bar{display:none!important;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .pin-box.shake{animation:shake .3s ease}
 .stbar{display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:12px}
@@ -300,7 +306,9 @@ body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{d
     </div>
     <button class="btn bok sm" id="lkBtn" onclick="requirePin(lockWk)">🔒 Lock &amp; Mark Paid</button>
   </div>
-  <div class="kstrip">
+  
+  <div class="page active" id="pg-reps">
+    <div class="kstrip">
     <div class="kc"><div class="kl">Total Reps</div><div class="kv" id="kR">—</div><div class="ks">this week</div></div>
     <div class="kc kcg"><div class="kl">Rep Gross</div><div class="kv" id="kG">$—</div><div class="ks">before deductions</div></div>
     <div class="kc kca"><div class="kl">Spiffs</div><div class="kv" id="kS">$—</div><div class="ks" id="kSs">0 active</div></div>
@@ -311,13 +319,11 @@ body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{d
   </div>
 
   <!-- PAGE: REPS -->
-  <div class="page active" id="pg-reps">
     <div class="sub-tabs">
-      <button class="sub-tab active" onclick="swSub('reps','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('reps','payouts',this)">💵 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('reps','mim',this)">📱 MIM Spiffs</button>
     </div>
-    <div class="sub-pane active" id="reps-overview">
+    <div class="sub-pane" id="reps-overview">
       <div class="card"><div class="card-hdr"><div class="card-title">👤 Rep Overview</div></div>
         <div class="card-body">
           <div class="emp" id="rep-ov-emp"><div class="emp-ic">📂</div><div class="emp-t">No rep data loaded</div><div class="emp-s">Go to Breakdown &amp; Payouts to upload CSV or load sample data.</div></div>
@@ -426,7 +432,6 @@ body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{d
     </div>
   </div>
 
-  <!-- PAGE: MANAGERS -->
   <div class="page" id="pg-managers">
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="swSub('mgr','overview',this)">📋 Overview</button>
@@ -542,71 +547,49 @@ body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{d
       <button class="sub-tab" onclick="swSub('coach','mim',this)">📱 MIM Spiffs</button>
     </div>
     <div class="sub-pane active" id="coach-overview">
-      <div class="card"><div class="card-hdr">
-        <div class="card-title">🎯 Coach Actuals — By Coach</div>
+      <div class="card"><div class="card-hdr"><div class="card-title">🎯 Coach Bonus Overview</div></div>
+        <div class="card-body">
+          <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:16px">
+            <div class="kc kcg"><div class="kl">Total Coach Gross</div><div class="kv" id="ck-gross">$—</div><div class="ks">all coaches</div></div>
+            <div class="kc kct"><div class="kl">MIM Spiff Total</div><div class="kv" id="ck-mim">$—</div><div class="ks">$10/BAN</div></div>
+            <div class="kc kcp"><div class="kl">Kicker Earned</div><div class="kv" id="ck-kick">$—</div><div class="ks">company-wide</div></div>
+            <div class="kc kcw"><div class="kl">Guardrails Hit</div><div class="kv" id="ck-guard">—</div><div class="ks">coaches affected</div></div>
+          </div>
+          <div class="tw"><table>
+            <thead><tr>
+              <th>Coach</th><th>Stores</th>
+              <th class="gc">Act Bonus $</th><th class="gc">Acc Bonus $</th>
+              <th class="gc">MIM Spiff $</th><th class="gc">Kicker $</th>
+              <th class="gn">Total $</th><th class="gn">Status</th>
+            </tr></thead>
+            <tbody id="coach-ov-body"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-pane" id="coach-calc">
+      <div class="card"><div class="card-hdr" style="background:var(--dk)">
+        <div class="card-title">🎯 Coach Actuals — By Coach / By Store</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn bghost sm" onclick="requirePin(saveCoachSheet)">💾 Save All</button>
           <button class="btn bghost sm" onclick="expCoachSheet()">⬇ Export CSV</button>
-          <button class="btn bghost sm" onclick="printCoachSheet()">🖨 Print All</button>
         </div>
       </div>
       <div class="card-body">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth"/></div>
           <div class="fi" style="min-width:160px"><label>Company Acc Total ($)</label><input type="number" id="coachSheetCoAcc" placeholder="e.g. 310000" min="0" onchange="renCoachSheet()"/></div>
-          <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
-            ⚡ Enter actuals per coach. Each coach section shows their stores. Bonus calculates automatically.
+          <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+            ⚡ Enter actuals per store. Each coach section shows their stores. Bonus calculates automatically.
           </div>
         </div>
-        <!-- SUMMARY STRIP -->
         <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:14px">
           <div class="kc kcg"><div class="kl">Total Coach Payout</div><div class="kv" id="cSheetTotal">$—</div></div>
           <div class="kc kct"><div class="kl">MIM Spiff Total</div><div class="kv" id="cSheetMim">$—</div></div>
           <div class="kc kcw"><div class="kl">Guardrails Hit</div><div class="kv" id="cSheetGuard">0</div></div>
           <div class="kc kcp"><div class="kl">Kicker Earned</div><div class="kv" id="cSheetKick">$—</div></div>
         </div>
-        <!-- COACH SECTIONS -->
         <div id="coachSheetSections"></div>
-      </div></div>
-    </div>
-    
-    <div class="sub-pane" id="coach-calc">
-      <div class="card"><div class="card-hdr card-hdr-dk">
-        <div class="card-title">🎯 Coach Bonus Calculator</div>
-        <button class="btn bghost sm" onclick="requirePin(()=>document.getElementById('dzCoach').querySelector('input').click())">⬆ Upload Metro CSV</button>
-      </div>
-      <div class="card-body">
-        <div class="dz" id="dzCoach" style="margin-bottom:14px" ondragover="dzo(event,'dzCoach')" ondragleave="dzl('dzCoach')" ondrop="requirePin(()=>dzd(event,'coach_metro'))">
-          <input type="file" accept=".csv,.txt" onchange="requirePin(()=>dzfs(event,'coach_metro'))"/>
-          <div class="dz-tag dz-m">METRO — COACH DATA</div><div class="dz-ic">📡</div>
-          <div class="dz-lb">Drop Metro CSV — Auto-populates all coach fields</div>
-          <div class="dz-sb">Doors · Act % to Goal · Avg Acc/Box · ELB Percentile · Shrink %</div>
-          <div class="dz-fn" id="fnCoach"></div>
-        </div>
-        <div style="background:#FFEBEE;border:1px solid var(--da);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--da);font-weight:600">⚠ Coach activation bonus is $0 if under 100% goal. Accessory bonus is $0 if under $50 avg/box baseline.</div>
-        <div class="fg fc3" style="margin-bottom:12px;align-items:end">
-          <div class="fi"><label>Coach</label><select id="coachSel" onchange="calcCoach()"><option value="">Select Coach…</option></select></div>
-          <div class="fi"><label>Review Period</label><input type="month" id="coachMonth"/></div>
-          <div class="fi"><label>Company Acc Total ($)</label><input type="number" id="coachCoAcc" placeholder="e.g. 310000" min="0" onchange="calcCoach()"/></div>
-        </div>
-        <div class="fg fc3" style="margin-bottom:14px;align-items:end">
-          <div class="fi"><label>Number of Doors</label><input type="number" id="coachDoors" placeholder="e.g. 5" min="0" onchange="calcCoach()"/></div>
-          <div class="fi"><label>Activation % to Goal</label><input type="number" id="coachActPct" placeholder="e.g. 112" min="0" step="0.1" onchange="calcCoach()"/></div>
-          <div class="fi"><label>Avg Accessories / Box ($)</label><input type="number" id="coachAccBox" placeholder="e.g. 65" min="0" step="0.01" onchange="calcCoach()"/></div>
-          <div class="fi"><label>Shrink %</label><input type="number" id="coachShrink" placeholder="e.g. 2.5" min="0" step="0.1" onchange="calcCoach()"/></div>
-          <div class="fi"><label>ELB Percentile (national %)</label><input type="number" id="coachELB" placeholder="e.g. 35" min="0" max="100" step="0.1" onchange="calcCoach()"/></div>
-          <div class="fi"><label>Total Boxes (all stores)</label><input type="number" id="coachBoxes" placeholder="e.g. 120" min="0" onchange="calcCoach()"/></div>
-        </div>
-        <div id="coachResult" style="display:none"></div>
-        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-          <button class="btn bp sm" onclick="requirePin(saveCoachCalc)">💾 Save This Period</button>
-          <button class="btn bo sm" onclick="clearCoach()">↺ Clear</button>
-          <button class="btn bok sm" onclick="exportCoachPDF()">🖨 Print / PDF</button>
-        </div>
-        <div style="margin-top:22px">
-          <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);margin-bottom:10px">📋 Saved Coach Records</div>
-          <div id="coachHistList"><p style="font-size:13px;color:var(--mu)">No records saved yet.</p></div>
-        </div>
       </div></div>
     </div>
     <div class="sub-pane" id="coach-mim">
@@ -1515,7 +1498,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(wk) loadWeek(wk);
   // Build week history selector
   buildWeekSelector();
+  // Set default months
+  const _n=new Date(),_mn=_n.getFullYear()+'-'+(String(_n.getMonth()+1).padStart(2,'0'));
+  const csm=document.getElementById('coachSheetMonth');if(csm&&!csm.value)csm.value=_mn;
+  const msm=document.getElementById('mgrSheetMonthIn');if(msm&&!msm.value)msm.value=_mn;
   const last=sessionStorage.getItem("wfo_page")||"pg-reps";
+  // Set initial body page class
+  document.body.classList.add('page-'+last);
   goPage(last,document.querySelector('[data-page="'+last+'"]'));
 });
 
@@ -1554,6 +1543,9 @@ function updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+
 function goPage(id,el){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".si").forEach(s=>s.classList.remove("active"));
+  // Set body page class for CSS targeting
+  document.body.className=document.body.className.replace(/\bpage-\S+/g,'').trim();
+  document.body.classList.add('page-'+id);
   const pg=document.getElementById(id);if(pg)pg.classList.add("active");
   if(el)el.classList.add("active");
   else{const si=document.querySelector('[data-page="'+id+'"]');if(si)si.classList.add("active");}
@@ -1561,7 +1553,7 @@ function goPage(id,el){
   if(id==="pg-leaderboard")renLB();
   if(id==="pg-summary")renSum();
   if(id==="pg-managers")renMgrOverview();
-  if(id==="pg-coaches")renCoachOv();
+  if(id==="pg-coaches"){renCoachOv();}
   if(id==="pg-roster")renRoster();
   if(id==="pg-admin"){
     document.body.classList.add("admin-active");
@@ -1580,6 +1572,7 @@ function swSub(prefix,id,btn){
   if(id==="mim")renMimTables();
   if(id==="overview"&&prefix==="reps")renRepOv();
   if(id==="overview"&&prefix==="coach")renCoachOv();
+  if(id==="calc"&&prefix==="coach")renCoachSheet();
 }
 
 // ── WEEK ──
@@ -1594,9 +1587,9 @@ function popDD(){
   SR.forEach(r=>{sf.innerHTML+=`<option value="${r.s}">${r.s}</option>`;ns.innerHTML+=`<option value="${r.s}">${r.s}</option>`;});
   syncCR();
 }
-function syncCR(){const el=document.getElementById("cbR"),pv=el.value;el.innerHTML="<option value=''>Select Rep...</option>";reps.forEach(r=>el.innerHTML+=`<option value="${r.n}"${r.n===pv?" selected":""}>${r.n} - ${r.s||"?"}</option>`);}
-function initMgrStoreDD(){const s=document.getElementById("mgrStore");s.innerHTML="<option value=''>Select Store...</option>";SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s} (${r.me} - ${r.mgr==="TBD"?"Mgr TBD":r.mgr})</option>`);}
-function initCoachDD(){const s=document.getElementById("coachSel");s.innerHTML="<option value=''>Select Coach...</option>";COACHES.sort().forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);}
+function syncCR(){const el=document.getElementById("cbR");if(!el)return;const pv=el.value;el.innerHTML="<option value=''>Select Rep...</option>";reps.forEach(r=>el.innerHTML+=`<option value="${r.n}"${r.n===pv?" selected":""}>${r.n} - ${r.s||"?"}</option>`);}
+function initMgrStoreDD(){const s=document.getElementById("mgrStore");if(!s)return;s.innerHTML="<option value=''>Select Store...</option>";SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s} (${r.me} - ${r.mgr==="TBD"?"Mgr TBD":r.mgr})</option>`);}
+function initCoachDD(){const s=document.getElementById("coachSel");if(!s)return;s.innerHTML="<option value=''>Select Coach...</option>";COACHES.sort().forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);}
 
 // ── TIER ENGINE ──
 function gBT(t){return T.box.find(x=>t>=x.mn&&t<=x.mx)||null;}
@@ -1726,12 +1719,14 @@ function renMimTables(){
 
 // ── COACH OVERVIEW ──
 function renCoachOv(){
-  const body=document.getElementById("coach-ov-body");if(!body)return;
-  const saved=JSON.parse(localStorage.getItem("wfo_coach_recs")||"[]");
+  const body=document.getElementById('coach-ov-body');if(!body)return;
+  const srBs=getSR_BS();
+  const saved=JSON.parse(localStorage.getItem('wfo_coach_recs')||'[]');
   const byCoach={};saved.forEach(r=>{if(!byCoach[r.coach]||r.period>byCoach[r.coach].period)byCoach[r.coach]=r;});
   let tGross=0,tMim=0,tKick=0,tGuard=0;
   body.innerHTML=COACHES.map(coach=>{
-    const rec=byCoach[coach],storeCount=SR.filter(s=>s.c===coach).length;
+    const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+    const rec=byCoach[coach];
     const cRate=T.coach?.mimRate||DT.coach.mimRate;
     const coachBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
     const mimSpiff=coachBans*cRate;
@@ -1739,13 +1734,22 @@ function renCoachOv(){
     tMim+=mimSpiff;
     const total=(rec?.total||0)+mimSpiff;
     const hasGuard=rec&&rec.guardrails&&rec.guardrails.length>0;
-    return`<tr><td style="font-weight:700;color:var(--se)">${coach}</td><td style="text-align:center">${storeCount}</td><td style="text-align:center">${rec?rec.actPct+"%":"—"}</td><td style="text-align:center">${rec?"$"+rec.accPerBox:"—"}</td><td style="text-align:center">${rec?rec.shrinkPct+"%":"—"}</td><td style="font-weight:700;color:var(--pr)">${rec?"$"+rec.actBonus.toFixed(2):"—"}</td><td style="font-weight:700;color:var(--se)">${rec?"$"+rec.accBonus.toFixed(2):"—"}</td><td style="font-weight:700;color:var(--ok)">$${mimSpiff.toFixed(2)}</td><td>${rec&&rec.kicker?"$"+rec.kicker.toFixed(2):"$0.00"}</td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${total.toFixed(2)}</td><td>${hasGuard?`<span class="bdg bfl">Guard</span>`:rec?`<span class="bdg bok2">Clean</span>`:`<span class="bdg bno">Pending</span>`}</td></tr>`;
-  }).join("");
+    return`<tr>
+      <td style="font-weight:700;color:var(--se)">${coach}</td>
+      <td style="text-align:center">${stores.length}</td>
+      <td style="font-weight:700;color:var(--pr)">${rec?"$"+rec.actBonus.toFixed(2):"—"}</td>
+      <td style="font-weight:700;color:var(--se)">${rec?"$"+rec.accBonus.toFixed(2):"—"}</td>
+      <td style="font-weight:700;color:var(--ok)">$${mimSpiff.toFixed(2)}</td>
+      <td>${rec&&rec.kicker?"$"+rec.kicker.toFixed(2):"$0.00"}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${total.toFixed(2)}</td>
+      <td>${hasGuard?`<span class="bdg bfl">Guard</span>`:rec?`<span class="bdg bok2">Clean</span>`:`<span class="bdg bno">Pending</span>`}</td>
+    </tr>`;
+  }).join('');
   const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  upd("ck-gross","$"+tGross.toFixed(2));upd("ck-mim","$"+tMim.toFixed(2));upd("ck-kick","$"+tKick.toFixed(2));upd("ck-guard",tGuard+" coach"+(tGuard!==1?"es":""));
+  upd('ck-gross','$'+tGross.toFixed(2));upd('ck-mim','$'+tMim.toFixed(2));
+  upd('ck-kick','$'+tKick.toFixed(2));upd('ck-guard',tGuard+' coach'+(tGuard!==1?'es':''));
 }
 
-// ── KPIs ──
 function upK(){
   let G=0,A=0,C=0,N=0,sp=0,tp=0;
   reps.forEach(r=>{const c=cRp(r);G+=c.gr;A+=c.arc;C+=c.cb;N+=c.nt;sp+=c.sp.tot;if((r.ta||0)>=25)tp++;});
@@ -2525,7 +2529,7 @@ function rstT(){if(!confirm("Reset all tiers to defaults?"))return;T=JSON.parse(
 function lT(){try{const s=localStorage.getItem("wfo_tiers");return s?JSON.parse(s):JSON.parse(JSON.stringify(DT));}catch{return JSON.parse(JSON.stringify(DT));}}
 
 // ── SPIFFS ──
-function onSS(){const v=document.getElementById("spSc").value,w=document.getElementById("spSW"),l=document.getElementById("spSL"),s=document.getElementById("spSV");if(v==="all"){w.style.display="none";return;}w.style.display="block";s.innerHTML="<option value=''>Select...</option>";if(v==="store"){l.textContent="Store";SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}else{l.textContent="Coach";COACHES.sort().forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);}}
+function onSS(){const v=document.getElementById("spSc")?.value,w=document.getElementById("spSW"),l=document.getElementById("spSL"),s=document.getElementById("spSV");if(!v||!s)return;if(v==="all"){w.style.display="none";return;}w.style.display="block";s.innerHTML="<option value=''>Select...</option>";if(v==="store"){l.textContent="Store";SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}else{l.textContent="Coach";COACHES.sort().forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);}}
 function addSp(){const nm=document.getElementById("spN").value.trim(),ty=document.getElementById("spT").value,a=+document.getElementById("spA").value||0,sc=document.getElementById("spSc").value,sv=document.getElementById("spSV").value,sd=document.getElementById("spSd").value,ed=document.getElementById("spEd").value,nt=document.getElementById("spNt").value.trim();if(!nm){tst2("Enter a spiff name.","er");return;}if(a<=0){tst2("Enter amount.","er");return;}if(!sd){tst2("Enter start date.","er");return;}sps.push({id:Date.now(),nm,ty,a,sc,sv,sd,ed,nt,on:true});savSp();renSL();renSB();renR();["spN","spA","spSd","spEd","spNt"].forEach(id=>document.getElementById(id).value="");document.getElementById("spSc").value="all";document.getElementById("spSW").style.display="none";tst2("Spiff added!","ok");}
 function tgSp(id){const s=sps.find(x=>x.id===id);if(s)s.on=!s.on;savSp();renSL();renSB();renR();}
 function rmSp(id){sps=sps.filter(s=>s.id!==id);savSp();renSL();renSB();renR();}
