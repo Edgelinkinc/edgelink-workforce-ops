@@ -263,6 +263,8 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 </header>
 <div class="layout">
 <nav class="sidebar">
+  <div class="sg">Admin</div>
+  <div class="si" data-page="pg-admin" onclick="goPage('pg-admin',this)"><span class="ic">🔐</span>Admin Center</div>
   <div class="sg">Bonuses</div>
   <div class="si active" data-page="pg-reps" onclick="goPage('pg-reps',this)"><span class="ic">👤</span>Reps</div>
   <div class="si" data-page="pg-managers" onclick="goPage('pg-managers',this)"><span class="ic">🏢</span>Managers</div>
@@ -273,8 +275,6 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
   <div class="si" data-page="pg-summary" onclick="goPage('pg-summary',this)"><span class="ic">📊</span>Summary</div>
   <div class="si" data-page="pg-history" onclick="goPage('pg-history',this)"><span class="ic">📋</span>History</div>
   <div class="sg">Navigation</div>
-  <div class="si" data-page="pg-assign" onclick="goPage('pg-assign',this)"><span class="ic">🏪</span>Store Assignments</div>
-  <div class="si" data-page="pg-roster" onclick="requirePin(()=>{goPage('pg-roster',this);renRoster();})"><span class="ic">👥</span>Rep Roster</div>
   <div class="si" onclick="location.href='index.html'"><span class="ic">🏠</span>Command Center</div>
 </nav>
 <main class="content">
@@ -293,7 +293,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
     <div style="display:flex;align-items:center;gap:6px">
       <div class="lk-dot open" id="lkDot"></div>
       <span class="lk-lbl open" id="lkLbl">Unlocked</span>
-      <span id="pinStatus" style="font-size:11px;font-weight:700;color:var(--wa)">🔑 PIN Required to Edit</span>
+      <button id="pinStatus" class="btn bw sm" onclick="goPage('pg-admin',document.querySelector('[data-page=\"pg-admin\"]'))" style="font-size:11px;font-weight:700">🔐 Admin Center</button>
       <span style="font-size:11px;color:var(--mu)" id="lkMeta">Ready</span>
     </div>
     <button class="btn bok sm" id="lkBtn" onclick="requirePin(lockWk)">🔒 Lock &amp; Mark Paid</button>
@@ -684,7 +684,410 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
   </div>
 
 </main></div>
-<div class="page" id="pg-roster">
+<div class="page" id="pg-admin">
+    <!-- PIN GATE -->
+    <div id="adminGate" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
+      <div style="background:var(--sf);border-radius:18px;padding:40px 36px;box-shadow:var(--shm);border:1px solid var(--bo);max-width:340px;width:100%">
+        <div style="font-size:48px;margin-bottom:8px">🔐</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--se);margin-bottom:4px">Admin Center</div>
+        <div style="font-size:13px;color:var(--mu);margin-bottom:24px">Enter your PIN to access admin tools</div>
+        <div style="display:flex;justify-content:center;gap:10px;margin-bottom:20px" id="adminPinDots">
+          <div class="pin-dot" id="apd0"></div><div class="pin-dot" id="apd1"></div>
+          <div class="pin-dot" id="apd2"></div><div class="pin-dot" id="apd3"></div>
+        </div>
+        <div class="pin-err" id="adminPinErr"></div>
+        <div class="pin-pad" style="margin-bottom:12px">
+          <button class="pin-btn" onclick="adminPinKey('1')">1</button><button class="pin-btn" onclick="adminPinKey('2')">2</button><button class="pin-btn" onclick="adminPinKey('3')">3</button>
+          <button class="pin-btn" onclick="adminPinKey('4')">4</button><button class="pin-btn" onclick="adminPinKey('5')">5</button><button class="pin-btn" onclick="adminPinKey('6')">6</button>
+          <button class="pin-btn" onclick="adminPinKey('7')">7</button><button class="pin-btn" onclick="adminPinKey('8')">8</button><button class="pin-btn" onclick="adminPinKey('9')">9</button>
+          <button class="pin-btn pin-clear" onclick="adminPinClear()">✕</button>
+          <button class="pin-btn" onclick="adminPinKey('0')">0</button>
+          <button class="pin-btn pin-enter" onclick="adminPinSubmit()">✓</button>
+        </div>
+        <div style="font-size:11px;color:var(--mu)">Session stays unlocked until you close the browser</div>
+      </div>
+    </div>
+
+    <!-- ADMIN CONTENT — hidden until PIN entered -->
+    <div id="adminContent" style="display:none">
+      <!-- HEADER -->
+      <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:var(--ra);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px;color:#fff">🔐 Admin Center</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px">Work Force Ops · Edgelink Inc · Owner / HR Only</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="background:rgba(0,166,81,.3);color:#fff;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700">✅ Admin Unlocked</span>
+          <button class="btn bd sm" onclick="adminLockOut()">🔒 Lock &amp; Exit</button>
+        </div>
+      </div>
+
+      <!-- ADMIN NAV TABS -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="sub-tab active" onclick="swAdmin('lock',this)">🔒 Lock Controls</button>
+        <button class="sub-tab" onclick="swAdmin('stores',this)">🏪 Store Roster</button>
+        <button class="sub-tab" onclick="swAdmin('roster',this)">👥 Rep Roster</button>
+        <button class="sub-tab" onclick="swAdmin('assignments',this)">🏪 Store Assignments</button>
+        <button class="sub-tab" onclick="swAdmin('backsheet',this)">📋 Backsheet Setup</button>
+        <button class="sub-tab" onclick="swAdmin('tiers',this)">⚙️ Tier Editor</button>
+        <button class="sub-tab" onclick="swAdmin('spiffs',this)">⚡ Spiff Manager</button>
+        <button class="sub-tab" onclick="swAdmin('data',this)">📊 Data Management</button>
+      </div>
+
+      <!-- LOCK CONTROLS -->
+      <div class="sub-pane active" id="admin-lock">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+          <!-- REP WEEK LOCK -->
+          <div class="card">
+            <div class="card-hdr card-hdr-pr"><div class="card-title">👤 Rep Week Lock</div></div>
+            <div class="card-body">
+              <div style="font-size:13px;color:var(--mu);margin-bottom:12px">Lock the current rep week to prevent any further edits. Week is marked as paid.</div>
+              <div style="background:var(--thb);border-radius:8px;padding:10px 13px;margin-bottom:12px">
+                <div style="font-size:11px;color:var(--mu)">Current Week</div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;color:var(--se)" id="adminWkDisp">—</div>
+                <div style="font-size:11px;color:var(--mu);margin-top:3px"><span id="adminRepCount">0</span> reps · <span id="adminGross">$0.00</span> gross</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <div class="lk-dot open" id="adminLkDot"></div>
+                <span class="lk-lbl" id="adminLkLbl" style="font-size:13px;font-weight:700">Unlocked</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn bok" id="adminLkBtn" onclick="adminToggleLock()">🔒 Lock &amp; Mark Paid</button>
+                <button class="btn bo sm" onclick="doExp()">⬇ Payroll CSV</button>
+              </div>
+            </div>
+          </div>
+          <!-- MANAGER PERIOD -->
+          <div class="card">
+            <div class="card-hdr" style="background:var(--se)"><div class="card-title">🏢 Manager Period Lock</div></div>
+            <div class="card-body">
+              <div style="font-size:13px;color:var(--mu);margin-bottom:12px">Lock the manager bonus period. Freezes all manager actuals and calculations.</div>
+              <div class="fi" style="margin-bottom:12px"><label>Lock Period</label><input type="month" id="adminMgrLockMonth"/></div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <div class="lk-dot open" id="adminMgrDot"></div>
+                <span class="lk-lbl open" id="adminMgrLbl" style="font-size:13px;font-weight:700">Unlocked</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn bok" id="adminMgrBtn" onclick="adminToggleMgrLock()">🔒 Lock Manager Period</button>
+                <button class="btn bo sm" onclick="expMgrSheet()">⬇ Export CSV</button>
+              </div>
+            </div>
+          </div>
+          <!-- COACH PERIOD -->
+          <div class="card">
+            <div class="card-hdr" style="background:var(--dk)"><div class="card-title">🎯 Coach Period Lock</div></div>
+            <div class="card-body">
+              <div style="font-size:13px;color:var(--mu);margin-bottom:12px">Lock the coach bonus period. Freezes all coach actuals and calculations.</div>
+              <div class="fi" style="margin-bottom:12px"><label>Lock Period</label><input type="month" id="adminCoachLockMonth"/></div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <div class="lk-dot open" id="adminCoachDot"></div>
+                <span class="lk-lbl open" id="adminCoachLbl" style="font-size:13px;font-weight:700">Unlocked</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn bok" id="adminCoachBtn" onclick="adminToggleCoachLock()">🔒 Lock Coach Period</button>
+                <button class="btn bo sm" onclick="expCoachSheet()">⬇ Export CSV</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<!-- STORE ROSTER TAB in Admin Center -->
+      <div class="sub-pane" id="admin-stores">
+        <div class="card"><div class="card-hdr" style="background:var(--dk)">
+          <div class="card-title">🏪 Store Roster — Manager &amp; Coach Assignments</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn bghost sm" onclick="expStoreRoster()">⬇ Export CSV</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- SUMMARY -->
+          <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr));margin-bottom:14px">
+            <div class="kc"><div class="kl">Total Stores</div><div class="kv" id="srTotal">34</div></div>
+            <div class="kc kcr"><div class="kl">No Coach</div><div class="kv" id="srTBDCoach">—</div></div>
+            <div class="kc kcw"><div class="kl">No Manager</div><div class="kv" id="srTBDMgr">—</div></div>
+            <div class="kc kcp"><div class="kl">Rose Perez</div><div class="kv" id="srCRosePerez">—</div></div>
+            <div class="kc kcg"><div class="kl">Mr. Watts</div><div class="kv" id="srCMr.Watts">—</div></div>
+            <div class="kc kct"><div class="kl">Ambulai</div><div class="kv" id="srCAmbulaiSheku">—</div></div>
+            <div class="kc kca"><div class="kl">Joel</div><div class="kv" id="srCJoelMontero">—</div></div>
+            <div class="kc kcw"><div class="kl">Manny</div><div class="kv" id="srCManny">—</div></div>
+            <div class="kc"><div class="kl">Cheryl</div><div class="kv" id="srCCheryl">—</div></div>
+          </div>
+          <!-- FILTERS -->
+          <div class="srch-bar" style="margin-bottom:12px">
+            <input class="srch-inp" type="text" id="srSearch" placeholder="🔍 Search store, manager, coach…" oninput="renStoreRoster()"/>
+            <select id="srFState" onchange="renStoreRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+              <option value="">All States</option>
+              <option value="TN">TN</option><option value="MA">MA</option>
+              <option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option>
+            </select>
+            <select id="srFCoach" onchange="renStoreRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+              <option value="">All Coaches</option>
+              <option value="Ambulai Sheku">Ambulai Sheku</option>
+              <option value="Cheryl">Cheryl</option>
+              <option value="Joel Montero">Joel Montero</option>
+              <option value="Manny">Manny</option>
+              <option value="Mr. Watts">Mr. Watts</option>
+              <option value="Rose Perez">Rose Perez</option>
+              <option value="">Unassigned</option>
+            </select>
+          </div>
+          <!-- TABLE -->
+          <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
+            <table>
+              <thead><tr>
+                <th style="min-width:200px">Store</th>
+                <th style="min-width:220px">Manager</th>
+                <th style="min-width:200px">Coach</th>
+                <th style="min-width:200px">Last Change</th>
+                <th>Log</th>
+              </tr></thead>
+              <tbody id="storeRosterBody"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--mu)">⚠ Changes are logged with timestamp and your name. All changes apply immediately to the coach bonus calculator and rep assignments.</div>
+        </div></div>
+      </div>
+
+
+      <!-- REP ROSTER -->
+      <div class="sub-pane" id="admin-roster">
+        <div class="card"><div class="card-hdr card-hdr-dk">
+          <div class="card-title">👥 Rep Roster</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn bghost sm" onclick="expRosterCSV()">⬇ Export CSV</button>
+            <button class="btn bghost sm" onclick="addRosterRep()">+ Add Rep</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr));margin-bottom:14px">
+            <div class="kc"><div class="kl">Total</div><div class="kv" id="aRosterTotal">83</div></div>
+            <div class="kc kcp"><div class="kl">Rose Perez</div><div class="kv" id="aRosterRP">—</div></div>
+            <div class="kc kcg"><div class="kl">Mr. Watts</div><div class="kv" id="aRosterMW">—</div></div>
+            <div class="kc kct"><div class="kl">Ambulai</div><div class="kv" id="aRosterAS">—</div></div>
+            <div class="kc kca"><div class="kl">Joel</div><div class="kv" id="aRosterJM">—</div></div>
+            <div class="kc kcw"><div class="kl">Manny</div><div class="kv" id="aRosterMN">—</div></div>
+            <div class="kc"><div class="kl">Cheryl</div><div class="kv" id="aRosterCH">—</div></div>
+            <div class="kc kcr"><div class="kl">TBD</div><div class="kv" id="aRosterTBD">—</div></div>
+          </div>
+          <div class="srch-bar" style="margin-bottom:10px">
+            <input class="srch-inp" type="text" id="aRosterSearch" placeholder="🔍 Search name, NTID, coach, state…" oninput="renAdminRoster()"/>
+            <select id="aRosterFState" onchange="renAdminRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All States</option><option value="TN">TN</option><option value="MA">MA</option><option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option></select>
+            <select id="aRosterFCoach" onchange="renAdminRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Coaches</option><option value="Ambulai Sheku">Ambulai Sheku</option><option value="Cheryl">Cheryl</option><option value="Joel Montero">Joel Montero</option><option value="Manny">Manny</option><option value="Mr. Watts">Mr. Watts</option><option value="Rose Perez">Rose Perez</option><option value="TBD">TBD</option></select>
+            <span class="srch-count" id="aRosterCount"></span>
+          </div>
+          <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
+            <table><thead><tr>
+              <th>#</th><th style="min-width:180px">Full Name</th><th>NTID</th><th>State</th>
+              <th class="gc" style="min-width:160px">Coach</th>
+              <th class="gc" style="min-width:220px">Store</th>
+              <th class="gc">First</th><th class="gc">Last</th>
+              <th class="gn">PPD / Gross</th>
+            </tr></thead>
+            <tbody id="aRosterBody"></tbody></table>
+          </div>
+          <div id="addRosterForm" style="display:none;margin-top:14px;background:#FFF0F7;border:1px solid var(--pr);border-radius:10px;padding:14px">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--pr);margin-bottom:10px">+ Add New Rep</div>
+            <div class="fg" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:10px">
+              <div class="fi"><label>NTID</label><input type="text" id="newNTID" placeholder="e.g. ABC12345"/></div>
+              <div class="fi"><label>First Name</label><input type="text" id="newFirst" placeholder="First"/></div>
+              <div class="fi"><label>Last Name</label><input type="text" id="newLast" placeholder="Last"/></div>
+              <div class="fi"><label>State</label><select id="newState"><option value="">Select…</option><option value="TN">TN</option><option value="MA">MA</option><option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option></select></div>
+              <div class="fi"><label>Coach</label><select id="newCoach"><option value="TBD">TBD</option><option value="Ambulai Sheku">Ambulai Sheku</option><option value="Cheryl">Cheryl</option><option value="Joel Montero">Joel Montero</option><option value="Manny">Manny</option><option value="Mr. Watts">Mr. Watts</option><option value="Rose Perez">Rose Perez</option></select></div>
+              <div class="fi"><label>Store</label><select id="newRosterStore"><option value="">Select Store…</option></select></div>
+            </div>
+            <div style="display:flex;gap:8px"><button class="btn bp sm" onclick="saveNewRosterRep()">+ Add</button><button class="btn bo sm" onclick="document.getElementById('addRosterForm').style.display='none'">Cancel</button></div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- STORE ASSIGNMENTS -->
+      <div class="sub-pane" id="admin-assignments">
+        <div class="card"><div class="card-hdr card-hdr-dk">
+          <div class="card-title">🏪 Store Assignments</div>
+          <div style="display:flex;gap:8px"><button class="btn bghost sm" onclick="expAssignCSV()">⬇ Export</button><button class="btn bd sm" onclick="clrAssign()">🗑 Clear All</button></div>
+        </div>
+        <div class="card-body">
+          <div style="background:#FFF0F7;border:1px solid var(--pr);border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:12px;color:var(--se)">ℹ️ Assignments save by NTID and persist across uploads. All future uploads auto-apply these assignments.</div>
+          <div class="srch-bar" style="margin-bottom:10px">
+            <input class="srch-inp" type="text" id="aAssignSearch" placeholder="🔍 Search rep or NTID…" oninput="renAdminAssign()"/>
+            <select id="aAssignFState" onchange="renAdminAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All States</option><option value="TN">TN</option><option value="MA">MA</option><option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option></select>
+            <span class="srch-count" id="aAssignCount"></span>
+          </div>
+          <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
+            <table><thead><tr>
+              <th>Full Name</th><th>NTID</th><th>State</th>
+              <th class="gc" style="min-width:130px">Last Name</th>
+              <th class="gc" style="min-width:220px">Store</th>
+              <th class="gc">Coach (auto)</th>
+              <th class="gc">PPD</th><th class="gc">Gross $</th><th class="gn">Status</th>
+            </tr></thead>
+            <tbody id="aAssignBody"></tbody></table>
+          </div>
+          <div style="margin-top:12px;padding:11px 14px;background:#F3E8FF;border:1px solid var(--se);border-radius:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:12px;font-weight:700;color:var(--se)">Bulk Assign:</span>
+            <select id="aBulkStore" style="padding:6px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;min-width:200px"><option value="">Select Store…</option></select>
+            <button class="btn bs sm" onclick="adminBulkAssign()">Apply to Unassigned</button>
+            <button class="btn bp sm" onclick="adminBulkAssignAll()">Apply to ALL Filtered</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- BACKSHEET -->
+      <div class="sub-pane" id="admin-backsheet">
+        <div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">📋 Backsheet Setup — Monthly Manager Rules</div></div>
+        <div class="card-body">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+            <div class="fi" style="min-width:180px"><label>Backsheet Month</label><input type="month" id="aBsMonth" onchange="loadAdminBsMonth()"/></div>
+            <div id="aBsLockStatus" style="display:flex;align-items:center;gap:8px;margin-top:18px"></div>
+            <button class="btn bp sm" style="margin-top:18px" onclick="saveAdminBsAll()">💾 Save All</button>
+            <button class="btn bok sm" style="margin-top:18px" onclick="printBacksheet()">🖨 Print Backsheet</button>
+          </div>
+          <div style="background:#F3E8FF;border:1px solid var(--se);border-radius:10px;padding:14px 16px;margin-bottom:16px">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);margin-bottom:10px">⚠️ Qualifying Thresholds</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:end">
+              <div class="fi"><label>ELB DQ Rank (≥ this = $0)</label><input type="number" id="aBsElbCut" value="3368" min="1" style="width:100px"/></div>
+              <div class="fi"><label>Attach % Threshold</label><input type="number" id="aBsAttachCut" value="60" min="0" max="100" style="width:100px"/></div>
+              <div class="fi"><label>Attach Penalty %</label><input type="number" id="aBsAttachPen" value="25" min="0" max="100" style="width:100px"/></div>
+              <button class="btn bs sm" style="margin-bottom:2px" onclick="addAdminDecelerator()">+ Add Decelerator</button>
+            </div>
+            <div id="aExtraDecels" style="margin-top:10px"></div>
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+              <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">📦 Categories &amp; Payout Rules</div>
+              <button class="btn bp sm" onclick="addAdminBsCat()">+ Add Category</button>
+            </div>
+            <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:900px">
+              <thead><tr style="background:var(--thb)">
+                <th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Category</th>
+                <th style="padding:7px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Base %</th>
+                <th style="padding:7px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Up %</th>
+                <th style="padding:7px 8px;text-align:center;background:#E8F5E9;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr)" colspan="2">T1 Base / Up</th>
+                <th style="padding:7px 8px;text-align:center;background:#FFF0F7;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr)" colspan="2">T2 Base / Up</th>
+                <th style="padding:7px 8px;text-align:center;background:#F3E8FF;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--se);text-transform:uppercase;border-bottom:2px solid var(--pr)" colspan="2">T3 Base / Up</th>
+                <th style="padding:7px 8px;border-bottom:2px solid var(--pr)"></th>
+              </tr></thead>
+              <tbody id="aBsCatBody"></tbody>
+            </table></div>
+          </div>
+          <div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);margin-bottom:10px">🎯 Monthly Targets — All 34 Stores</div>
+            <div style="overflow-x:auto;border:1px solid var(--bo);border-radius:10px"><table style="width:100%;border-collapse:collapse;font-size:11px">
+              <thead><tr style="background:var(--thb)" id="aBsTgtHdr"></tr></thead>
+              <tbody id="aBsTgtBody"></tbody>
+            </table></div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- TIERS -->
+      <div class="sub-pane" id="admin-tiers">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card"><div class="card-hdr" style="background:var(--pr)"><div class="card-title">👤 Rep Tiers</div></div>
+          <div class="card-body">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px">📦 Box Level Ups</div>
+            <div id="aBxR"></div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px;margin-top:14px">🛍️ Accessory Levels</div>
+            <div id="aAcR"></div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px;margin-top:14px">⚡ Power Ups</div>
+            <div class="tr2"><label>Affirm $/sale:</label><input type="number" id="aTAf" value="5" min="0" step="0.5"/></div>
+            <div class="tr2"><label>HSI $/unit:</label><input type="number" id="aTHs" value="5" min="0" step="0.5"/></div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px;margin-top:14px">📱 MIM Payout</div>
+            <div class="tr2"><label>1st account ($):</label><input type="number" id="aTM1" value="20" min="0"/></div>
+            <div class="tr2"><label>2nd line ($):</label><input type="number" id="aTM2" value="5" min="0"/></div>
+            <div class="tr2"><label>3rd line ($):</label><input type="number" id="aTM3" value="10" min="0"/></div>
+            <div class="tr2"><label>4th line ($):</label><input type="number" id="aTM4" value="15" min="0"/></div>
+            <div class="tr2"><label>5th line ($):</label><input type="number" id="aTM5" value="20" min="0"/></div>
+            <div class="tr2"><label>6th line ($):</label><input type="number" id="aTM6" value="25" min="0"/></div>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="btn bp sm" onclick="saveAdminTiers()">💾 Save Rep Tiers</button>
+              <button class="btn bo sm" onclick="rstT()">↺ Reset</button>
+            </div>
+          </div></div>
+          <div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">🎯 Coach Tiers</div></div>
+          <div class="card-body">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px">Activation Bonus — Per Door</div>
+            <div class="tr2"><label>100%+ $/door:</label><input type="number" id="aCAt100" value="200" min="0"/></div>
+            <div class="tr2"><label>115%+ $/door:</label><input type="number" id="aCAt115" value="275" min="0"/></div>
+            <div class="tr2"><label>125%+ $/door:</label><input type="number" id="aCAt125" value="325" min="0"/></div>
+            <div class="tr2"><label>ELB bottom 40% penalty %:</label><input type="number" id="aCAtPen" value="25" min="0" max="100"/></div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px;margin-top:14px">Accessory Bonus — Per Box</div>
+            <div class="tr2"><label>$50+/box $/box:</label><input type="number" id="aCAc50" value="2" min="0" step="0.5"/></div>
+            <div class="tr2"><label>$60+/box $/box:</label><input type="number" id="aCAc60" value="3" min="0" step="0.5"/></div>
+            <div class="tr2"><label>$70+/box $/box:</label><input type="number" id="aCAc70" value="4" min="0" step="0.5"/></div>
+            <div class="tr2"><label>ELB drop tiers:</label><input type="number" id="aCAcElbDrop" value="1" min="0" max="3"/></div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px;margin-top:14px">Shrink Guardrail</div>
+            <div class="tr2"><label>2.1-3% penalty %:</label><input type="number" id="aCSh1" value="10" min="0" max="100"/></div>
+            <div class="tr2"><label>3.1-5% penalty %:</label><input type="number" id="aCSh2" value="25" min="0" max="100"/></div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:8px;border-bottom:2px solid var(--bo);padding-bottom:4px;margin-top:14px">Kicker &amp; MIM</div>
+            <div class="tr2"><label>$300K kicker $:</label><input type="number" id="aCKick1" value="500" min="0"/></div>
+            <div class="tr2"><label>$350K kicker $:</label><input type="number" id="aCKick2" value="750" min="0"/></div>
+            <div class="tr2"><label>MIM rate $/BAN:</label><input type="number" id="aCMimRate" value="10" min="0" step="0.5"/></div>
+            <div style="margin-top:12px"><button class="btn bs sm" onclick="saveAdminCoachTiers()">💾 Save Coach Tiers</button></div>
+          </div></div>
+        </div>
+        <div class="card" style="margin-top:14px"><div class="card-hdr" style="background:var(--dk)"><div class="card-title">🏢 Manager Tiers</div></div>
+        <div class="card-body"><div id="aAdminMgrTiers"></div><div style="margin-top:12px"><button class="btn bp sm" onclick="saveAdminMgrTiers()">💾 Save Manager Tiers</button></div></div></div>
+      </div>
+
+      <!-- SPIFFS -->
+      <div class="sub-pane" id="admin-spiffs">
+        <div class="card"><div class="card-hdr card-hdr-pr"><div class="card-title">⚡ Spiff Manager</div></div>
+        <div class="card-body">
+          <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:#8a6000">⚠️ GitHub sync when workflow is set up. Currently saves to this browser.</div>
+          <div id="aSpiffList"><p style="font-size:13px;color:var(--mu)">No spiffs yet.</p></div>
+          <div style="border:2px dashed var(--bo);border-radius:9px;padding:14px;background:#FFF0F7;margin-top:12px">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--pr);margin-bottom:10px">+ Add New Spiff</div>
+            <div class="fg fc2" style="margin-bottom:8px">
+              <div class="fi"><label>Name</label><input type="text" id="aSpN" placeholder="e.g. April iPhone Promo"/></div>
+              <div class="fi"><label>Type</label><select id="aSpT"><option value="flat_per_rep">Flat $ per rep (weekly)</option><option value="flat_per_unit">Flat $ per unit</option><option value="pct_gross">% of gross</option></select></div>
+              <div class="fi"><label>Amount</label><input type="number" id="aSpA" placeholder="0.00" min="0" step="0.01"/></div>
+              <div class="fi"><label>Applies To</label><select id="aSpSc" onchange="onAdminSS()"><option value="all">All Reps</option><option value="store">Specific Store</option><option value="coach">Specific Coach</option></select></div>
+              <div class="fi" id="aSpSW" style="display:none"><label id="aSpSL">Store</label><select id="aSpSV"><option value="">Select…</option></select></div>
+              <div class="fi"><label>Start Date</label><input type="date" id="aSpSd"/></div>
+              <div class="fi"><label>End Date (blank = open)</label><input type="date" id="aSpEd"/></div>
+              <div class="fi fl"><label>Notes</label><textarea id="aSpNt" placeholder="e.g. Metro promo"></textarea></div>
+            </div>
+            <button class="btn bp sm" onclick="addAdminSp()">⚡ Add Spiff</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- DATA MANAGEMENT -->
+      <div class="sub-pane" id="admin-data">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+          <div class="card"><div class="card-hdr card-hdr-pr"><div class="card-title">🗑 Clear Data</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+            <button class="btn bd" onclick="clrAll()">🗑 Clear All Rep Data</button>
+            <button class="btn bd" onclick="if(confirm('Clear all chargebacks?')){CBs=[];saveSession();renCBL();tst2('Cleared.','ok')}">🗑 Clear All Chargebacks</button>
+            <button class="btn bd" onclick="if(confirm('Clear all store assignments?')){clrAssign()}">🗑 Clear Store Assignments</button>
+            <button class="btn bd" onclick="if(confirm('Clear all manager records?')){localStorage.removeItem('wfo_mgr_recs');renMgrHist();renMgrOverview();tst2('Cleared.','ok')}">🗑 Clear Manager Records</button>
+            <button class="btn bd" onclick="if(confirm('Clear all coach records?')){localStorage.removeItem('wfo_coach_recs');renCoachOv();tst2('Cleared.','ok')}">🗑 Clear Coach Records</button>
+            <button class="btn bd" onclick="rstT()">↺ Reset All Tiers to Defaults</button>
+          </div></div>
+          <div class="card"><div class="card-hdr" style="background:var(--ok)"><div class="card-title">⬇ Export Everything</div></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+            <button class="btn bok" onclick="doExp()">⬇ Rep Payroll CSV (Paychex)</button>
+            <button class="btn bok" onclick="doSum()">⬇ Rep Summary CSV</button>
+            <button class="btn bok" onclick="expMgrSheet()">⬇ Manager Actuals CSV</button>
+            <button class="btn bok" onclick="expCoachSheet()">⬇ Coach Actuals CSV</button>
+            <button class="btn bok" onclick="expRosterCSV()">⬇ Rep Roster CSV</button>
+            <button class="btn bok" onclick="expAssignCSV()">⬇ Store Assignments CSV</button>
+            <button class="btn bok" onclick="printAllStubs()">🖨 Print All Bonus Slips</button>
+          </div></div>
+          <div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">📋 System Info</div></div>
+          <div class="card-body">
+            <div id="adminSysInfo" style="font-size:12px;color:var(--mu);line-height:2"></div>
+          </div></div>
+        </div>
+      </div>
+
+    </div><!-- /adminContent -->
+  </div><!-- /pg-admin -->
+
+
+  <div class="page" id="pg-roster">
     <div class="card"><div class="card-hdr card-hdr-dk">
       <div class="card-title">👥 Rep Roster — Admin Only</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1080,8 +1483,12 @@ function applyRosterToRep(rep){
     if(r.full)rep.fullName=r.full;
     if(r.first)rep.firstName=r.first;
     if(r.last&&!ov)rep.lastName=r.last;
-    if(r.coach&&(!rep.c||rep.c==='TBD'))rep.c=r.coach;
+    if(r.coach&&(!rep.c||rep.c===''||rep.c==='TBD'))rep.c=r.coach;
     if(r.state)rep.state=r.state;
+    // Apply stored assignment if exists
+    const asgn=getAssignment(ri);
+    if(asgn?.s&&!rep.s)rep.s=asgn.s;
+    if(asgn?.c)rep.c=asgn.c;
   }
   // Override takes priority over roster last name
   if(ov){rep.lastName=ov;rep.fullName=((rep.firstName||rep.n||'')+' '+ov).trim();}
@@ -1133,6 +1540,7 @@ function goPage(id,el){
   sessionStorage.setItem("wfo_page",id);
   if(id==="pg-leaderboard")renLB();
   if(id==="pg-roster")renRoster();
+  if(id==="pg-admin"){if(_pinUnlocked){document.getElementById('adminGate').style.display='none';document.getElementById('adminContent').style.display='block';initAdminCenter();}else{document.getElementById('adminGate').style.display='flex';document.getElementById('adminContent').style.display='none';}}
   if(id==="pg-summary")renSum();
   if(id==="pg-managers")renMgrOverview();
   if(id==="pg-coaches")renCoachOv();
@@ -1431,7 +1839,12 @@ function pC(txt,src,fn){
   }
   setDZ(true);saveSession();renR();document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
   applyRosterToAll();
-  st2(fn+" - "+ad+" added, "+up+" updated.","ok");
+  saveSession();
+  // Show week confirmation banner
+  const wkDisplay=document.getElementById('wkb')?.textContent||'selected week';
+  st2("✅ "+fn+" loaded — "+ad+" new, "+up+" updated — Data for: "+wkDisplay+"","ok");
+  // Prompt week confirmation
+  showWeekConfirm(fn,ad+up);
 }
 function csvSp(l){const r=[];let c="",q=false;for(const ch of l){if(ch==='"'){q=!q;continue;}if(ch===","&&!q){r.push(c);c="";continue;}c+=ch;}r.push(c);return r;}
 
@@ -2161,6 +2574,32 @@ function exportCoachPDF(){
   openPF(body,"Coach Bonus - "+coach);
 }
 
+// ── WEEK CONFIRM BANNER ──
+function showWeekConfirm(fn,count){
+  // Remove existing banner
+  const ex=document.getElementById('wkConfirmBanner');if(ex)ex.remove();
+  const wkDisplay=document.getElementById('wkb')?.textContent||'—';
+  const wkVal=document.getElementById('wks')?.value||'';
+  const div=document.createElement('div');
+  div.id='wkConfirmBanner';
+  div.style.cssText='background:linear-gradient(135deg,#E8F5E9,#F0FBF4);border:2px solid var(--ok);border-radius:10px;padding:11px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px';
+  div.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:20px">✅</span>
+    <div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--ok)">${fn} loaded — ${count} reps</div>
+      <div style="font-size:12px;color:var(--mu)">Data assigned to: <strong style="color:var(--se)">${wkDisplay}</strong></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:12px;color:var(--mu)">Wrong week?</span>
+    <input type="date" value="${wkVal}" style="padding:5px 8px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none" onchange="requirePin(()=>{document.getElementById('wks').value=this.value;onWC();div.querySelector('strong').textContent=document.getElementById('wkb').textContent;})" id="wkConfirmDate"/>
+    <button class="btn bo sm" onclick="this.closest('#wkConfirmBanner').remove()">✕ Dismiss</button>
+  </div>`;
+  // Insert before stbar or at top of content
+  const stb=document.getElementById('stb');
+  if(stb&&stb.parentNode)stb.parentNode.insertBefore(div,stb.nextSibling);
+}
+
 // ── SHEET STATUS ──
 function updSheetStatus(){
   const ms=document.getElementById('mgrSheetStatus');
@@ -2184,10 +2623,9 @@ function updSheetStatus(){
     cs.style.color=isLocked?'var(--da)':isAdmin?'var(--ok)':'#8a6000';
   }
   if(ps){
-    if(isLocked){ps.textContent='🔒 Period Locked';ps.style.color='var(--da)';}
-    else if(isAdmin){ps.textContent='✅ Admin Unlocked — Editing Enabled';ps.style.color='var(--ok)';}
-    else{ps.textContent='🔑 PIN Required to Edit';ps.style.color='var(--wa)';}
-  }
+    if(isLocked){ps.textContent='🔒 Locked — Click to Unlock';ps.style.background='var(--da)';ps.style.color='#fff';ps.style.border='none';ps.onclick=()=>requirePin(unlockWk);}
+    else if(isAdmin){ps.textContent='✅ Admin Mode — Editing ON';ps.style.background='var(--ok)';ps.style.color='#fff';ps.style.border='none';ps.onclick=null;}
+    else{ps.textContent='🔑 Click to Enable Editing';ps.style.background='var(--wa)';ps.style.color='#1A1A1A';ps.style.border='none';ps.onclick=()=>requirePin(()=>{});}}
 }
 
 // ── HELPERS ──
@@ -2452,82 +2890,152 @@ function printMgrSheet(){
 }
 
 // ══════════════════════════════════════════════════════
-// COACH ONE-SHEET
+// COACH ONE-SHEET — PER STORE (1 door per store)
 // ══════════════════════════════════════════════════════
-let coachSheetData={}; // {coachName: {actPct, accPerBox, shrinkPct, elbPctile, totalBoxes}}
+// coachSheetData structure:
+// {storeName: {actPct, accPerBox, shrinkPct, elbPctile, totalBoxes}}
+
+function calcStoreCoachBonus(storeName, sd){
+  const ct=T.coach||DT.coach;
+  const elbBottom40=(+sd.elbPctile||0)>60;
+  let actBonus=0, accBonus=0;
+  const guardrails=[];
+  const actPct=+sd.actPct||0;
+  const accPerBox=+sd.accPerBox||0;
+  const shrinkPct=+sd.shrinkPct||0;
+  const totalBoxes=+sd.totalBoxes||0;
+
+  // ACTIVATION — 1 door per store, 0 if under 100%
+  if(actPct>=100){
+    let rate=actPct>=125?ct.at125:actPct>=115?ct.at115:ct.at100;
+    if(elbBottom40){rate=rate*(1-ct.atPen/100);guardrails.push('ELB −'+ct.atPen+'%');}
+    actBonus=rate*1; // 1 door
+  }
+
+  // ACCESSORY — 0 if under $50 avg baseline
+  if(accPerBox>=50&&totalBoxes>0){
+    let accRate=accPerBox>=70?ct.ac70:accPerBox>=60?ct.ac60:ct.ac50;
+    if(elbBottom40){
+      const drop=ct.acElbDrop||1;
+      const tiers=[ct.ac50,ct.ac60,ct.ac70];
+      const ci=accPerBox>=70?2:accPerBox>=60?1:0;
+      accRate=tiers[Math.max(0,ci-drop)];
+      guardrails.push('ELB acc drop');
+    }
+    let shrinkMult=1;
+    if(shrinkPct>5){shrinkMult=0;guardrails.push('Shrink >5%');}
+    else if(shrinkPct>3){shrinkMult=1-ct.sh2/100;guardrails.push('Shrink −'+ct.sh2+'%');}
+    else if(shrinkPct>2){shrinkMult=1-ct.sh1/100;guardrails.push('Shrink −'+ct.sh1+'%');}
+    accBonus=accRate*totalBoxes*shrinkMult;
+  }
+
+  return{actBonus,accBonus,total:actBonus+accBonus,guardrails,actPct,accPerBox,shrinkPct};
+}
 
 function renCoachSheet(){
   const el=document.getElementById('coachSheetSections');if(!el)return;
   const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
   const ct=T.coach||DT.coach;
+  const srBs=getSR_BS(); // Live store roster
+
   let totalPayout=0,totalMim=0,totalKick=0,guardCount=0;
 
   el.innerHTML=COACHES.map(coach=>{
-    const sd=coachSheetData[coach]||{};
-    const stores=SR.filter(s=>s.c===coach);
+    // Get stores for this coach from LIVE store roster backsheet
+    const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+    if(!stores.length)return'';
+
     const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
     const mimSpiff=mimBans*ct.mimRate;
-    // Calculate bonus
-    const doors=+sd.doors||stores.length;
-    const actPct=+sd.actPct||0;
-    const accPerBox=+sd.accPerBox||0;
-    const shrinkPct=+sd.shrinkPct||0;
-    const elbPctile=+sd.elbPctile||0;
-    const totalBoxes=+sd.totalBoxes||0;
-    const elbBottom40=elbPctile>60;
-    let actBonus=0,accBonus=0,kicker=0;const guardrails=[];
-    if(actPct>=100){let rate=actPct>=125?ct.at125:actPct>=115?ct.at115:ct.at100;if(elbBottom40){rate*=(1-ct.atPen/100);guardrails.push('ELB −'+ct.atPen+'%');}actBonus=rate*doors;}
-    if(accPerBox>=50&&totalBoxes>0){let accRate=accPerBox>=70?ct.ac70:accPerBox>=60?ct.ac60:ct.ac50;if(elbBottom40){const drop=ct.acElbDrop||1;const tiers=[ct.ac50,ct.ac60,ct.ac70];const ci=accPerBox>=70?2:accPerBox>=60?1:0;accRate=tiers[Math.max(0,ci-drop)];guardrails.push('ELB acc drop');}let sm=1;if(shrinkPct>5){sm=0;guardrails.push('Shrink >5%');}else if(shrinkPct>3){sm=1-ct.sh2/100;guardrails.push('Shrink −'+ct.sh2+'%');}else if(shrinkPct>2){sm=1-ct.sh1/100;guardrails.push('Shrink −'+ct.sh1+'%');}accBonus=accRate*totalBoxes*sm;}
-    if(coAcc>=350000)kicker=ct.kick2;else if(coAcc>=300000)kicker=ct.kick1;
-    const total=actBonus+accBonus+mimSpiff+kicker;
-    totalPayout+=total;totalMim+=mimSpiff;totalKick+=kicker;if(guardrails.length)guardCount++;
+
+    // Calculate per-store bonuses
+    let coachActTotal=0,coachAccTotal=0,coachGuardrails=[];
+    const storeResults=stores.map(store=>{
+      const sd=coachSheetData[store.s]||{};
+      const res=calcStoreCoachBonus(store.s,sd);
+      coachActTotal+=res.actBonus;
+      coachAccTotal+=res.accBonus;
+      if(res.guardrails.length)coachGuardrails=coachGuardrails.concat(res.guardrails.map(g=>store.s+': '+g));
+      return{store,sd,res};
+    });
+
+    // Kicker — company-wide, split equally among coaches or just flag
+    let kicker=0;
+    if(coAcc>=350000)kicker=ct.kick2;
+    else if(coAcc>=300000)kicker=ct.kick1;
+
+    const coachTotal=coachActTotal+coachAccTotal+mimSpiff+kicker;
+    totalPayout+=coachTotal;totalMim+=mimSpiff;totalKick+=kicker;
+    if(coachGuardrails.length)guardCount++;
 
     return`<div style="margin-bottom:20px;border:1px solid var(--bo);border-radius:12px;overflow:hidden">
       <!-- COACH HEADER -->
       <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-        <div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">${coach}</div><div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${stores.length} stores · ${mimBans} MM BANs</div></div>
-        <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em">Total Bonus</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;color:#fff">$${total.toFixed(2)}</div></div>
-      </div>
-      <!-- INPUT GRID -->
-      <div style="padding:14px 16px;background:#FAFAFA;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-        ${[
-          ['Doors (auto: '+stores.length+')','doors','number',doors||''],
-          ['Activation % to Goal','actPct','number',sd.actPct||''],
-          ['Avg Acc / Box ($)','accPerBox','number',sd.accPerBox||''],
-          ['Shrink %','shrinkPct','number',sd.shrinkPct||''],
-          ['ELB Percentile (national)','elbPctile','number',sd.elbPctile||''],
-          ['Total Boxes (all stores)','totalBoxes','number',sd.totalBoxes||''],
-        ].map(([lbl,fld,typ,val])=>`<div class="fi"><label>${lbl}</label><input type="${typ}" value="${val}" placeholder="Enter…" style="padding:6px 9px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:13px;outline:none" onchange="setCoachSheet('${coach}','${fld}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></div>`).join('')}
-      </div>
-      <!-- RESULTS BAR -->
-      <div style="padding:10px 16px;background:#fff;border-top:1px solid var(--bo);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <div style="display:flex;gap:16px;flex-wrap:wrap;flex:1">
-          ${[['Act Bonus',actBonus,'var(--pr)'],['Acc Bonus',accBonus,'var(--se)'],['MIM Spiff',mimSpiff,'var(--ok)'],['Kicker',kicker,'#00897B)']].map(([l,v,c])=>`<div><div style="font-size:9px;color:var(--mu);font-weight:700;text-transform:uppercase">${l}</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:${c}">$${v.toFixed(2)}</div></div>`).join('')}
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">${coach}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${stores.length} stores · ${mimBans} MM BANs</div>
         </div>
-        ${guardrails.length?`<div style="display:flex;gap:4px;flex-wrap:wrap">${guardrails.map(g=>`<span class="bdg bfl">${g}</span>`).join('')}</div>`:'<span class="bdg bok2">✓ Clean</span>'}
+        <div style="text-align:right">
+          <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em">Total Bonus</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;color:#fff">$${coachTotal.toFixed(2)}</div>
+        </div>
       </div>
-      <!-- STORES TABLE -->
-      <div style="border-top:1px solid var(--bo)">
+      <!-- COACH SUBTOTALS -->
+      <div style="padding:10px 16px;background:#F8F8F8;border-bottom:1px solid var(--bo);display:flex;gap:16px;flex-wrap:wrap">
+        ${[['Act Bonus',coachActTotal,'var(--pr)'],['Acc Bonus',coachAccTotal,'var(--se)'],['MIM Spiff ('+mimBans+' BANs)',mimSpiff,'var(--ok)'],['Kicker',kicker,'#00897B']].map(([l,v,c])=>`<div><div style="font-size:9px;color:var(--mu);font-weight:700;text-transform:uppercase">${l}</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:${c}">$${v.toFixed(2)}</div></div>`).join('')}
+        ${coachGuardrails.length?`<div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:4px;align-items:center">${coachGuardrails.map(g=>`<span class="bdg bfl" style="font-size:9px">${g}</span>`).join('')}</div>`:'<span class="bdg bok2" style="margin-left:auto">✓ Clean</span>'}
+      </div>
+      <!-- PER-STORE ROWS -->
+      <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-size:11px">
           <thead><tr style="background:var(--thb)">
-            <th style="padding:6px 12px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Store</th>
-            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Tier</th>
-            <th style="padding:6px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Manager</th>
-            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Reps</th>
-            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">Total PPD</th>
-            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:1px solid var(--bo)">MM BANs</th>
+            <th style="padding:6px 12px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);white-space:nowrap">Store</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Tier</th>
+            <th style="padding:6px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Manager</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Act % ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Acc/Box $ ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Shrink % ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">ELB Pctile ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Boxes ✎</th>
+            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#E8F5E9">Act $</th>
+            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#E8F5E9">Acc $</th>
+            <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:#fff;text-transform:uppercase;border-bottom:2px solid var(--pr);background:var(--dk)">Store Total</th>
+            <th style="padding:6px 8px;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:#fff;text-transform:uppercase;border-bottom:2px solid var(--pr);background:var(--dk)">Flags</th>
           </tr></thead>
-          <tbody>${stores.map((s,si)=>{
-            const storeReps=reps.filter(r=>r.s===s.s);
-            const storePPD=storeReps.reduce((sum,r)=>sum+(r.ta||0),0);
-            const storeBans=storeReps.reduce((sum,r)=>sum+(r.mb||0),0);
+          <tbody>${storeResults.map(({store,sd,res},si)=>{
+            const storeMgr=srBs[store.s]?.mgr||store.mgr;
+            const storeReps=reps.filter(r=>r.s===store.s);
+            const storeBans=storeReps.reduce((s,r)=>s+(r.mb||0),0);
+            const inpStyle=`width:70px;padding:4px 6px;border:1px solid var(--bo);border-radius:5px;font-size:11px;font-family:'Nunito',sans-serif;outline:none;text-align:center;background:#fff`;
+            const disabled=!_pinUnlocked||wkLocked;
             return`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}">
-              <td style="padding:5px 12px;font-weight:600;font-size:11px">${s.s}</td>
-              <td style="padding:5px 10px;text-align:center"><span class="bdg ${s.tier===1?'bok2':s.tier===2?'bt1':'bt2'}">${s.me}</span></td>
-              <td style="padding:5px 10px;font-size:10px;color:var(--mu)">${s.mgr==='TBD'?'—':s.mgr}</td>
-              <td style="padding:5px 10px;text-align:center;font-weight:700">${storeReps.length}</td>
-              <td style="padding:5px 10px;text-align:center;font-weight:700;color:var(--se)">${storePPD}</td>
-              <td style="padding:5px 10px;text-align:center;font-weight:700;color:var(--ok)">${storeBans}</td>
+              <td style="padding:5px 12px;font-weight:700;font-size:11px;white-space:nowrap;color:var(--se)">${store.s}</td>
+              <td style="padding:5px 8px;text-align:center"><span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span></td>
+              <td style="padding:5px 10px;font-size:10px;color:var(--mu);white-space:nowrap">${X(storeMgr==='TBD'?'—':storeMgr)}</td>
+              <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
+                ${disabled?`<strong style="color:${res.actPct>=100?'var(--ok)':'var(--da)'}">${sd.actPct||'—'}${sd.actPct?'%':''}</strong>`:
+                `<input type="number" value="${sd.actPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.actPct>=100?'#F0FBF4':+sd.actPct>0?'#FFF5F5':'#fff'}" onchange="setCoachSheet('${store.s}','actPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+              </td>
+              <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
+                ${disabled?`<strong>${sd.accPerBox||'—'}${sd.accPerBox?'$':''}</strong>`:
+                `<input type="number" value="${sd.accPerBox||''}" placeholder="$" min="0" step="0.01" style="${inpStyle}" onchange="setCoachSheet('${store.s}','accPerBox',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+              </td>
+              <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
+                ${disabled?`<strong style="color:${+sd.shrinkPct>5?'var(--da)':+sd.shrinkPct>2?'var(--wa)':'var(--ok)'}">${sd.shrinkPct||'—'}${sd.shrinkPct?'%':''}</strong>`:
+                `<input type="number" value="${sd.shrinkPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.shrinkPct>5?'#FFEBEE':+sd.shrinkPct>2?'#FFF8E1':'#fff'}" onchange="setCoachSheet('${store.s}','shrinkPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+              </td>
+              <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
+                ${disabled?`<strong>${sd.elbPctile||'—'}${sd.elbPctile?'%':''}</strong>`:
+                `<input type="number" value="${sd.elbPctile||''}" placeholder="%" min="0" max="100" step="0.1" style="${inpStyle};background:${+sd.elbPctile>60?'#FFF8E1':'#fff'}" onchange="setCoachSheet('${store.s}','elbPctile',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+              </td>
+              <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
+                ${disabled?`<strong>${sd.totalBoxes||'—'}</strong>`:
+                `<input type="number" value="${sd.totalBoxes||''}" placeholder="0" min="0" style="${inpStyle}" onchange="setCoachSheet('${store.s}','totalBoxes',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`}
+              </td>
+              <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--ok)">$${res.actBonus.toFixed(2)}</strong>${res.actPct>0&&res.actPct<100?`<div style="font-size:8px;color:var(--da)">Under 100%</div>`:''}</td>
+              <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--se)">$${res.accBonus.toFixed(2)}</strong></td>
+              <td style="padding:5px 10px;text-align:center;background:#F3E8FF"><strong style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${res.total.toFixed(2)}</strong></td>
+              <td style="padding:5px 8px;text-align:center">${res.guardrails.length?res.guardrails.map(g=>`<span class="bdg bfl" style="font-size:8px;display:block;margin:1px 0">${g}</span>`).join(''):'<span class="bdg bok2" style="font-size:8px">✓</span>'}</td>
             </tr>`;
           }).join('')}</tbody>
         </table>
@@ -2542,54 +3050,57 @@ function renCoachSheet(){
   u('cSheetGuard',guardCount);
   u('cSheetKick','$'+totalKick.toFixed(2));
 }
-function setCoachSheet(coach,field,val){
-  if(!_pinUnlocked){tst2('PIN required to edit.','er');renCoachSheet();return;}
-  if(wkLocked){tst2('Period is locked. Unlock first.','er');renCoachSheet();return;}
-  if(!coachSheetData[coach])coachSheetData[coach]={};
-  coachSheetData[coach][field]=val;
-  clearTimeout(window._coachSheetTimer);
-  window._coachSheetTimer=setTimeout(()=>renCoachSheet(),200);
-}
+
+// Save coach sheet — per store records
 function saveCoachSheet(){
   const mn=document.getElementById('coachSheetMonth')?.value;
   if(!mn){tst2('Select a period.','er');return;}
   const ct=T.coach||DT.coach;
   const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
+  const srBs=getSR_BS();
   const existing=JSON.parse(localStorage.getItem('wfo_coach_recs')||'[]');
+
   COACHES.forEach(coach=>{
-    const sd=coachSheetData[coach];if(!sd)return;
-    const stores=SR.filter(s=>s.c===coach);
+    const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+    if(!stores.length)return;
     const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
     const mimSpiff=mimBans*ct.mimRate;
-    const doors=+sd.doors||stores.length;
-    const actPct=+sd.actPct||0,accPerBox=+sd.accPerBox||0,shrinkPct=+sd.shrinkPct||0,elbPctile=+sd.elbPctile||0,totalBoxes=+sd.totalBoxes||0;
-    const elbBottom40=elbPctile>60;
-    let actBonus=0,accBonus=0,kicker=0;const guardrails=[];
-    if(actPct>=100){let rate=actPct>=125?ct.at125:actPct>=115?ct.at115:ct.at100;if(elbBottom40){rate*=(1-ct.atPen/100);guardrails.push('ELB −'+ct.atPen+'%');}actBonus=rate*doors;}
-    if(accPerBox>=50&&totalBoxes>0){let accRate=accPerBox>=70?ct.ac70:accPerBox>=60?ct.ac60:ct.ac50;if(elbBottom40){const drop=ct.acElbDrop||1;const tiers=[ct.ac50,ct.ac60,ct.ac70];const ci=accPerBox>=70?2:accPerBox>=60?1:0;accRate=tiers[Math.max(0,ci-drop)];guardrails.push('ELB drop');}let sm=1;if(shrinkPct>5)sm=0;else if(shrinkPct>3)sm=1-ct.sh2/100;else if(shrinkPct>2)sm=1-ct.sh1/100;accBonus=accRate*totalBoxes*sm;}
-    if(coAcc>=350000)kicker=ct.kick2;else if(coAcc>=300000)kicker=ct.kick1;
-    const total=actBonus+accBonus+mimSpiff+kicker;
-    const rec={id:Date.now(),coach,period:mn,actPct,accPerBox,shrinkPct,elbPctile,doors,totalBoxes,coAcc,actBonus,accBonus,mimSpiff,kicker,total,guardrails,savedAt:new Date().toLocaleString()};
+    let coachActTotal=0,coachAccTotal=0,allGuardrails=[],storeBreakdown=[];
+    stores.forEach(store=>{
+      const sd=coachSheetData[store.s]||{};
+      const res=calcStoreCoachBonus(store.s,sd);
+      coachActTotal+=res.actBonus;coachAccTotal+=res.accBonus;
+      if(res.guardrails.length)allGuardrails=allGuardrails.concat(res.guardrails.map(g=>store.s+': '+g));
+      storeBreakdown.push({store:store.s,actPct:+sd.actPct||0,accPerBox:+sd.accPerBox||0,shrinkPct:+sd.shrinkPct||0,elbPctile:+sd.elbPctile||0,totalBoxes:+sd.totalBoxes||0,actBonus:res.actBonus,accBonus:res.accBonus,total:res.total});
+    });
+    let kicker=coAcc>=350000?ct.kick2:coAcc>=300000?ct.kick1:0;
+    const total=coachActTotal+coachAccTotal+mimSpiff+kicker;
+    const rec={id:Date.now(),coach,period:mn,storeBreakdown,actBonus:coachActTotal,accBonus:coachAccTotal,mimSpiff,kicker,total,guardrails:allGuardrails,coAcc,savedAt:new Date().toLocaleString()};
     const idx=existing.findIndex(r=>r.coach===coach&&r.period===mn);
     if(idx>=0)existing[idx]=rec;else existing.unshift(rec);
   });
   localStorage.setItem('wfo_coach_recs',JSON.stringify(existing));
   renCoachOv();tst2('All coach data saved!','ok');
 }
+
+// Export coach sheet CSV — per store breakdown
 function expCoachSheet(){
   const mn=document.getElementById('coachSheetMonth')?.value||'';
-  const ct=T.coach||DT.coach;
-  const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
-  const hd=['Coach','Doors','Act%','Acc/Box$','Shrink%','ELB Pctile','Boxes','Act Bonus$','Acc Bonus$','MIM$','Kicker$','Total$','Guardrails'];
-  const rows=COACHES.map(coach=>{
-    const sd=coachSheetData[coach]||{};
-    const stores=SR.filter(s=>s.c===coach);
-    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
-    const mimSpiff=mimBans*ct.mimRate;
-    return[coach,sd.doors||stores.length,sd.actPct||'',sd.accPerBox||'',sd.shrinkPct||'',sd.elbPctile||'',sd.totalBoxes||'','','','','','',''];
+  const srBs=getSR_BS();
+  const hd=['Coach','Store','Tier','Manager','Act%','Acc/Box$','Shrink%','ELB Pctile','Boxes','Act Bonus$','Acc Bonus$','Store Total$','Guardrails'];
+  const rows=[];
+  COACHES.forEach(coach=>{
+    const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+    stores.forEach(store=>{
+      const sd=coachSheetData[store.s]||{};
+      const res=calcStoreCoachBonus(store.s,sd);
+      rows.push([coach,store.s,store.me,srBs[store.s]?.mgr||store.mgr,sd.actPct||'',sd.accPerBox||'',sd.shrinkPct||'',sd.elbPctile||'',sd.totalBoxes||'',res.actBonus.toFixed(2),res.accBonus.toFixed(2),res.total.toFixed(2),res.guardrails.join('; ')]);
+    });
   });
   dlC([hd,...rows],'WFO_CoachActuals_'+mn+'.csv');tst2('Exported.','ok');
 }
+
+
 function printCoachSheet(){tst2('Use browser print — Ctrl+P','wn');}
 
 // ══════════════════════════════════════════════════════
@@ -2779,6 +3290,533 @@ function expRosterCSV(){
   const hd=['#','NTID','Full Name','First','Last','State','Coach','Store','In CSV','PPD','Gross $'];
   const rows=all.map((r,i)=>[i+1,r.ntid,r.full,r.first,r.last,r.state,r.coach,r.store,r.inCSV?'Yes':'No',r.ppd,r.gross.toFixed(2)]);
   dlC([hd,...rows],'WFO_RepRoster.csv');tst2('Roster exported.','ok');
+}
+
+// ══════════════════════════════════════════════════════
+// ADMIN CENTER
+// ══════════════════════════════════════════════════════
+let _adminPinEntry = '';
+let mgrPeriodLocked = false;
+let coachPeriodLocked = false;
+
+function adminPinKey(d){
+  if(_adminPinEntry.length>=4)return;
+  _adminPinEntry+=d;updAdminPinDots();
+  if(_adminPinEntry.length===4)setTimeout(adminPinSubmit,100);
+}
+function adminPinClear(){_adminPinEntry='';updAdminPinDots();document.getElementById('adminPinErr').textContent='';}
+function adminPinSubmit(){
+  if(_adminPinEntry===PIN){
+    _pinUnlocked=true;
+    document.getElementById('adminGate').style.display='none';
+    document.getElementById('adminContent').style.display='block';
+    _adminPinEntry='';updAdminPinDots();
+    initAdminCenter();
+    // Also update button in week bar
+    const ps=document.getElementById('pinStatus');
+    if(ps){ps.textContent='✅ Admin Mode — Editing ON';ps.style.background='var(--ok)';ps.style.color='#fff';ps.onclick=null;}
+    updSheetStatus();
+    clearTimeout(_renTimer);_renTimer=setTimeout(()=>renR(),80);
+  } else {
+    document.getElementById('adminPinErr').textContent='Incorrect PIN. Try again.';
+    document.getElementById('adminPinBox')?.classList.add('shake');
+    setTimeout(()=>document.getElementById('adminPinBox')?.classList.remove('shake'),350);
+    _adminPinEntry='';updAdminPinDots();
+  }
+}
+function updAdminPinDots(){
+  for(let i=0;i<4;i++){const d=document.getElementById('apd'+i);if(d)d.className='pin-dot'+(_adminPinEntry.length>i?' filled':'');}
+}
+function adminLockOut(){
+  _pinUnlocked=false;
+  document.getElementById('adminGate').style.display='flex';
+  document.getElementById('adminContent').style.display='none';
+  _adminPinEntry='';updAdminPinDots();
+  const ps=document.getElementById('pinStatus');
+  if(ps){ps.textContent='🔑 Click to Enable Editing';ps.style.background='var(--wa)';ps.style.color='#1A1A1A';}
+  updSheetStatus();renR();
+  goPage('pg-reps',document.querySelector('[data-page="pg-reps"]'));
+}
+function swAdmin(tab,btn){
+  document.querySelectorAll('#adminContent .sub-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#adminContent .sub-tab').forEach(b=>b.classList.remove('active'));
+  const p=document.getElementById('admin-'+tab);if(p)p.classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(tab==='stores')renStoreRoster();
+  if(tab==='roster')renAdminRoster();
+  if(tab==='assignments')renAdminAssign();
+  if(tab==='tiers')initAdminTiers();
+  if(tab==='spiffs')renAdminSpiffs();
+  if(tab==='data')renAdminSysInfo();
+  if(tab==='backsheet'){const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
+}
+
+function initAdminCenter(){
+  // Set week display
+  const wkd=document.getElementById('wkb')?.textContent||'—';
+  const wd=document.getElementById('adminWkDisp');if(wd)wd.textContent=wkd;
+  // Rep count and gross
+  let tG=0;reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
+  const rc=document.getElementById('adminRepCount');if(rc)rc.textContent=reps.length;
+  const gr=document.getElementById('adminGross');if(gr)gr.textContent='$'+tG.toFixed(2);
+  // Lock status
+  updAdminLockUI();
+  // Month defaults
+  const n=new Date(),mn=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));
+  const aml=document.getElementById('adminMgrLockMonth');if(aml&&!aml.value)aml.value=mn;
+  const acl=document.getElementById('adminCoachLockMonth');if(acl&&!acl.value)acl.value=mn;
+  // Populate bulk assign store dropdown
+  const bs=document.getElementById('aBulkStore');
+  if(bs&&bs.options.length<=1)SR.forEach(r=>bs.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
+  // Populate new roster store dropdown
+  const ns=document.getElementById('newRosterStore');
+  if(ns&&ns.options.length<=1)SR.forEach(r=>ns.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
+  // Backsheet month default
+  const abm=document.getElementById('aBsMonth');if(abm&&!abm.value)abm.value=mn;
+  // Init spiff scope dropdowns
+  const aSpSV=document.getElementById('aSpSV');
+  if(aSpSV&&aSpSV.options.length<=1)SR.forEach(r=>aSpSV.innerHTML+=`<option value="${r.s}">${r.s}</option>`);
+}
+function updAdminLockUI(){
+  const dot=document.getElementById('adminLkDot'),lbl=document.getElementById('adminLkLbl'),btn=document.getElementById('adminLkBtn');
+  if(dot)dot.className='lk-dot'+(wkLocked?' locked':' open');
+  if(lbl){lbl.className='lk-lbl'+(wkLocked?' locked':' open');lbl.textContent=wkLocked?'Locked — Paid':'Unlocked';}
+  if(btn){btn.textContent=wkLocked?'🔓 Unlock Week':'🔒 Lock & Mark Paid';btn.className=wkLocked?'btn bd':'btn bok';}
+  const md=document.getElementById('adminMgrDot'),ml=document.getElementById('adminMgrLbl'),mb=document.getElementById('adminMgrBtn');
+  if(md)md.className='lk-dot'+(mgrPeriodLocked?' locked':' open');
+  if(ml){ml.className='lk-lbl'+(mgrPeriodLocked?' locked':' open');ml.textContent=mgrPeriodLocked?'Locked':'Unlocked';}
+  if(mb){mb.textContent=mgrPeriodLocked?'🔓 Unlock Manager':'🔒 Lock Manager Period';mb.className=mgrPeriodLocked?'btn bd':'btn bok';}
+  const cd=document.getElementById('adminCoachDot'),cl=document.getElementById('adminCoachLbl'),cb=document.getElementById('adminCoachBtn');
+  if(cd)cd.className='lk-dot'+(coachPeriodLocked?' locked':' open');
+  if(cl){cl.className='lk-lbl'+(coachPeriodLocked?' locked':' open');cl.textContent=coachPeriodLocked?'Locked':'Unlocked';}
+  if(cb){cb.textContent=coachPeriodLocked?'🔓 Unlock Coach':'🔒 Lock Coach Period';cb.className=coachPeriodLocked?'btn bd':'btn bok';}
+}
+function adminToggleLock(){
+  if(wkLocked){if(!confirm('Unlock week for corrections?'))return;wkLocked=false;tst2('Week unlocked.','ok');}
+  else{if(!reps.length){tst2('No rep data to lock.','er');return;}if(!confirm('Lock & mark as paid?'))return;lockWk();}
+  updAdminLockUI();updLk();renR();
+}
+function adminToggleMgrLock(){
+  mgrPeriodLocked=!mgrPeriodLocked;
+  const mn=document.getElementById('adminMgrLockMonth')?.value||'';
+  tst2('Manager period '+(mgrPeriodLocked?'locked':'unlocked')+(mn?' — '+mn:'')+'.',mgrPeriodLocked?'ok':'wn');
+  updAdminLockUI();updSheetStatus();
+}
+function adminToggleCoachLock(){
+  coachPeriodLocked=!coachPeriodLocked;
+  const mn=document.getElementById('adminCoachLockMonth')?.value||'';
+  tst2('Coach period '+(coachPeriodLocked?'locked':'unlocked')+(mn?' — '+mn:'')+'.',coachPeriodLocked?'ok':'wn');
+  updAdminLockUI();updSheetStatus();
+}
+
+// ── ADMIN ROSTER ──
+function renAdminRoster(){
+  const srch=(document.getElementById('aRosterSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('aRosterFState')?.value||'';
+  const fCoach=document.getElementById('aRosterFCoach')?.value||'';
+  const all=getMergedRoster();
+  const coachCounts={};
+  all.forEach(r=>{const c=r.coach||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  upd('aRosterTotal',all.length);upd('aRosterRP',coachCounts['Rose Perez']||0);upd('aRosterMW',coachCounts['Mr. Watts']||0);
+  upd('aRosterAS',coachCounts['Ambulai Sheku']||0);upd('aRosterJM',coachCounts['Joel Montero']||0);
+  upd('aRosterMN',coachCounts['Manny']||0);upd('aRosterCH',coachCounts['Cheryl']||0);upd('aRosterTBD',coachCounts['TBD']||0);
+  const fil=all.filter(r=>{
+    if(fState&&r.state!==fState)return false;
+    if(fCoach&&r.coach!==fCoach)return false;
+    if(srch&&!(r.full||'').toLowerCase().includes(srch)&&!(r.ntid||'').toLowerCase().includes(srch)&&!(r.coach||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+  const lbl=document.getElementById('aRosterCount');if(lbl)lbl.textContent=fil.length+' reps';
+  const body=document.getElementById('aRosterBody');if(!body)return;
+  body.innerHTML=fil.map((r,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+    <td style="padding:7px 10px;color:var(--mu);font-size:11px">${i+1}</td>
+    <td style="padding:7px 10px"><div style="font-weight:700;color:var(--se);font-size:13px">${X(r.full||'—')}</div>${r.inCSV?`<span class="bdg bok2" style="font-size:8px">✓ CSV</span>`:`<span class="bdg bno" style="font-size:8px">Not uploaded</span>`}</td>
+    <td style="padding:7px 10px;font-family:monospace;font-size:11px;color:var(--mu)">${r.ntid||'—'}</td>
+    <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||'—'}</span></td>
+    <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterCoach('${r.ntid}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'">${['Ambulai Sheku','Cheryl','Joel Montero','Manny','Mr. Watts','Rose Perez','TBD'].map(c=>`<option value="${c}"${r.coach===c?' selected':''}>${c}</option>`).join('')}</select></td>
+    <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterStore('${r.ntid}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"><option value="">${r.store||'— Unassigned —'}</option>${SR.map(s=>`<option value="${s.s}"${r.store===s.s?' selected':''}>${s.s}</option>`).join('')}</select></td>
+    <td style="padding:5px 8px"><input type="text" value="${X(r.first||'')}" placeholder="First" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterName('${r.ntid}','first',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
+    <td style="padding:5px 8px"><input type="text" value="${X(r.last||'')}" placeholder="Last" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRosterName('${r.ntid}','last',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
+    <td style="padding:7px 10px;text-align:center">${r.ppd>0?`<div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:12px;color:var(--pr)">$${r.gross.toFixed(0)}</div><div style="font-size:9px;color:var(--mu)">${r.ppd} PPD</div>`:'<span style="font-size:10px;color:var(--mu)">—</span>'}</td>
+  </tr>`).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps match.</td></tr>`;
+}
+
+// ── ADMIN ASSIGNMENTS ──
+function renAdminAssign(){
+  const srch=(document.getElementById('aAssignSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('aAssignFState')?.value||'';
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  const fil=reps.filter(r=>{
+    if(fState&&r.state!==fState)return false;
+    if(srch&&!(dispName(r)).toLowerCase().includes(srch)&&!(r.ri||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+  const lbl=document.getElementById('aAssignCount');if(lbl)lbl.textContent=fil.length+' reps';
+  const body=document.getElementById('aAssignBody');if(!body)return;
+  const rInfo=ri=>REP_ROSTER[ri]||{};
+  body.innerHTML=fil.map((r,i)=>{
+    const c=cRp(r),assigned=!!r.s,ri2=r.ri||r.n;
+    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 10px"><div style="font-weight:700;color:var(--se)">${X(dispName(r))}</div></td>
+      <td style="padding:7px 10px;font-family:monospace;font-size:11px;color:var(--mu)">${r.ri||'—'}</td>
+      <td style="padding:7px 10px;text-align:center"><span class="bdg bt2">${r.state||rInfo(r.ri)?.state||'—'}</span></td>
+      <td style="padding:5px 8px;background:#FFFBF0;border-left:2px solid var(--wa)"><input type="text" value="${X(r.lastName||rInfo(r.ri)?.last||'')}" placeholder="Last name" style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="updRepLastName('${ri2}',this.value,${reps.indexOf(r)})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>
+      <td style="padding:5px 8px"><select style="width:100%;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-family:'Nunito',sans-serif;font-size:11px;outline:none" onchange="applyAssign('${ri2}',this.value,${reps.indexOf(r)})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"><option value="">${r.s||'— Unassigned —'}</option>${SR.map(s=>`<option value="${s.s}"${r.s===s.s?' selected':''}>${s.s}</option>`).join('')}</select></td>
+      <td style="padding:7px 10px;font-size:11px;color:var(--mu)">${r.c||'—'}</td>
+      <td style="text-align:center;font-weight:700;color:var(--se);padding:7px 10px">${r.ta||0}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr);padding:7px 10px">$${c.gr.toFixed(2)}</td>
+      <td style="padding:7px 10px">${assigned?`<span class="bdg bok2">✓</span>`:`<span class="bdg bfl">Unassigned</span>`}</td>
+    </tr>`;
+  }).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:28px;color:var(--mu)">No reps yet — upload RTPOS CSV first.</td></tr>`;
+}
+function adminBulkAssign(){
+  const store=document.getElementById('aBulkStore')?.value;if(!store){tst2('Select a store.','er');return;}
+  const unassigned=reps.filter(r=>!r.s);if(!unassigned.length){tst2('No unassigned reps.','wn');return;}
+  unassigned.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
+  saveSession();renAdminAssign();renR();tst2(unassigned.length+' reps assigned to '+store,'ok');
+}
+function adminBulkAssignAll(){
+  const store=document.getElementById('aBulkStore')?.value;if(!store){tst2('Select a store.','er');return;}
+  const srch=(document.getElementById('aAssignSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('aAssignFState')?.value||'';
+  const fil=reps.filter(r=>(!srch||dispName(r).toLowerCase().includes(srch))&&(!fState||r.state===fState));
+  if(!confirm('Assign '+fil.length+' reps to '+store+'?'))return;
+  fil.forEach(r=>{const key=r.ri||r.n;const coach=setAssignment(key,store);r.s=store;r.c=coach;});
+  saveSession();renAdminAssign();renR();tst2(fil.length+' reps assigned.','ok');
+}
+
+// ── ADMIN TIERS ──
+function initAdminTiers(){
+  // Rep tiers
+  const bxEl=document.getElementById('aBxR');
+  if(bxEl)bxEl.innerHTML=T.box.map((t,i)=>`<div class="tr2"><label>Tier ${i+1} min totact:</label><input type="number" id="aBM${i}" value="${t.mn}" min="0" style="width:75px"/><label style="min-width:auto;margin-left:8px">$/act:</label><input type="number" id="aBR${i}" value="${t.r}" min="0" step="0.5" style="width:70px"/></div>`).join('');
+  const acEl=document.getElementById('aAcR');
+  if(acEl)acEl.innerHTML=T.acc.map((t,i)=>`<div class="tr2"><label>Tier ${i+1} min $:</label><input type="number" id="aAM${i}" value="${t.mp}" min="0" style="width:80px"/><label style="min-width:auto;margin-left:8px">Payout %:</label><input type="number" id="aAP${i}" value="${t.p}" min="0" max="100" step="0.5" style="width:70px"/></div>`).join('');
+  document.getElementById('aTAf').value=T.af;
+  document.getElementById('aTHs').value=T.hs;
+  T.mi.forEach((v,i)=>{const el=document.getElementById('aTM'+(i+1));if(el)el.value=v;});
+  // Coach tiers
+  const ct=T.coach||DT.coach;
+  const cids={aCAt100:'at100',aCAt115:'at115',aCAt125:'at125',aCAtPen:'atPen',aCAc50:'ac50',aCAc60:'ac60',aCAc70:'ac70',aCAcElbDrop:'acElbDrop',aCSh1:'sh1',aCSh2:'sh2',aCKick1:'kick1',aCKick2:'kick2',aCMimRate:'mimRate'};
+  Object.entries(cids).forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)el.value=ct[key]??DT.coach[key];});
+  // Manager tiers
+  const mgr=T.mgr||DT.mgr;
+  const tn={1:'Tier 1 (High Volume)',2:'Tier 2 (2ME)',3:'Tier 3 (1ME)'};
+  const cn={acts:'New Voice Acts',hsi:'HSI',bts:'BTS',acc:'Accessories'};
+  const mgrEl=document.getElementById('aAdminMgrTiers');
+  if(mgrEl)mgrEl.innerHTML=[1,2,3].map(tier=>`<div style="margin-bottom:16px"><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--se);margin-bottom:6px">${tn[tier]}</div>${Object.keys(cn).map(cat=>`<div class="tr2"><label>${cn[cat]}:</label><span style="font-size:11px;color:var(--mu);min-width:50px">Base $</span><input type="number" id="amte_${tier}_${cat}_b" value="${mgr[tier]?.cats[cat]?.base||DT.mgr[tier].cats[cat].base}" min="0" step="0.25" style="width:85px"/><span style="font-size:11px;color:var(--mu);min-width:55px">Up $</span><input type="number" id="amte_${tier}_${cat}_u" value="${mgr[tier]?.cats[cat]?.up||DT.mgr[tier].cats[cat].up}" min="0" step="0.25" style="width:85px"/></div>`).join('')}</div>`).join('<hr style="border:1px solid var(--bo);margin:10px 0"/>');
+}
+function saveAdminTiers(){
+  T.box.forEach((t,i)=>{t.mn=+document.getElementById('aBM'+i)?.value||t.mn;t.r=+document.getElementById('aBR'+i)?.value||t.r;});
+  for(let i=0;i<T.box.length-1;i++)T.box[i].mx=T.box[i+1].mn-1;
+  T.acc.forEach((t,i)=>{t.mp=+document.getElementById('aAM'+i)?.value||t.mp;t.p=+document.getElementById('aAP'+i)?.value||t.p;});
+  for(let i=0;i<T.acc.length-1;i++)T.acc[i].xp=T.acc[i+1].mp-1;
+  T.af=+document.getElementById('aTAf').value||5;T.hs=+document.getElementById('aTHs').value||5;
+  T.mi=T.mi.map((_,i)=>+document.getElementById('aTM'+(i+1))?.value||_);
+  localStorage.setItem('wfo_tiers',JSON.stringify(T));localStorage.setItem('wfo_ts',new Date().toISOString());
+  renR();tst2('Rep tiers saved!','ok');
+}
+function saveAdminCoachTiers(){
+  if(!T.coach)T.coach=JSON.parse(JSON.stringify(DT.coach));
+  const cids={aCAt100:'at100',aCAt115:'at115',aCAt125:'at125',aCAtPen:'atPen',aCAc50:'ac50',aCAc60:'ac60',aCAc70:'ac70',aCAcElbDrop:'acElbDrop',aCSh1:'sh1',aCSh2:'sh2',aCKick1:'kick1',aCKick2:'kick2',aCMimRate:'mimRate'};
+  Object.entries(cids).forEach(([elId,key])=>{const el=document.getElementById(elId);if(el)T.coach[key]=+el.value||DT.coach[key];});
+  localStorage.setItem('wfo_tiers',JSON.stringify(T));
+  tst2('Coach tiers saved!','ok');
+}
+function saveAdminMgrTiers(){
+  if(!T.mgr)T.mgr=JSON.parse(JSON.stringify(DT.mgr));
+  [1,2,3].forEach(tier=>{['acts','hsi','bts','acc'].forEach(cat=>{const b=document.getElementById('amte_'+tier+'_'+cat+'_b');const u=document.getElementById('amte_'+tier+'_'+cat+'_u');if(b&&u){T.mgr[tier].cats[cat].base=+b.value||T.mgr[tier].cats[cat].base;T.mgr[tier].cats[cat].up=+u.value||T.mgr[tier].cats[cat].up;}});T.mgr[tier].baseMax=Object.values(T.mgr[tier].cats).reduce((s,c)=>s+c.base,0);T.mgr[tier].upMax=Object.values(T.mgr[tier].cats).reduce((s,c)=>s+c.up,0);});
+  localStorage.setItem('wfo_tiers',JSON.stringify(T));
+  tst2('Manager tiers saved!','ok');
+}
+
+// ── ADMIN BACKSHEET ──
+function loadAdminBsMonth(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);
+  document.getElementById('aBsElbCut').value=bs.qualifiers.elbCutoff;
+  document.getElementById('aBsAttachCut').value=bs.qualifiers.attachCutoff;
+  document.getElementById('aBsAttachPen').value=bs.qualifiers.attachPenalty;
+  const lockEl=document.getElementById('aBsLockStatus');
+  if(lockEl)lockEl.innerHTML=bs.locked?`<span style="color:var(--da);font-weight:700;font-size:12px">🔒 Locked</span><button class="btn bo sm" onclick="unlockAdminBs()">Unlock</button>`:`<span style="color:var(--ok);font-weight:700;font-size:12px">🟢 Open</span><button class="btn bd sm" onclick="lockAdminBs()">🔒 Lock</button>`;
+  renAdminBsCats(bs);renAdminBsGrid(bs);
+}
+function renAdminBsCats(bs){
+  const body=document.getElementById('aBsCatBody');if(!body)return;
+  body.innerHTML=bs.categories.map((cat,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+    <td style="padding:5px 8px"><input style="width:180px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none" value="${X(cat.name)}" onchange="updAdminBsCat('${cat.id}','name',this.value)"/></td>
+    <td style="padding:5px 8px;text-align:center"><input type="number" style="width:60px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.baseThresh}" onchange="updAdminBsCat('${cat.id}','baseThresh',+this.value)"/>%</td>
+    <td style="padding:5px 8px;text-align:center"><input type="number" style="width:60px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.upThresh}" onchange="updAdminBsCat('${cat.id}','upThresh',+this.value)"/>%</td>
+    <td style="padding:5px 8px;text-align:center;background:#F5FBF5"><input type="number" style="width:62px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t1base}" onchange="updAdminBsCat('${cat.id}','t1base',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#F5FBF5"><input type="number" style="width:62px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t1up}" onchange="updAdminBsCat('${cat.id}','t1up',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#FFF8FC"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t2base}" onchange="updAdminBsCat('${cat.id}','t2base',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#FFF8FC"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t2up}" onchange="updAdminBsCat('${cat.id}','t2up',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#F8F5FF"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t3base}" onchange="updAdminBsCat('${cat.id}','t3base',+this.value)"/>$</td>
+    <td style="padding:5px 8px;text-align:center;background:#F8F5FF"><input type="number" style="width:58px;padding:5px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center" value="${cat.t3up}" onchange="updAdminBsCat('${cat.id}','t3up',+this.value)"/>$</td>
+    <td style="padding:5px 8px"><button class="btn bd xs" onclick="rmAdminBsCat('${cat.id}')">✕</button></td>
+  </tr>`).join('');
+}
+function renAdminBsGrid(bs){
+  const hdr=document.getElementById('aBsTgtHdr'),body=document.getElementById('aBsTgtBody');if(!hdr||!body)return;
+  hdr.innerHTML=`<th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);white-space:nowrap;position:sticky;left:0;background:var(--thb)">Store</th><th style="padding:7px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Tier</th><th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Mgr</th>`+bs.categories.map(cat=>`<th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);white-space:nowrap">${X(cat.name)}</th>`).join('');
+  body.innerHTML=SR.map((store,si)=>{
+    const tgts=bs.targets[store.s]||{};
+    return`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}"><td style="padding:5px 10px;font-weight:700;color:var(--se);font-size:11px;white-space:nowrap;position:sticky;left:0;background:inherit">${X(store.s)}</td><td style="padding:5px 8px;text-align:center"><span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span></td><td style="padding:5px 10px;font-size:10px;color:var(--mu);white-space:nowrap">${X(store.mgr==='TBD'?'—':store.mgr)}</td>${bs.categories.map(cat=>`<td style="padding:3px 6px;text-align:center"><input type="number" min="0" step="0.01" value="${tgts[cat.id]||''}" placeholder="0" style="width:80px;padding:4px 7px;border:1px solid var(--bo);border-radius:6px;font-size:11px;font-family:'Nunito',sans-serif;outline:none;text-align:center" onchange="setAdminBsTgt('${store.s}','${cat.id}',+this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/></td>`).join('')}</tr>`;
+  }).join('');
+}
+function updAdminBsCat(id,field,val){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);const cat=bs.categories.find(c=>c.id===id);if(cat)cat[field]=val;
+  saveBs(bs);if(field==='name')renAdminBsGrid(bs);
+}
+function setAdminBsTgt(store,catId,val){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);if(!bs.targets[store])bs.targets[store]={};bs.targets[store][catId]=val;saveBs(bs);
+}
+function addAdminBsCat(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month){tst2('Select a month first.','er');return;}
+  const bs=getOrCreateBs(month);const id='cat_'+Date.now();
+  bs.categories.push({id,name:'New Category',t1base:0,t1up:0,t2base:0,t2up:0,t3base:0,t3up:0,baseThresh:100,upThresh:125});
+  saveBs(bs);renAdminBsCats(bs);renAdminBsGrid(bs);
+}
+function rmAdminBsCat(id){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);bs.categories=bs.categories.filter(c=>c.id!==id);saveBs(bs);renAdminBsCats(bs);renAdminBsGrid(bs);
+}
+function saveAdminBsAll(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month){tst2('Select a month.','er');return;}
+  const bs=getOrCreateBs(month);
+  bs.qualifiers.elbCutoff=+document.getElementById('aBsElbCut').value||3368;
+  bs.qualifiers.attachCutoff=+document.getElementById('aBsAttachCut').value||60;
+  bs.qualifiers.attachPenalty=+document.getElementById('aBsAttachPen').value||25;
+  saveBs(bs);updBsBanner();tst2('Backsheet saved!','ok');
+}
+function lockAdminBs(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  if(!confirm('Lock '+month+'? Rules will be frozen.'))return;
+  const bs=getOrCreateBs(month);bs.locked=true;saveBs(bs);loadAdminBsMonth();tst2('Backsheet locked.','ok');
+}
+function unlockAdminBs(){
+  const month=document.getElementById('aBsMonth')?.value;if(!month)return;
+  const bs=getOrCreateBs(month);bs.locked=false;saveBs(bs);loadAdminBsMonth();tst2('Backsheet unlocked.','ok');
+}
+function addAdminDecelerator(){
+  const el=document.getElementById('aExtraDecels');if(!el)return;
+  const div=document.createElement('div');
+  div.style.cssText='display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap';
+  div.innerHTML=`<input type="text" placeholder="Name" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:150px;font-family:'Nunito',sans-serif;outline:none"/><input type="text" placeholder="Rule" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:200px;font-family:'Nunito',sans-serif;outline:none"/><input type="number" placeholder="Penalty %" style="padding:5px 8px;border:1px solid var(--bo);border-radius:6px;font-size:12px;width:80px;font-family:'Nunito',sans-serif;outline:none"/><button class="btn bd xs" onclick="this.parentElement.remove()">✕</button>`;
+  el.appendChild(div);
+}
+
+// ── ADMIN SPIFFS ──
+function renAdminSpiffs(){
+  const el=document.getElementById('aSpiffList');if(!el)return;
+  if(!sps.length){el.innerHTML="<p style='font-size:13px;color:var(--mu)'>No spiffs yet.</p>";return;}
+  const td=new Date();
+  el.innerHTML=sps.map(s=>{const st=new Date(s.sd+'T12:00:00'),en=s.ed?new Date(s.ed+'T12:00:00'):null,exp=en&&td>en;const cl=!s.on?'off':exp?'exp':'',sl=!s.on?'Inactive':exp?'Expired':'Active',sc=!s.on?'off':exp?'ex':'on';const tl={flat_per_rep:'$/rep/week',flat_per_unit:'$/unit',pct_gross:'% of gross'};return`<div class="spiff-item ${cl}" style="margin-bottom:8px"><div class="spiff-ih"><div class="spiff-name">⚡ ${X(s.nm)}</div><div style="display:flex;gap:6px;align-items:center"><span class="ss-dot ${sc}">${sl}</span><button class="btn bo xs" onclick="tgSp(${s.id});renAdminSpiffs()">${s.on?'Pause':'Activate'}</button><button class="btn bd xs" onclick="rmSp(${s.id});renAdminSpiffs()">✕</button></div></div><div class="spiff-meta"><span>$${s.a} ${tl[s.ty]||s.ty}</span><span>${s.sd}${s.ed?' → '+s.ed:''}</span><span>${s.sc==='all'?'All Reps':s.sc+': '+s.sv}</span></div></div>`;}).join('');
+}
+function onAdminSS(){
+  const v=document.getElementById('aSpSc').value,w=document.getElementById('aSpSW'),l=document.getElementById('aSpSL'),s=document.getElementById('aSpSV');
+  if(v==='all'){w.style.display='none';return;}
+  w.style.display='block';
+  if(v==='store'){l.textContent='Store';s.innerHTML='<option value="">Select...</option>';SR.forEach(r=>s.innerHTML+=`<option value="${r.s}">${r.s}</option>`);}
+  else{l.textContent='Coach';s.innerHTML='<option value="">Select...</option>';COACHES.sort().forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);}
+}
+function addAdminSp(){
+  const nm=document.getElementById('aSpN').value.trim(),ty=document.getElementById('aSpT').value,a=+document.getElementById('aSpA').value||0;
+  const sc=document.getElementById('aSpSc').value,sv=document.getElementById('aSpSV').value;
+  const sd=document.getElementById('aSpSd').value,ed=document.getElementById('aSpEd').value,nt=document.getElementById('aSpNt').value.trim();
+  if(!nm){tst2('Enter a name.','er');return;}if(a<=0){tst2('Enter amount.','er');return;}if(!sd){tst2('Enter start date.','er');return;}
+  sps.push({id:Date.now(),nm,ty,a,sc,sv,sd,ed,nt,on:true});
+  savSp();renSB();renR();renAdminSpiffs();
+  ['aSpN','aSpA','aSpSd','aSpEd','aSpNt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('aSpSc').value='all';document.getElementById('aSpSW').style.display='none';
+  tst2('Spiff added!','ok');
+}
+
+// ── DATA MANAGEMENT ──
+function renAdminSysInfo(){
+  const el=document.getElementById('adminSysInfo');if(!el)return;
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  const hist=JSON.parse(localStorage.getItem('wfo_wk_hist')||'[]');
+  const mgrRecs=JSON.parse(localStorage.getItem('wfo_mgr_recs')||'[]');
+  const coachRecs=JSON.parse(localStorage.getItem('wfo_coach_recs')||'[]');
+  let tG=0;reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
+  el.innerHTML=`
+    <div><strong>Reps loaded:</strong> ${reps.length}</div>
+    <div><strong>Week:</strong> ${document.getElementById('wkb')?.textContent||'—'}</div>
+    <div><strong>Rep Gross:</strong> $${tG.toFixed(2)}</div>
+    <div><strong>Chargebacks:</strong> ${CBs.length} ($${CBs.reduce((s,c)=>s+c.a,0).toFixed(2)})</div>
+    <div><strong>Active Spiffs:</strong> ${actSp().length}</div>
+    <div><strong>Store Assignments:</strong> ${Object.keys(assigns).length}</div>
+    <div><strong>Paid Weeks History:</strong> ${hist.length}</div>
+    <div><strong>Manager Records:</strong> ${mgrRecs.length}</div>
+    <div><strong>Coach Records:</strong> ${coachRecs.length}</div>
+    <div><strong>Dashboard Version:</strong> v5.0</div>
+    <div><strong>Last Updated:</strong> ${document.getElementById('lu')?.textContent||'—'}</div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// STORE ROSTER BACKSHEET
+// Storage: wfo_store_roster = {storeName: {mgr, coach, tier, state, log:[]}}
+// ══════════════════════════════════════════════════════
+
+function getSR_BS(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('wfo_store_roster')||'null');
+    if(saved)return saved;
+    // Initialize from SR array
+    const init={};
+    SR.forEach(s=>{
+      init[s.s]={mgr:s.mgr==='TBD'?'':s.mgr,coach:s.c==='TBD'?'':s.c,tier:s.tier,me:s.me,state:s.s.split('-')[0],log:[]};
+    });
+    localStorage.setItem('wfo_store_roster',JSON.stringify(init));
+    return init;
+  }catch{return{};}
+}
+function saveSR_BS(data){localStorage.setItem('wfo_store_roster',JSON.stringify(data));}
+
+// Get current manager for a store
+function getStoreMgr(storeName){
+  const d=getSR_BS();return d[storeName]?.mgr||SR.find(s=>s.s===storeName)?.mgr||'TBD';
+}
+// Get current coach for a store
+function getStoreCoach(storeName){
+  const d=getSR_BS();return d[storeName]?.coach||SR.find(s=>s.s===storeName)?.c||'TBD';
+}
+// Update manager with log
+function updateStoreMgr(storeName,newMgr,changedBy){
+  const d=getSR_BS();
+  if(!d[storeName])d[storeName]={mgr:'',coach:'',log:[]};
+  const old=d[storeName].mgr||'—';
+  d[storeName].log.unshift({field:'Manager',old,new:newMgr,by:changedBy||'Admin',at:new Date().toLocaleString()});
+  d[storeName].mgr=newMgr;
+  saveSR_BS(d);
+}
+// Update coach with log
+function updateStoreCoach(storeName,newCoach,changedBy){
+  const d=getSR_BS();
+  if(!d[storeName])d[storeName]={mgr:'',coach:'',log:[]};
+  const old=d[storeName].coach||'—';
+  d[storeName].log.unshift({field:'Coach',old,new:newCoach,by:changedBy||'Admin',at:new Date().toLocaleString()});
+  d[storeName].coach=newCoach;
+  // Update all reps assigned to this store
+  reps.forEach(r=>{if(r.s===storeName)r.c=newCoach;});
+  saveSession();renR();
+  saveSR_BS(d);
+}
+
+// ── RENDER STORE ROSTER ADMIN PAGE ──
+function renStoreRoster(){
+  const body=document.getElementById('storeRosterBody');if(!body)return;
+  const d=getSR_BS();
+  const srch=(document.getElementById('srSearch')?.value||'').toLowerCase();
+  const fState=document.getElementById('srFState')?.value||'';
+  const fCoach=document.getElementById('srFCoach')?.value||'';
+
+  // Update summary
+  const coachCounts={};
+  SR.forEach(s=>{const c=d[s.s]?.coach||s.c||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
+  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  upd('srTotal',SR.length);
+  upd('srTBDCoach',SR.filter(s=>!d[s.s]?.coach||d[s.s]?.coach==='').length);
+  upd('srTBDMgr',SR.filter(s=>!d[s.s]?.mgr||d[s.s]?.mgr==='').length);
+  COACHES.forEach(c=>{const el=document.getElementById('srC_'+c.replace(/\s+/g,''));if(el)el.textContent=coachCounts[c]||0;});
+
+  const fil=SR.filter(s=>{
+    if(fState&&!s.s.startsWith(fState+'-'))return false;
+    if(fCoach&&(d[s.s]?.coach||s.c)!==fCoach)return false;
+    if(srch&&!s.s.toLowerCase().includes(srch)&&!(d[s.s]?.mgr||'').toLowerCase().includes(srch)&&!(d[s.s]?.coach||'').toLowerCase().includes(srch))return false;
+    return true;
+  });
+
+  body.innerHTML=fil.map((store,i)=>{
+    const sd=d[store.s]||{mgr:'',coach:'',log:[]};
+    const mgr=sd.mgr||'';
+    const coach=sd.coach||'';
+    const hasLog=sd.log&&sd.log.length>0;
+    const lastChange=hasLog?sd.log[0]:null;
+    return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 12px;font-weight:700;color:var(--se);font-size:12px;white-space:nowrap">
+        ${X(store.s)}
+        <div style="display:flex;gap:4px;margin-top:3px">
+          <span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span>
+          <span class="bdg bt2">${store.s.split('-')[0]}</span>
+        </div>
+      </td>
+      <td style="padding:5px 10px;min-width:200px">
+        <input type="text" value="${X(mgr)}" placeholder="Enter manager name…"
+          style="width:100%;padding:6px 9px;border:2px solid ${mgr?'var(--bo)':'var(--wa)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;background:${mgr?'#fff':'#FFFBF0'}"
+          onchange="requirePin(()=>updStoreMgrInline('${store.s}',this.value))"
+          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${mgr?'var(--bo)':'var(--wa)'}'"/>
+        ${!mgr?`<div style="font-size:9px;color:var(--wa);font-weight:700;margin-top:2px">⚠ No manager assigned</div>`:''}
+      </td>
+      <td style="padding:5px 10px;min-width:200px">
+        <select style="width:100%;padding:6px 9px;border:2px solid ${coach?'var(--bo)':'var(--wa)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;background:${coach?'#fff':'#FFFBF0'}"
+          onchange="requirePin(()=>updStoreCoachInline('${store.s}',this.value))"
+          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${coach?'var(--bo)':'var(--wa)'}'">
+          <option value="">${coach||'— Assign Coach —'}</option>
+          ${[...COACHES,''].map(c=>c?`<option value="${c}"${coach===c?' selected':''}>${c}</option>`:'').join('')}
+        </select>
+        ${!coach?`<div style="font-size:9px;color:var(--wa);font-weight:700;margin-top:2px">⚠ No coach assigned</div>`:''}
+      </td>
+      <td style="padding:7px 10px;text-align:center">
+        ${hasLog?`<div style="font-size:10px;color:var(--mu)">${lastChange.field}: ${X(lastChange.old)} → <strong>${X(lastChange.new)}</strong></div><div style="font-size:9px;color:var(--mu)">${lastChange.by} · ${lastChange.at}</div>`:`<span style="font-size:10px;color:var(--mu)">No changes</span>`}
+      </td>
+      <td style="padding:7px 10px;text-align:center">
+        <button class="btn bo xs" onclick="showStoreLog('${store.s}')">📋 ${hasLog?sd.log.length+' changes':'Log'}</button>
+      </td>
+    </tr>`;
+  }).join('');
+  if(!fil.length)body.innerHTML=`<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--mu)">No stores match.</td></tr>`;
+}
+
+function updStoreMgrInline(store,val){
+  const by=prompt('Your name (for change log):','Admin')||'Admin';
+  updateStoreMgr(store,val.trim(),by);
+  renStoreRoster();tst2('Manager updated for '+store,'ok');
+}
+function updStoreCoachInline(store,val){
+  const by=prompt('Your name (for change log):','Admin')||'Admin';
+  updateStoreCoach(store,val,by);
+  renStoreRoster();renCoachSheet();tst2('Coach updated for '+store,'ok');
+}
+function showStoreLog(store){
+  const d=getSR_BS();const log=(d[store]?.log)||[];
+  if(!log.length){tst2('No changes logged for '+store,'wn');return;}
+  const html=`<div style="max-width:600px;margin:0 auto;padding:20px">
+    <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--se);margin-bottom:14px">📋 Change Log — ${store}</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:var(--thb)">
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">Field</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">From</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">To</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">By</th>
+        <th style="padding:8px 12px;text-align:left;border-bottom:2px solid var(--pr);font-family:'Poppins',sans-serif;font-size:9px;color:var(--tht);text-transform:uppercase">When</th>
+      </tr></thead>
+      <tbody>${log.map((l,i)=>`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
+        <td style="padding:8px 12px"><span class="bdg ${l.field==='Coach'?'bt2':'bt1'}">${l.field}</span></td>
+        <td style="padding:8px 12px;color:var(--da)">${X(l.old||'—')}</td>
+        <td style="padding:8px 12px;font-weight:700;color:var(--ok)">${X(l.new||'—')}</td>
+        <td style="padding:8px 12px;color:var(--mu)">${X(l.by)}</td>
+        <td style="padding:8px 12px;color:var(--mu);font-size:11px">${l.at}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+  openPF(html,'Change Log — '+store);
+}
+function expStoreRoster(){
+  const d=getSR_BS();
+  const hd=['Store','State','Tier','Manager','Coach','Last Change','Changed By','Changed At'];
+  const rows=SR.map(s=>{
+    const sd=d[s.s]||{};const last=sd.log?.[0]||{};
+    return[s.s,s.s.split('-')[0],s.me,sd.mgr||'TBD',sd.coach||'TBD',last.field?last.field+': '+last.old+' → '+last.new:'',last.by||'',last.at||''];
+  });
+  dlC([hd,...rows],'WFO_StoreRoster.csv');tst2('Store roster exported.','ok');
 }
 
 </script>
