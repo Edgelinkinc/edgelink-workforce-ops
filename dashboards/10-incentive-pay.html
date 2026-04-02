@@ -239,7 +239,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .pin-cancel{font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;margin-top:4px;text-decoration:underline}
 body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{display:none!important;}
 body.page-pg-home .week-bar,body.page-pg-home .stbar,body.page-pg-home .kstrip{display:none!important;}
-body.admin-active .content{padding:0!important;}body.admin-active #pg-admin{margin:0;width:100%;}
+body.admin-active .content{padding:0!important;}body.admin-active #pg-admin{margin:0;width:100%;position:fixed;inset:0;z-index:500;overflow-y:auto;background:var(--bg);}
 body:not(.page-pg-reps):not(.page-pg-chargebacks) .week-bar{display:none!important;}
 body.page-pg-managers .week-bar,body.page-pg-coaches .week-bar,
 body.page-pg-leaderboard .week-bar,body.page-pg-summary .week-bar,
@@ -534,7 +534,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 <main class="content">
   <div class="stbar" id="stb"></div>
 
-  <div class="page active" id="pg-home" style="background:#F8F8F8;overflow-y:auto;padding-bottom:80px;min-height:400px;display:block!important;visibility:visible!important">
+  <div class="page active" id="pg-home" style="background:#F8F8F8;overflow-y:auto;padding-bottom:80px;min-height:400px">
 
   <!-- WELCOME -->
   <div style="background:linear-gradient(135deg,#4A1A6B,#6E2B8B);border-radius:12px;padding:20px;margin-bottom:12px;color:#fff">
@@ -2229,14 +2229,7 @@ function goPage(id,el){
   if(id==="pg-summary")renSum();
   if(id==="pg-managers")renMgrOverview();
   if(id==="pg-coaches"){renCoachOv();renCoachMim();}
-  if(id==="pg-home"){
-    try{initHomePage();}
-    catch(e){
-      const el=document.getElementById('homePending');
-      if(el)el.innerHTML='<div style="color:red;padding:12px;font-size:12px">Error: '+e.message+'</div>';
-      console.error('initHomePage error:',e);
-    }
-  }
+  if(id==="pg-home")initHomePage();
   if(id==="pg-roster")renRoster();
   if(id==="pg-flyers"){renRepFlyer();}
   if(id==="pg-employee"){initEmpView();}
