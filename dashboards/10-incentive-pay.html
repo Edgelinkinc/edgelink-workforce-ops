@@ -293,6 +293,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
     <div style="display:flex;align-items:center;gap:6px">
       <div class="lk-dot open" id="lkDot"></div>
       <span class="lk-lbl open" id="lkLbl">Unlocked</span>
+      <span id="pinStatus" style="font-size:11px;font-weight:700;color:var(--wa)">🔑 PIN Required to Edit</span>
       <span style="font-size:11px;color:var(--mu)" id="lkMeta">Ready</span>
     </div>
     <button class="btn bok sm" id="lkBtn" onclick="requirePin(lockWk)">🔒 Lock &amp; Mark Paid</button>
@@ -367,14 +368,14 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
           <div class="tw"><table>
             <thead><tr>
               <th>Rep / Store / Coach</th>
-              <th class="gr">PPD</th><th class="gr">New</th><th class="gr">React</th><th class="gr">Upg</th>
-              <th class="gr">Tab</th><th class="gr">Watch</th><th class="gr">BTS</th>
-              <th class="gr">HSI</th><th class="gr">Affirm</th><th class="gr">Hrs</th>
-              <th class="gr">Box/Hr</th><th class="gr">Acc/Hr</th><th class="gr">Acc Net $</th>
+              <th class="gr" style="background:#FFF8E1;color:#8a6000">PPD ✎</th><th class="gr">New</th><th class="gr">React</th><th class="gr">Upg</th>
+              <th class="gr">Tab</th><th class="gr">Watch</th><th class="gr" style="background:#FFF8E1;color:#8a6000">BTS ✎</th>
+              <th class="gr" style="background:#FFF8E1;color:#8a6000">HSI ✎</th><th class="gr" style="background:#FFF8E1;color:#8a6000">Affirm ✎</th><th class="gr">Hrs</th>
+              <th class="gr">Box/Hr</th><th class="gr">Acc/Hr</th><th class="gr" style="background:#FFF8E1;color:#8a6000">Acc Net $ ✎</th>
               <th class="gc">Box Tier</th><th class="gc">Box $</th>
               <th class="gc">Acc Tier</th><th class="gc">Acc $</th>
               <th class="gc">PU $</th>
-              <th class="gc">BANs</th><th class="gc">MIM Lines</th><th class="gc">MIM $</th>
+              <th class="gc" style="background:#FFF8E1;color:#8a6000">BANs ✎</th><th class="gc" style="background:#FFF8E1;color:#8a6000">Lines ✎</th><th class="gc">MIM $</th>
               <th class="gc">Spiffs $</th><th class="gc">GROSS $</th>
               <th class="ga">Arcade</th>
               <th class="gn">Net Owed</th><th class="gn">Actions</th>
@@ -444,7 +445,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
       <div class="card-body">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div class="fi" style="min-width:160px"><label>Active Month</label><input type="month" id="mgrSheetMonthIn" onchange="onMgrSheetMonth()"/></div>
-          <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+          <div id="mgrSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals for all stores. Targets pull from Backsheet Setup. Bonus calculates automatically per store tier and monthly rules.
           </div>
         </div>
@@ -549,7 +550,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
           <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth"/></div>
           <div class="fi" style="min-width:160px"><label>Company Acc Total ($)</label><input type="number" id="coachSheetCoAcc" placeholder="e.g. 310000" min="0" onchange="renCoachSheet()"/></div>
-          <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+          <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals per coach. Each coach section shows their stores. Bonus calculates automatically.
           </div>
         </div>
@@ -1106,6 +1107,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
   const mn=document.getElementById("mgrMonth");if(mn){const n=new Date();mn.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
   const cm=document.getElementById("coachMonth");if(cm){const n=new Date();cm.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
+  updSheetStatus();
   const last=sessionStorage.getItem("wfo_page")||"pg-reps";
   goPage(last,document.querySelector('[data-page="'+last+'"]'));
 });
@@ -1197,20 +1199,37 @@ function renR(fS,fC,srch,fState){
     tG+=c.gr;tA+=c.arc;tC+=c.cb;tN+=c.nt;tB+=c.bx;tAc+=c.ac;tSp+=c.sp.tot;
     return`<tr class="${ng?"row-neg":top?"row-top":""}">
       <td><div style="font-weight:700;color:var(--se);font-size:12px">${X(dispName(r))}</div><div style="font-size:9px;color:var(--mu)">${r.lastName?X(r.lastName):''}</div>${r.ri?`<div style="font-size:9px;color:var(--mu);font-family:monospace">${r.ri}</div>`:""}<div style="font-size:10px;color:var(--mu)">${X(r.state||'')} ${X(r.s||"—")}</div><div style="font-size:10px;color:var(--mu)">${X(r.c||"—")}</div></td>
-      <td style="text-align:center;font-weight:700;color:var(--se)">${r.ta||0}</td>
+      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
+        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.ta||0}" min="0" style="width:54px" onchange="requirePin(()=>uR(${i},'ta',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">PPD</span>`:`<strong style="color:var(--se)">${r.ta||0}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
+      </td>
       <td style="text-align:center;color:var(--mu)">${r.na||0}</td><td style="text-align:center;color:var(--mu)">${r.ra||0}</td><td style="text-align:center;color:var(--mu)">${r.up||0}</td>
-      <td style="text-align:center;color:var(--mu)">${r.tb||0}</td><td style="text-align:center;color:var(--mu)">${r.wt||0}</td><td style="text-align:center;font-weight:700">${bts}</td>
-      <td style="text-align:center;color:var(--mu)">${r.hs||0}</td><td style="text-align:center;color:var(--mu)">${r.af||0}</td><td style="text-align:center;color:var(--mu)">${r.hr||0}</td>
+      <td style="text-align:center;color:var(--mu)">${r.tb||0}</td><td style="text-align:center;color:var(--mu)">${r.wt||0}</td>
+      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
+        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${bts}" min="0" style="width:54px" onchange="requirePin(()=>{reps[${i}].tb=+this.value;reps[${i}].wt=0;saveSession();renR();})" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">BTS</span>`:`<strong>${bts}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
+      </td>
+      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
+        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.hs||0}" min="0" style="width:54px" onchange="requirePin(()=>uR(${i},'hs',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">HSI</span>`:`<span>${r.hs||0}</span>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
+      </td>
+      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="text-align:center">
+        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.af||0}" min="0" style="width:54px" onchange="requirePin(()=>uR(${i},'af',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">Affirm</span>`:`<span>${r.af||0}</span>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
+      </td>
+      <td style="text-align:center;color:var(--mu)">${r.hr||0}</td>
       <td style="text-align:center;font-size:10px;color:var(--mu)">${r.hr?((r.ta||0)/r.hr).toFixed(2):"—"}</td>
       <td style="text-align:center;font-size:10px;color:var(--mu)">${r.hr?((r.ap||0)/r.hr).toFixed(2):"—"}</td>
-      <td style="font-weight:600">$${(r.ap||0).toFixed(2)}</td>
+      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}" style="font-weight:600">
+        ${_pinUnlocked&&!wkLocked?`<input class="ni niw" type="number" value="${(r.ap||0).toFixed(2)}" min="0" step="0.01" style="width:80px" onchange="requirePin(()=>uR(${i},'ap',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">Acc $</span>`:`<strong>$${(r.ap||0).toFixed(2)}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
+      </td>
       <td><span class="bdg ${bT.c}">${bT.l}</span></td>
       <td><strong style="color:var(--pr)">$${c.bx.toFixed(2)}</strong></td>
       <td><span class="bdg ${aT.c}">${aT.l}</span></td>
       <td><strong style="color:var(--se)">$${c.ac.toFixed(2)}</strong><div class="pb">${aT.p}% of net</div></td>
       <td><strong>$${c.pu.t.toFixed(2)}</strong><div class="pb">Af $${c.pu.a.toFixed(0)} HSI $${c.pu.h.toFixed(0)}</div></td>
-      <td class="edit-cell"><input class="ni" type="number" value="${r.mb||0}" min="0" onchange="uR(${i},'mb',+this.value)"/><span class="edit-hint">✎</span></td>
-      <td class="edit-cell"><input class="ni" type="number" value="${r.ml||0}" min="0" onchange="uR(${i},'ml',+this.value)"/><span class="edit-hint">✎</span></td>
+      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}">
+        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.mb||0}" min="0" onchange="requirePin(()=>uR(${i},'mb',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">BANs</span>`:`<strong>${r.mb||0}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
+      </td>
+      <td class="${_pinUnlocked&&!wkLocked?'edit-cell':''}">
+        ${_pinUnlocked&&!wkLocked?`<input class="ni" type="number" value="${r.ml||0}" min="0" onchange="requirePin(()=>uR(${i},'ml',+this.value))" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/><span class="edit-hint">Lines</span>`:`<strong>${r.ml||0}</strong>${wkLocked?'<div style="font-size:8px;color:var(--da)">🔒</div>':'<div style="font-size:8px;color:var(--wa)">🔑</div>'}`}
+      </td>
       <td><strong style="color:var(--ok)">$${c.mi.p.toFixed(2)}</strong></td>
       <td>${c.sp.tot>0?`<strong style="color:var(--ac)">$${c.sp.tot.toFixed(2)}</strong>`:`<span style="color:var(--mu)">$0</span>`}</td>
       <td><div class="pt">$${c.gr.toFixed(2)}</div></td>
@@ -2142,6 +2161,35 @@ function exportCoachPDF(){
   openPF(body,"Coach Bonus - "+coach);
 }
 
+// ── SHEET STATUS ──
+function updSheetStatus(){
+  const ms=document.getElementById('mgrSheetStatus');
+  const cs=document.getElementById('coachSheetStatus');
+  const ps=document.getElementById('pinStatus');
+  const isAdmin=_pinUnlocked;const isLocked=wkLocked;
+  if(ms){
+    if(isLocked)ms.innerHTML='🔒 Period locked — unlock with PIN to make corrections';
+    else if(isAdmin)ms.innerHTML='✅ Admin mode — all fields editable. Click Save All when done.';
+    else ms.innerHTML='🔑 PIN required to edit — enter PIN in top bar then fields become active';
+    ms.style.background=isLocked?'#FFEBEE':isAdmin?'#E8F5E9':'#FFF8E1';
+    ms.style.borderColor=isLocked?'var(--da)':isAdmin?'var(--ok)':'var(--wa)';
+    ms.style.color=isLocked?'var(--da)':isAdmin?'var(--ok)':'#8a6000';
+  }
+  if(cs){
+    if(isLocked)cs.innerHTML='🔒 Period locked — unlock with PIN to make corrections';
+    else if(isAdmin)cs.innerHTML='✅ Admin mode — all fields editable. Click Save All when done.';
+    else cs.innerHTML='🔑 PIN required to edit — enter PIN in top bar then fields become active';
+    cs.style.background=isLocked?'#FFEBEE':isAdmin?'#E8F5E9':'#FFF8E1';
+    cs.style.borderColor=isLocked?'var(--da)':isAdmin?'var(--ok)':'var(--wa)';
+    cs.style.color=isLocked?'var(--da)':isAdmin?'var(--ok)':'#8a6000';
+  }
+  if(ps){
+    if(isLocked){ps.textContent='🔒 Period Locked';ps.style.color='var(--da)';}
+    else if(isAdmin){ps.textContent='✅ Admin Unlocked — Editing Enabled';ps.style.color='var(--ok)';}
+    else{ps.textContent='🔑 PIN Required to Edit';ps.style.color='var(--wa)';}
+  }
+}
+
 // ── HELPERS ──
 function st2(msg,type="in"){const el=document.getElementById("stb");if(!el)return;el.textContent=msg;el.className="stbar show "+type;setTimeout(()=>el.classList.remove("show"),6000);}
 function tst2(msg,type="ok"){const el=document.getElementById("tst");el.textContent=msg;el.className="tst "+type;el.style.display="block";el.style.animation="su .3s ease";setTimeout(()=>el.style.display="none",3000);}
@@ -2336,6 +2384,8 @@ function renMgrSheet(){
   u('mgrSheetMax',maxCount);
 }
 function setMgrSheet(store,field,val){
+  if(!_pinUnlocked){tst2('PIN required to edit.','er');renMgrSheet();return;}
+  if(wkLocked){tst2('Period is locked. Unlock first.','er');renMgrSheet();return;}
   if(!mgrSheetData[store])mgrSheetData[store]={};
   mgrSheetData[store][field]=val;
   // Debounce re-render
@@ -2493,6 +2543,8 @@ function renCoachSheet(){
   u('cSheetKick','$'+totalKick.toFixed(2));
 }
 function setCoachSheet(coach,field,val){
+  if(!_pinUnlocked){tst2('PIN required to edit.','er');renCoachSheet();return;}
+  if(wkLocked){tst2('Period is locked. Unlock first.','er');renCoachSheet();return;}
   if(!coachSheetData[coach])coachSheetData[coach]={};
   coachSheetData[coach][field]=val;
   clearTimeout(window._coachSheetTimer);
