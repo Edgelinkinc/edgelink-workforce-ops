@@ -284,6 +284,7 @@ body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{d
     <label>Week of:</label>
     <input type="date" id="wks" onchange="onWC()"/>
     <span class="wkbdg" id="wkb">—</span>
+    <span id="wkLockBadge" style="display:none;background:var(--ok);color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:7px">✓ PAID</span>
     <label style="margin-left:8px">Store:</label>
     <select id="fSt" onchange="apF()"><option value="">All Stores</option></select>
     <label>State:</label>
@@ -1510,6 +1511,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   const cm=document.getElementById("coachMonth");if(cm){const n=new Date();cm.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
   loadCustomRoster();
   updSheetStatus();
+  // Load current week data from storage
+  if(wk) loadWeek(wk);
+  // Build week history selector
+  buildWeekSelector();
   const last=sessionStorage.getItem("wfo_page")||"pg-reps";
   goPage(last,document.querySelector('[data-page="'+last+'"]'));
 });
@@ -1668,7 +1673,7 @@ function renR(fS,fC,srch,fState){
       </td>
       <td>
         <div style="display:flex;flex-direction:column;gap:4px">
-          ${wkLocked?`<span class="bdg bfl">Locked</span>`:`<button class="btn bp xs" onclick="shSt(${i})">Slip</button><button class="btn bd xs" onclick="requirePin(()=>rmR(${i}))">x</button>`}
+          ${wkLocked?`<div style="display:flex;flex-direction:column;gap:3px"><span class="bdg bfl" style="font-size:8px">🔒 Read Only</span><button class="btn bp xs" onclick="shSt(${i})">Slip</button></div>`:`<button class="btn bp xs" onclick="shSt(${i})">Slip</button><button class="btn bd xs" onclick="requirePin(()=>rmR(${i}))">x</button>`}
         </div>
       </td>
     </tr>`;
@@ -2629,11 +2634,15 @@ function showWeekConfirm(fn,count){
 function confirmWeekAndClose(){
   const dateIn=document.getElementById('wkConfirmDateIn')?.value;
   if(dateIn){
+    wk=dateIn;
     document.getElementById('wks').value=dateIn;
-    onWC();
+    updWB();
+    // Save uploaded data to this week's storage
+    saveCurrentWeek();
+    buildWeekSelector();
   }
   const modal=document.getElementById('wkConfirmModal');if(modal)modal.remove();
-  tst2('Week confirmed — data assigned correctly.','ok');
+  tst2('Week confirmed — data saved to week of '+document.getElementById('wkb').textContent,'ok');
 }
 // ── SHEET STATUS ──
 function updSheetStatus(){
@@ -4338,6 +4347,291 @@ function getStoresForState(state){
   const stateMap = {TN:'TN-',MA:'MA-',RI:'RI-',CT:'CT-',AR:'AR-'};
   const prefix = stateMap[state];
   return prefix ? SR.filter(s=>s.s.startsWith(prefix)) : SR;
+}
+
+// ══════════════════════════════════════════════════════
+// MULTI-WEEK DATA STORE
+// Storage: wfo_week_{YYYY-MM-DD} = {reps, cbs, locked, lockedAt, repCount, gross}
+// Global: wfo_cbs_queue = [] (chargebacks pending next open week)
+// ══════════════════════════════════════════════════════
+
+const MAX_WEEKS = 52;
+
+// ── WEEK KEY ──
+function wkKey(date){
+  // Normalize to Monday of that week
+  const d = new Date((date||wk)+'T12:00:00');
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day===0?6:day-1));
+  return monday.toISOString().split('T')[0];
+}
+
+// ── GET/SAVE WEEK DATA ──
+function getWeekData(date){
+  const key = 'wfo_week_'+wkKey(date);
+  try{
+    const d = JSON.parse(localStorage.getItem(key)||'null');
+    return d || {reps:[], cbs:[], locked:false, lockedAt:null, gross:0};
+  }catch{return {reps:[], cbs:[], locked:false, lockedAt:null, gross:0};}
+}
+function saveWeekData(date, data){
+  const key = 'wfo_week_'+wkKey(date);
+  localStorage.setItem(key, JSON.stringify(data));
+  // Maintain week index
+  const idx = getWeekIndex();
+  const wkk = wkKey(date);
+  if(!idx.includes(wkk)){
+    idx.unshift(wkk);
+    if(idx.length > MAX_WEEKS) idx.pop();
+    localStorage.setItem('wfo_week_index', JSON.stringify(idx));
+  }
+}
+function getWeekIndex(){
+  try{return JSON.parse(localStorage.getItem('wfo_week_index')||'[]');}catch{return[];}
+}
+
+// ── LOAD WEEK INTO ACTIVE STATE ──
+function loadWeek(date){
+  const d = getWeekData(date);
+  reps = d.reps || [];
+  CBs = d.cbs || [];
+  wkLocked = d.locked || false;
+  // Apply roster to all loaded reps
+  loadCustomRoster();
+  applyRosterToAll();
+  // Apply pending chargebacks to this week if unlocked
+  if(!wkLocked) applyPendingCBs();
+  renR();renCBL();upK();updLk();updSheetStatus();
+  renWkHist();
+}
+
+// ── SAVE CURRENT WEEK ──
+function saveCurrentWeek(){
+  if(!wk) return;
+  let tG=0; reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
+  saveWeekData(wk, {
+    reps: JSON.parse(JSON.stringify(reps)),
+    cbs: JSON.parse(JSON.stringify(CBs)),
+    locked: wkLocked,
+    lockedAt: wkLocked ? (getWeekData(wk).lockedAt || new Date().toLocaleString()) : null,
+    gross: tG,
+    repCount: reps.length,
+    savedAt: new Date().toLocaleString()
+  });
+}
+
+// ── CHARGEBACK QUEUE ──
+function getCBQueue(){
+  try{return JSON.parse(localStorage.getItem('wfo_cbs_queue')||'[]');}catch{return[];}
+}
+function saveCBQueue(q){localStorage.setItem('wfo_cbs_queue', JSON.stringify(q));}
+
+// Add CB to queue — always goes to next open pay period
+function addToQueue(cb){
+  const q = getCBQueue();
+  q.push({...cb, queuedAt: new Date().toLocaleString(), appliedTo: null});
+  saveCBQueue(q);
+}
+
+// Apply pending CBs to current open week
+function applyPendingCBs(){
+  if(wkLocked) return;
+  const q = getCBQueue();
+  const pending = q.filter(cb => !cb.appliedTo);
+  if(!pending.length) return;
+  pending.forEach(cb=>{
+    // Check if rep is in current week
+    const repInWeek = reps.find(r=>r.n===cb.rp||r.ri===cb.rp);
+    if(repInWeek || true){ // Apply regardless
+      CBs.push({...cb, appliedTo: wk, note: (cb.note||'')+(cb.queuedAt?' (queued '+cb.queuedAt+')':'')});
+      cb.appliedTo = wk;
+    }
+  });
+  saveCBQueue(q);
+  saveCurrentWeek();
+}
+
+// ── WEEK SWITCHER ──
+function switchWeek(newDate){
+  // Save current week before switching
+  if(wk && reps.length > 0) saveCurrentWeek();
+  // Switch
+  wk = wkKey(newDate);
+  document.getElementById('wks').value = wk;
+  updWB();
+  // Load new week
+  loadWeek(wk);
+  // Update UI
+  const wd = getWeekData(wk);
+  if(wd.locked){
+    tst2('Week of '+document.getElementById('wkb').textContent+' — LOCKED (Read Only)','wn');
+  } else if(!wd.reps?.length){
+    st2('No data for this week yet — upload RTPOS CSV to get started','in');
+  } else {
+    tst2('Week of '+document.getElementById('wkb').textContent+' loaded — '+wd.reps.length+' reps','ok');
+  }
+}
+
+// ── OVERRIDE onWC to use switchWeek ──
+function onWC(){
+  const newDate = document.getElementById('wks').value;
+  if(!newDate) return;
+  switchWeek(newDate);
+}
+
+// ── OVERRIDE lockWk to save week data ──
+function lockWk(){
+  if(!reps.length){tst2('No rep data to lock.','er');return;}
+  if(!confirm('Lock week of '+document.getElementById('wkb').textContent+' and mark as paid?'))return;
+  wkLocked = true;
+  // Roll any pending CBs to next week queue
+  const openCBs = CBs.filter(c=>!c.locked);
+  // Save locked week
+  saveCurrentWeek();
+  updLk();renR();renWkHist();
+  tst2('Week locked and marked paid ✅','ok');
+}
+
+function unlockWk(){
+  if(!confirm('Unlock week for corrections?'))return;
+  wkLocked = false;
+  saveCurrentWeek();
+  updLk();renR();
+  tst2('Week unlocked.','ok');
+}
+
+// ── OVERRIDE saveSession to save per-week ──
+function saveSession(){
+  if(wk) saveCurrentWeek();
+}
+
+// ── OVERRIDE renWkHist to show week selector ──
+function renWkHist(){
+  const el = document.getElementById('histList');if(!el)return;
+  const idx = getWeekIndex();
+  if(!idx.length){el.innerHTML="<p style='font-size:13px;color:var(--mu)'>No weeks saved yet.</p>";return;}
+  el.innerHTML = idx.map((wkDate,i)=>{
+    const d = getWeekData(wkDate);
+    const start = new Date(wkDate+'T12:00:00');
+    const end = new Date(start); end.setDate(end.getDate()+6);
+    const label = start.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+end.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const isActive = wkDate === wk;
+    const isLocked = d.locked;
+    return`<div class="hist-item" style="border-left:4px solid ${isActive?'var(--pr)':isLocked?'var(--ok)':'var(--bo)'};cursor:pointer;background:${isActive?'#FFF0F7':'#FAFAFA'}" onclick="requirePin(()=>switchWeek('${wkDate}'))">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;color:var(--se)">Week of ${label}</div>
+            ${isActive?'<span class="bdg btop">Active</span>':''}
+            ${isLocked?'<span class="bdg bok2">✓ Paid</span>':'<span class="bdg bwa">Open</span>'}
+          </div>
+          <div style="font-size:11px;color:var(--mu);margin-top:2px">${d.repCount||0} reps · ${isLocked?'Locked '+d.lockedAt:'Not locked'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Gross</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--pr)">$${(d.gross||0).toFixed(2)}</div></div>
+          <div style="display:flex;gap:6px">
+            ${!isLocked&&!isActive?`<button class="btn bp xs" onclick="event.stopPropagation();requirePin(()=>switchWeek('${wkDate}'))">Load</button>`:''}
+            <button class="btn bo xs" onclick="event.stopPropagation();expWeekCSV('${wkDate}')">⬇ CSV</button>
+            ${isLocked&&!isActive?`<button class="btn bd xs" onclick="event.stopPropagation();requirePin(()=>deleteWeek('${wkDate}'))">✕</button>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function expWeekCSV(wkDate){
+  const d = getWeekData(wkDate);
+  if(!d.reps?.length){tst2('No data for that week.','wn');return;}
+  const hd=['NTID','Rep','Store','Coach','Week','PPD','Gross $','Net $','Status'];
+  const rows = d.reps.map(r=>{
+    const bx=cBx(r.ta||0),ac=cAc(r.ap||0),pu=cPU(r),mi=cMI(r.ml);
+    const arc=(r.al||[]).reduce((s,t)=>s+(t.a||0),0);
+    const cb=d.cbs.filter(c=>c.rp===r.n).reduce((s,c)=>s+(c.a||0),0);
+    const gr=bx+ac+pu.t+mi.p;
+    return[r.ri||'',r.n,r.s,r.c,wkDate,r.ta||0,gr.toFixed(2),(gr-arc-cb).toFixed(2),d.locked?'Paid':'Open'];
+  });
+  dlC([hd,...rows],'WFO_Week_'+wkDate+'.csv');
+  tst2('Week CSV exported.','ok');
+}
+
+function deleteWeek(wkDate){
+  if(!confirm('Delete all data for week of '+wkDate+'? This cannot be undone.'))return;
+  localStorage.removeItem('wfo_week_'+wkDate);
+  const idx = getWeekIndex().filter(w=>w!==wkDate);
+  localStorage.setItem('wfo_week_index', JSON.stringify(idx));
+  renWkHist();
+  tst2('Week deleted.','ok');
+}
+
+// ── WEEK SELECTOR DROPDOWN ──
+function buildWeekSelector(){
+  const el = document.getElementById('wks');
+  if(!el) return;
+  // Keep as date input but add a week history dropdown next to it
+  let sel = document.getElementById('wkHistSel');
+  if(!sel){
+    sel = document.createElement('select');
+    sel.id = 'wkHistSel';
+    sel.style.cssText = 'padding:6px 10px;border:2px solid var(--bo);border-radius:7px;font-family:"Nunito",sans-serif;font-size:12px;background:var(--sf);outline:none;max-width:200px';
+    sel.onchange = function(){if(this.value)switchWeek(this.value);};
+    el.parentNode.insertBefore(sel, el.nextSibling);
+  }
+  const idx = getWeekIndex();
+  sel.innerHTML = '<option value="">📋 Week History</option>';
+  idx.forEach(wkDate=>{
+    const d = getWeekData(wkDate);
+    const start = new Date(wkDate+'T12:00:00');
+    const end = new Date(start); end.setDate(end.getDate()+6);
+    const label = start.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+end.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    sel.innerHTML += `<option value="${wkDate}" ${wkDate===wk?'selected':''}>${label} ${d.locked?'✓':''} (${d.repCount||0} reps)</option>`;
+  });
+}
+
+// ── OVERRIDE addCB to use queue system ──
+function addCB(){
+  const tp=cbST==="Custom"?document.getElementById("cbCT").value.trim():cbST;
+  const rp=document.getElementById("cbR").value,a=+document.getElementById("cbA").value||0;
+  const by=document.getElementById("cbB").value.trim(),rf=document.getElementById("cbRf").value.trim();
+  const nt=document.getElementById("cbNt").value.trim();
+  if(!tp){tst2("Select a type.","er");return;}
+  if(!rp){tst2("Select a rep.","er");return;}
+  if(a<=0){tst2("Enter amount.","er");return;}
+  if(!by){tst2("Enter your name.","er");return;}
+  const r=reps.find(x=>x.n===rp);
+  const cb={id:Date.now(),rp,st:r?.s||"",tp,a,by,rf,nt,at:new Date().toLocaleString()};
+  // Always add to current week's CBs (next open pay = current open week)
+  if(wkLocked){
+    // Current week locked — add to queue for next open week
+    addToQueue(cb);
+    tst2('Week locked — CB queued for next open pay period','wn');
+  } else {
+    CBs.push({...cb, appliedTo: wk});
+    saveCurrentWeek();
+    tst2("CB posted — "+tp+" $"+a.toFixed(2)+" for "+rp+" (Week of "+document.getElementById('wkb').textContent+")","ok");
+  }
+  ["cbA","cbB","cbRf","cbNt"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cbR").value="";
+  document.getElementById("cbCT").style.display="none";
+  document.querySelectorAll(".cpp").forEach(p=>p.classList.remove("sel"));cbST="";
+  renCBL();renR();
+}
+
+// Show CB queue status in chargeback tab
+function renCBL(){
+  const tb=document.getElementById("cb-body");if(!tb)return;
+  const q = getCBQueue().filter(c=>!c.appliedTo);
+  // Show queue banner if pending CBs
+  let qBanner = document.getElementById('cbQueueBanner');
+  if(q.length){
+    if(!qBanner){qBanner=document.createElement('div');qBanner.id='cbQueueBanner';qBanner.style.cssText='background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:12px;color:#8a6000';document.getElementById('cb-form-wrap')?.after(qBanner);}
+    qBanner.innerHTML=`⏳ <strong>${q.length} chargeback${q.length!==1?'s':''} queued</strong> for next open pay period — will auto-apply when you open the next week.`;
+  } else if(qBanner){qBanner.remove();}
+
+  if(!CBs.length){tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mu);font-style:italic">No chargebacks for this week</td></tr>`;upK();return;}
+  tb.innerHTML=CBs.map(c=>`<tr><td style="font-weight:700">${X(c.rp)}</td><td style="font-size:11px;color:var(--mu)">${X(c.st)}</td><td><span class="bdg bfl">${X(c.tp)}</span></td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--da)">$${c.a.toFixed(2)}</td><td style="font-size:11px">${X(c.by)}</td><td style="font-size:11px;color:var(--mu)">${X(c.rf)||"—"}</td><td style="font-size:11px;color:var(--mu);max-width:150px">${X(c.nt)||"—"}</td><td style="font-size:11px;color:var(--mu)">${c.at}</td><td>${wkLocked?'<span class="bdg bfl">Locked</span>':`<button class="btn bd xs" onclick="requirePin(()=>rmCB(${c.id}))">x</button>`}</td></tr>`).join("");
+  upK();
 }
 
 </script>
