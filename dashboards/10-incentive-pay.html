@@ -27,14 +27,15 @@ body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--tx);min-he
 .sm{padding:5px 12px;font-size:12px}
 .xs{padding:3px 8px;font-size:11px;border-radius:6px}
 .layout{display:flex;min-height:calc(100vh - 60px);background:var(--bg)}
-.sidebar{width:220px;background:var(--dk);position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;flex-shrink:0;padding:12px 0}
+.sidebar{width:220px;min-width:220px;background:var(--dk);position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;flex-shrink:0;padding:12px 0;z-index:10}
 .sg{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:10px 18px 4px}
 .si{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:13px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;transition:all .2s;border-left:3px solid transparent;user-select:none}
 .si:hover{background:rgba(255,255,255,.07);color:#fff}
 .si.active{background:rgba(226,0,116,.2);color:#fff;border-left-color:var(--pr)}
 .si .ic{font-size:15px;width:20px;text-align:center}
-.content{flex:1;padding:22px;min-width:0;background:var(--bg);overflow-y:auto}
-.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%}
+.content{flex:1;min-width:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;height:calc(100vh - 60px)}
+#adminContent .sub-tab{font-size:11px!important;padding:6px 11px!important;white-space:nowrap!important;flex-shrink:0!important}
+.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%;padding:22px;box-sizing:border-box}
 .sub-tabs{display:flex;gap:8px;margin-bottom:16px}
 .sub-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--bo);background:var(--sf);color:var(--mu);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
 .sub-tab:hover{border-color:var(--se);color:var(--se)}.sub-tab.active{background:var(--se);color:#fff;border-color:var(--se)}
@@ -379,7 +380,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
 /* ── FLYER STYLES ── */
 .flyer-pane{display:none}.flyer-pane.active{display:block}
-.flyer-card{background:#fff;border-radius:16px;box-shadow:var(--shm);overflow:hidden;border:1px solid var(--bo);max-width:700px;margin:0 auto}
+.flyer-card{position:relative;z-index:1;background:#fff;border-radius:16px;box-shadow:var(--shm);overflow:hidden;border:1px solid var(--bo);max-width:700px;margin:0 auto}
 .flyer-hdr{background:linear-gradient(135deg,var(--pr),var(--se));padding:24px 28px;display:flex;align-items:center;justify-content:space-between;color:#fff}
 .flyer-co{font-size:10px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
 .flyer-title{font-family:'Poppins',sans-serif;font-weight:900;font-size:22px}
@@ -417,7 +418,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 .flyer-footer{background:var(--thb);padding:10px 24px;font-size:10px;color:var(--mu);text-align:center;border-top:1px solid var(--bo)}
 @media print{
   .sidebar,.bnav,.week-bar,.topbar,.sub-tabs,.btn,.flyer-footer{display:none!important}
-  .flyer-card{box-shadow:none;border:none;max-width:100%}
+  .flyer-card{position:relative;z-index:1;box-shadow:none;border:none;max-width:100%}
   .content{padding:0}
   .flyer-pane{display:none!important}
   .flyer-pane.active{display:block!important}
@@ -460,25 +461,7 @@ body.page-pg-assign .week-bar{display:none!important;}
   </div>
 </header>
 <div class="layout">
-  <!-- MOBILE BOTTOM NAV -->
-  <nav class="bnav" id="bnav">
-    <button class="bn" onclick="goPage('pg-home',this)" data-page="pg-home"><span class="bn-ic">🏠</span><span class="bn-lbl">Home</span></button>
-    <button class="bn" onclick="goPage('pg-reps',this)" data-page="pg-reps"><span class="bn-ic">👤</span><span class="bn-lbl">Reps</span></button>
-    <button class="bn" onclick="goPage('pg-managers',this)" data-page="pg-managers"><span class="bn-ic">🏢</span><span class="bn-lbl">Mgrs</span></button>
-    <button class="bn" onclick="goPage('pg-coaches',this)" data-page="pg-coaches"><span class="bn-ic">🎯</span><span class="bn-lbl">Coaches</span></button>
-    <button class="bn" onclick="goPage('pg-summary',this)" data-page="pg-summary"><span class="bn-ic">📊</span><span class="bn-lbl">Summary</span></button>
-    <button class="bn" onclick="toggleMobileMenu()" id="moreBtn"><span class="bn-ic">☰</span><span class="bn-lbl">More</span></button>
-  </nav>
-  <!-- MOBILE MORE MENU -->
-  <div class="mobile-more" id="mobileMore" style="display:none">
-    <div class="mm-hdr"><span>Work Force Ops</span><button onclick="toggleMobileMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">✕</button></div>
-    <div class="mm-items">
-      <button class="mm-item" onclick="goPage('pg-admin',document.querySelector('[data-page=\'pg-admin\']'));toggleMobileMenu()">🔐 Admin Center</button>
-      <button class="mm-item" onclick="requirePin(()=>{goPage('pg-chargebacks',this);});toggleMobileMenu()">⚡ Chargebacks (Admin)</button>
-      <button class="mm-item" onclick="goPage('pg-leaderboard',this);toggleMobileMenu()">🏆 Leaderboard</button>
-      <button class="mm-item" onclick="goPage('pg-summary',this);toggleMobileMenu()">📊 Summary</button>
-    </div>
-  </div>
+
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-toggle" onclick="toggleSidebar()" id="sidebarToggle" title="Collapse sidebar">
     <span id="toggleIcon">◀</span>
@@ -569,7 +552,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <button onclick="goPage('pg-employee',null)" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
         <span style="font-size:24px">💵</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">My Bonus</span>
       </button>
-      <button onclick="goPage('pg-flyers',null);swFlyer('rep')" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+      <button onclick="goPage('pg-reps',null);setTimeout(()=>swSub('reps','structure',document.getElementById('ift-rep')),150)" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
         <span style="font-size:24px">📋</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Structure</span>
       </button>
 
@@ -671,6 +654,105 @@ body.page-pg-assign .week-bar{display:none!important;}
 
 
   
+  <div class="page" id="pg-employee">
+  <div style="width:100%;max-width:680px">
+  <div style="text-align:center;padding:0 0 10px">
+    <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--se)">💵 My Bonus</div>
+    <div style="font-size:13px;color:var(--mu)">Select your name to see your current week breakdown</div>
+  </div>
+
+  <!-- NAME SELECTOR -->
+  <div style="max-width:420px;margin:0 auto 20px;padding:0 16px">
+    <div class="fi">
+      <label style="font-size:13px;font-weight:700;color:var(--se)">Select Your Name</label>
+      <select id="empSelect" onchange="loadEmpBonus()"
+        style="width:100%;padding:12px 14px;border:2px solid var(--bo);border-radius:10px;font-family:'Nunito',sans-serif;font-size:15px;outline:none;background:#fff">
+        <option value="">— Choose your name —</option>
+      </select>
+    </div>
+    <div style="font-size:11px;color:var(--mu);margin-top:6px;text-align:center" id="empWeekLabel"></div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div id="emp-empty" style="text-align:center;padding:20px 20px">
+    <div style="font-size:48px;margin-bottom:12px">💵</div>
+    <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:var(--se);margin-bottom:6px">Select your name above</div>
+    <div style="font-size:13px;color:var(--mu)">Your bonus breakdown for the current week will appear here</div>
+  </div>
+
+  <!-- BONUS CARD -->
+  <div id="emp-card" style="display:none;max-width:600px;margin:0 auto;padding:0 16px 40px" id="printEmpBonus">
+    <!-- HEADER -->
+    <div style="background:linear-gradient(135deg,var(--dk),var(--pr));border-radius:16px;padding:20px 24px;margin-bottom:16px;color:#fff">
+      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em">Edgelink Inc — Work Force Ops</div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;margin:4px 0" id="empName">—</div>
+      <div style="font-size:12px;opacity:.75" id="empInfo">—</div>
+      <div style="font-size:12px;opacity:.75;margin-top:2px" id="empWeekDisp">Week of —</div>
+    </div>
+
+    <!-- BREAKDOWN CARDS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="kc" style="border-left:4px solid var(--pr)">
+        <div class="kl">Box Bonus</div>
+        <div class="kv" id="empBx" style="color:var(--pr)">$—</div>
+        <div class="ks" id="empBxDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--se)">
+        <div class="kl">Accessory Bonus</div>
+        <div class="kv" id="empAc" style="color:var(--se)">$—</div>
+        <div class="ks" id="empAcDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid #00897B">
+        <div class="kl">Power Ups</div>
+        <div class="kv" id="empPu" style="color:#00897B">$—</div>
+        <div class="ks" id="empPuDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--ok)">
+        <div class="kl">MIM Spiff</div>
+        <div class="kv" id="empMim" style="color:var(--ok)">$—</div>
+        <div class="ks" id="empMimDetail">—</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--ac)">
+        <div class="kl">Spiffs</div>
+        <div class="kv" id="empSp" style="color:var(--ac)">$—</div>
+        <div class="ks" id="empSpDetail">0 active</div>
+      </div>
+      <div class="kc" style="border-left:4px solid var(--da)">
+        <div class="kl">Arcade (MIM paid)</div>
+        <div class="kv" id="empArc" style="color:var(--da)">-$—</div>
+        <div class="ks">coach-paid</div>
+      </div>
+    </div>
+
+    <!-- CHARGEBACKS -->
+    <div id="empCbSection" style="display:none;background:#FFEBEE;border:1px solid var(--da);border-radius:10px;padding:12px 16px;margin-bottom:14px">
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--da);margin-bottom:8px">⚡ Chargebacks This Week</div>
+      <div id="empCbList"></div>
+    </div>
+
+    <!-- NET OWED -->
+    <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:14px;padding:18px 22px;color:#fff;text-align:center;margin-bottom:16px">
+      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Net Owed This Week</div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:36px" id="empNet">$—</div>
+      <div style="font-size:11px;opacity:.7;margin-top:4px">Gross $<span id="empGross">—</span> − Arcade $<span id="empArcAmt">—</span> − CB $<span id="empCbAmt">—</span></div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn bp" onclick="printEmpBonus()">🖨 Print My Bonus Slip</button>
+      <button class="btn bghost" onclick="document.getElementById('empSelect').value='';loadEmpBonus()">✕ Clear</button>
+    </div>
+
+    <!-- FINE PRINT -->
+    <div style="font-size:10px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.6">
+      Questions about your bonus? See your manager or coach.<br>
+      CONFIDENTIAL — Edgelink Inc Internal Use Only
+    </div>
+  </div>
+</div>
+  </div><!-- /pg-employee wrapper -->
+
+
   <div class="page" id="pg-reps">
     
 
@@ -719,7 +801,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <!-- UPLOAD BANNER -->
       <div style="background:linear-gradient(135deg,#F3E8FF,#FFF0F7);border:1px solid var(--se);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);flex:1">📂 Load Data — Upload in Admin Center</div>
-        <button class="btn bp sm" onclick="goPage('pg-admin',document.querySelector('[data-page=\'pg-admin\']'));setTimeout(()=>swAdmin('data',null),300)">⬆ Go to Upload</button>
+        <button class="btn bp sm" onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('data',null),300)">⬆ Go to Upload</button>
         <div style="font-size:11px;color:var(--mu)" id="repUploadStatus"></div>
       </div>
       <div class="card"><div class="card-hdr card-hdr-dk">
@@ -741,22 +823,7 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="kc kcw"><div class="kl">Top Earner Zone</div><div class="kv" id="kT">—</div><div class="ks">25+ PPD</div></div>
   </div>
 
-        <div class="dz-row">
-          <div class="dz" id="dzR" ondragover="dzo(event,'dzR')" ondragleave="dzl('dzR')" ondrop="requirePin(()=>dzd(event,'rtbdi'))">
-            <input type="file" accept=".csv,.txt" onchange="requirePin(()=>dzfs(event,'rtbdi'))"/>
-            <div class="dz-tag dz-r">RTBDI / RTPOS</div><div class="dz-ic">🖥️</div>
-            <div class="dz-lb">Drop RTPOS CSV Here</div>
-            <div class="dz-sb">totact · totaccessoryprofit · financedcount · hint · tablet · watch</div>
-            <div class="dz-fn" id="fnR"></div>
-          </div>
-          <div class="dz" id="dzM" ondragover="dzo(event,'dzM')" ondragleave="dzl('dzM')" ondrop="requirePin(()=>dzd(event,'metro'))">
-            <input type="file" accept=".csv,.txt" onchange="requirePin(()=>dzfs(event,'metro'))"/>
-            <div class="dz-tag dz-m">METRO BY T-MOBILE</div><div class="dz-ic">📡</div>
-            <div class="dz-lb">Drop Metro CSV Here</div>
-            <div class="dz-sb">MM BANs · MIM Lines · ELB · Attach % · Activation %</div>
-            <div class="dz-fn" id="fnM"></div>
-          </div>
-        </div>
+        
         <div class="spiff-ban" id="spb"><div class="spiff-ban-t">⚡ Active Spiffs This Week — Stack on All Payouts</div><div class="spiff-pills" id="spp"></div></div>
         <div class="emp" id="re"><div class="emp-ic">📂</div><div class="emp-t">Drop CSV files above to get started</div><div class="emp-s">Upload RTPOS and Metro exports. All calculations are automatic.</div><div style="margin-top:14px"><button class="btn bp" onclick="requirePin(loadSmp)">▶ Load Sample Data</button></div></div>
         <div id="rw" style="display:none">
@@ -816,6 +883,18 @@ body.page-pg-assign .week-bar{display:none!important;}
       </div></div>
     </div>
     <div class="sub-pane" id="reps-structure">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px;color:var(--se)">📋 Bonus Structure</div>
+          <div style="font-size:12px;color:var(--mu)" id="flyerEffDateInline">Effective — current tiers</div>
+        </div>
+        <button class="btn bp sm" onclick="printRepFlyerInline()">🖨 Print Flyer</button>
+      </div>
+      <div class="sub-tabs" style="margin-bottom:16px">
+        <button class="sub-tab active" id="ift-rep" onclick="swInlineFlyer('rep',this)">👤 Rep</button>
+        <button class="sub-tab" id="ift-coach" onclick="swInlineFlyer('coach',this)">🎯 Coach</button>
+        <button class="sub-tab" id="ift-mgr" onclick="swInlineFlyer('mgr',this)">🏢 Manager</button>
+      </div>
       <div id="repFlyerInline"></div>
     </div>
     <div class="sub-pane" id="reps-mim">
@@ -928,6 +1007,15 @@ body.page-pg-assign .week-bar{display:none!important;}
     </div>
     
     <div class="sub-pane" id="mgr-structure">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:18px;color:var(--se)">🏢 Manager Bonus Structure</div>
+        <button class="btn bp sm" onclick="openPF(document.getElementById('mgrFlyerInline').innerHTML,'Manager Bonus Structure')">🖨 Print</button>
+      </div>
+      <div class="sub-tabs" style="margin-bottom:14px">
+        <button class="sub-tab active" id="mft-i-1" onclick="swMgrTierFlyerTo(1,document.getElementById('mgrFlyerInline'))">🥇 Tier 1</button>
+        <button class="sub-tab" id="mft-i-2" onclick="swMgrTierFlyerTo(2,document.getElementById('mgrFlyerInline'))">🥈 Tier 2</button>
+        <button class="sub-tab" id="mft-i-3" onclick="swMgrTierFlyerTo(3,document.getElementById('mgrFlyerInline'))">🥉 Tier 3</button>
+      </div>
       <div id="mgrFlyerInline"></div>
     </div>
     <div class="sub-pane" id="mgr-mim">
@@ -1079,11 +1167,146 @@ body.page-pg-assign .week-bar{display:none!important;}
     </div>
   </div>
 
-<div class="page" id="pg-admin" style="min-height:100vh;">
+<div class="page" id="pg-roster">
+    <div class="card"><div class="card-hdr card-hdr-dk">
+      <div class="card-title">👥 Rep Roster — Admin Only</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn bghost sm" onclick="expRosterCSV()">⬇ Export CSV</button>
+        <button class="btn bghost sm" onclick="requirePin(addRosterRep)">+ Add Rep</button>
+        <button class="btn bghost sm" onclick="requirePin(saveRosterAll)">💾 Save All</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- SUMMARY STRIP -->
+      <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:14px">
+        <div class="kc"><div class="kl">Total Reps</div><div class="kv" id="rosterTotal">83</div><div class="ks">all coaches</div></div>
+        <div class="kc kcp"><div class="kl">Rose Perez</div><div class="kv" id="rosterRP">—</div><div class="ks">reps</div></div>
+        <div class="kc kcg"><div class="kl">Mr. Watts</div><div class="kv" id="rosterMW">—</div><div class="ks">reps</div></div>
+        <div class="kc kct"><div class="kl">Ambulai Sheku</div><div class="kv" id="rosterAS">—</div><div class="ks">reps</div></div>
+        <div class="kc kca"><div class="kl">Joel Montero</div><div class="kv" id="rosterJM">—</div><div class="ks">reps</div></div>
+        <div class="kc kcw"><div class="kl">Manny</div><div class="kv" id="rosterMN">—</div><div class="ks">reps</div></div>
+        <div class="kc"><div class="kl">Cheryl</div><div class="kv" id="rosterCH">—</div><div class="ks">reps</div></div>
+        <div class="kc kcr"><div class="kl">TBD</div><div class="kv" id="rosterTBD">—</div><div class="ks">unassigned</div></div>
+      </div>
+      <!-- FILTERS -->
+      <div class="srch-bar" style="margin-bottom:12px">
+        <input class="srch-inp" type="text" id="rosterSearch" placeholder="🔍 Search name, NTID, coach, state…" oninput="renRoster()"/>
+        <select id="rosterFState" onchange="renRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+          <option value="">All States</option>
+          <option value="TN">TN</option><option value="MA">MA</option>
+          <option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option>
+        </select>
+        <select id="rosterFCoach" onchange="renRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+          <option value="">All Coaches</option>
+          <option value="Ambulai Sheku">Ambulai Sheku</option>
+          <option value="Cheryl">Cheryl</option>
+          <option value="Joel Montero">Joel Montero</option>
+          <option value="Manny">Manny</option>
+          <option value="Mr. Watts">Mr. Watts</option>
+          <option value="Rose Perez">Rose Perez</option>
+          <option value="TBD">TBD</option>
+        </select>
+        <span class="srch-count" id="rosterCountLbl"></span>
+      </div>
+      <!-- ROSTER TABLE -->
+      <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
+        <table>
+          <thead><tr>
+            <th style="min-width:40px">#</th>
+            <th style="min-width:180px">Full Name</th>
+            <th style="min-width:100px">NTID</th>
+            <th style="min-width:60px">State</th>
+            <th class="gc" style="min-width:160px">Coach</th>
+            <th class="gc" style="min-width:220px">Store Assignment</th>
+            <th class="gc" style="min-width:120px">First Name</th>
+            <th class="gc" style="min-width:120px">Last Name</th>
+            <th class="gn" style="min-width:80px">Actions</th>
+          </tr></thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+      </div>
+      <!-- ADD REP FORM -->
+      <div id="addRosterForm" style="display:none;margin-top:16px;background:#FFF0F7;border:1px solid var(--pr);border-radius:10px;padding:16px">
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--pr);margin-bottom:12px">+ Add New Rep</div>
+        <div class="fg" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:10px">
+          <div class="fi"><label>NTID</label><input type="text" id="newNTID" placeholder="e.g. ABC12345"/></div>
+          <div class="fi"><label>First Name</label><input type="text" id="newFirst" placeholder="First"/></div>
+          <div class="fi"><label>Last Name</label><input type="text" id="newLast" placeholder="Last"/></div>
+          <div class="fi"><label>State</label>
+            <select id="newState">
+              <option value="">Select…</option>
+              <option value="TN">TN</option><option value="MA">MA</option>
+              <option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option>
+            </select>
+          </div>
+          <div class="fi"><label>Coach</label>
+            <select id="newCoach">
+              <option value="TBD">TBD</option>
+              <option value="Ambulai Sheku">Ambulai Sheku</option>
+              <option value="Cheryl">Cheryl</option>
+              <option value="Joel Montero">Joel Montero</option>
+              <option value="Manny">Manny</option>
+              <option value="Mr. Watts">Mr. Watts</option>
+              <option value="Rose Perez">Rose Perez</option>
+            </select>
+          </div>
+          <div class="fi"><label>Store</label><select id="newRosterStore"><option value="">Select Store…</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn bp sm" onclick="requirePin(saveNewRosterRep)">+ Add Rep</button>
+          <button class="btn bo sm" onclick="document.getElementById('addRosterForm').style.display='none'">Cancel</button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+<div class="page" id="pg-assign">
+    <div class="card"><div class="card-hdr card-hdr-dk">
+      <div class="card-title">🏪 Store Assignments</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="font-size:11px;color:rgba(255,255,255,.6)">Assign stores by NTID — saves permanently, applies on every future upload</span>
+        <button class="btn bghost sm" onclick="expAssignCSV()">⬇ Export</button>
+        <button class="btn bghost sm" onclick="requirePin(clrAssign)">🗑 Clear All</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div style="background:#FFF0F7;border:1px solid var(--pr);border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:var(--se)">
+        ℹ️ Assignments save by NTID and persist across uploads. Upload your RTPOS CSV first, then assign stores here. All future uploads will auto-apply these assignments.
+      </div>
+      <div class="srch-bar" style="margin-bottom:12px">
+        <input class="srch-inp" type="text" id="assignSearch" placeholder="🔍 Search rep name or NTID…" oninput="renAssign()"/>
+        <span class="srch-count" id="assignCountLbl"></span>
+        <select id="assignFilterSt" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Stores</option></select>
+        <select id="assignFilterCo" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Coaches</option></select>
+      </div>
+      <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
+        <table>
+          <thead><tr>
+            <th>Rep Name</th><th>NTID</th>
+            <th class="gc">Assign Store</th><th class="gc">Coach (auto)</th>
+            <th class="gc">PPD This Week</th><th class="gc">Gross $</th>
+            <th class="gn">Status</th>
+          </tr></thead>
+          <tbody id="assignBody"></tbody>
+        </table>
+      </div>
+      <!-- BULK ASSIGN -->
+      <div style="margin-top:14px;padding:12px 14px;background:#F3E8FF;border:1px solid var(--se);border-radius:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:700;color:var(--se)">Bulk Assign:</span>
+        <select id="bulkStore" style="padding:6px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;min-width:200px"><option value="">Select Store…</option></select>
+        <button class="btn bs sm" onclick="requirePin(bulkAssign)">Apply to Unassigned Reps</button>
+        <button class="btn bp sm" onclick="requirePin(bulkAssignAll)">Apply to ALL Filtered Reps</button>
+      </div>
+    </div></div>
+  </div>
+
+
+  <div class="page" id="pg-admin">
     <!-- PIN GATE -->
     <div id="adminGate" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);text-align:center;padding:40px">
       <div style="background:var(--sf);border-radius:18px;padding:40px 36px;box-shadow:var(--shm);border:1px solid var(--bo);max-width:340px;width:100%">
-        <div style="font-size:48px;margin-bottom:8px">🔐</div>
+        <button onclick="goPage('pg-home',null)" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:12px;margin-bottom:12px;text-decoration:underline">← Back to Dashboard</button>
+      <div style="font-size:48px;margin-bottom:8px">🔐</div>
         <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--se);margin-bottom:4px">Admin Center</div>
         <div style="font-size:13px;color:var(--mu);margin-bottom:24px">Enter your PIN to access admin tools</div>
         <div style="display:flex;justify-content:center;gap:10px;margin-bottom:20px" id="adminPinDots">
@@ -1104,7 +1327,7 @@ body.page-pg-assign .week-bar{display:none!important;}
     </div>
 
     <!-- ADMIN CONTENT — hidden until PIN entered -->
-    <div id="adminContent" style="display:none;padding:22px;">
+    <div id="adminContent" style="display:none;padding:18px;overflow-x:hidden">
       <!-- HEADER -->
       <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:var(--ra);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
@@ -1113,13 +1336,14 @@ body.page-pg-assign .week-bar{display:none!important;}
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span style="background:rgba(0,166,81,.3);color:#fff;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700">✅ Admin Unlocked</span>
+          <button class="btn bghost sm" style="white-space:nowrap;font-size:11px" onclick="goPage('pg-home',null)">← Home</button>
           <button class="btn bd sm" onclick="adminLockOut()">🔒 Lock &amp; Exit</button>
         </div>
       </div>
 
       <!-- ADMIN NAV TABS -->
-      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-        <button class="sub-tab active" onclick="swAdmin('lock',this)">🔒 Lock Controls</button>
+      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch">
+        <button class="sub-tab active" onclick="swAdmin('lock',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:6px 12px">🔒 Lock Controls</button>
         <button class="sub-tab" onclick="swAdmin('stores',this)">🏪 Store Roster</button>
         <button class="sub-tab" onclick="swAdmin('roster',this)">👥 Rep Roster</button>
         <button class="sub-tab" onclick="swAdmin('assignments',this)">🏪 Store Assignments</button>
@@ -1453,6 +1677,58 @@ body.page-pg-assign .week-bar{display:none!important;}
 
       <!-- DATA MANAGEMENT -->
       <div class="sub-pane" id="admin-data">
+
+        <!-- UPLOAD SECTION -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hdr card-hdr-pr"><div class="card-title">📂 Upload Data Files</div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:12px">
+              <!-- RTPOS -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">📊 RTPOS — Rep Data</div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Weekly rep performance · hours, activations, accessories</div>
+                <div class="dz" id="dzR" ondragover="dzo(event,'dzR')" ondragleave="dzl('dzR')" ondrop="requirePin(()=>dzd(event,'rtbdi'))">
+                  <input type="file" accept=".csv,.txt" onchange="requirePin(()=>dzfs(event,'rtbdi'))"/>
+                  <div class="dz-ic">📂</div>
+                  <div class="dz-txt">Drop RTPOS CSV or click</div>
+                </div>
+                <div class="dz-fn" id="fnR" style="margin-top:4px;font-size:11px;color:var(--ok)"></div>
+              </div>
+              <!-- METRO REPS -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">📡 Metro CSV — Reps</div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Activations, upgrades from Metro Power BI</div>
+                <div class="dz" id="dzM" ondragover="dzo(event,'dzM')" ondragleave="dzl('dzM')" ondrop="requirePin(()=>dzd(event,'metro'))">
+                  <input type="file" accept=".csv,.txt" onchange="requirePin(()=>dzfs(event,'metro'))"/>
+                  <div class="dz-ic">📂</div>
+                  <div class="dz-txt">Drop Metro CSV or click</div>
+                </div>
+                <div class="dz-fn" id="fnM" style="margin-top:4px;font-size:11px;color:var(--ok)"></div>
+              </div>
+              <!-- METRO MANAGER -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">🏢 Metro CSV — Managers</div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Manager actuals from Metro Power BI</div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".csv,.xlsx" style="display:none" onchange="requirePin(()=>pF(this.files[0],'mgr_metro'))"/>
+                  <div class="btn bp sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload Manager CSV</div>
+                </label>
+                <div id="fnMgr" style="font-size:11px;color:var(--ok)"></div>
+              </div>
+              <!-- METRO COACH -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">🎯 Metro CSV — Coaches</div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Coach store data from Metro Power BI</div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".csv,.xlsx" style="display:none" onchange="requirePin(()=>pF(this.files[0],'coach_metro'))"/>
+                  <div class="btn bs sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload Coach CSV</div>
+                </label>
+                <div id="fnCoach" style="font-size:11px;color:var(--ok)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
           <div class="card"><div class="card-hdr card-hdr-pr"><div class="card-title">🗑 Clear Data</div></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
@@ -1523,355 +1799,6 @@ body.page-pg-assign .week-bar{display:none!important;}
       </div>
 </div><!-- /adminContent -->
   </div><!-- /pg-admin -->
-
-
-  <div class="page" id="pg-roster">
-    <div class="card"><div class="card-hdr card-hdr-dk">
-      <div class="card-title">👥 Rep Roster — Admin Only</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn bghost sm" onclick="expRosterCSV()">⬇ Export CSV</button>
-        <button class="btn bghost sm" onclick="requirePin(addRosterRep)">+ Add Rep</button>
-        <button class="btn bghost sm" onclick="requirePin(saveRosterAll)">💾 Save All</button>
-      </div>
-    </div>
-    <div class="card-body">
-      <!-- SUMMARY STRIP -->
-      <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:14px">
-        <div class="kc"><div class="kl">Total Reps</div><div class="kv" id="rosterTotal">83</div><div class="ks">all coaches</div></div>
-        <div class="kc kcp"><div class="kl">Rose Perez</div><div class="kv" id="rosterRP">—</div><div class="ks">reps</div></div>
-        <div class="kc kcg"><div class="kl">Mr. Watts</div><div class="kv" id="rosterMW">—</div><div class="ks">reps</div></div>
-        <div class="kc kct"><div class="kl">Ambulai Sheku</div><div class="kv" id="rosterAS">—</div><div class="ks">reps</div></div>
-        <div class="kc kca"><div class="kl">Joel Montero</div><div class="kv" id="rosterJM">—</div><div class="ks">reps</div></div>
-        <div class="kc kcw"><div class="kl">Manny</div><div class="kv" id="rosterMN">—</div><div class="ks">reps</div></div>
-        <div class="kc"><div class="kl">Cheryl</div><div class="kv" id="rosterCH">—</div><div class="ks">reps</div></div>
-        <div class="kc kcr"><div class="kl">TBD</div><div class="kv" id="rosterTBD">—</div><div class="ks">unassigned</div></div>
-      </div>
-      <!-- FILTERS -->
-      <div class="srch-bar" style="margin-bottom:12px">
-        <input class="srch-inp" type="text" id="rosterSearch" placeholder="🔍 Search name, NTID, coach, state…" oninput="renRoster()"/>
-        <select id="rosterFState" onchange="renRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
-          <option value="">All States</option>
-          <option value="TN">TN</option><option value="MA">MA</option>
-          <option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option>
-        </select>
-        <select id="rosterFCoach" onchange="renRoster()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
-          <option value="">All Coaches</option>
-          <option value="Ambulai Sheku">Ambulai Sheku</option>
-          <option value="Cheryl">Cheryl</option>
-          <option value="Joel Montero">Joel Montero</option>
-          <option value="Manny">Manny</option>
-          <option value="Mr. Watts">Mr. Watts</option>
-          <option value="Rose Perez">Rose Perez</option>
-          <option value="TBD">TBD</option>
-        </select>
-        <span class="srch-count" id="rosterCountLbl"></span>
-      </div>
-      <!-- ROSTER TABLE -->
-      <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
-        <table>
-          <thead><tr>
-            <th style="min-width:40px">#</th>
-            <th style="min-width:180px">Full Name</th>
-            <th style="min-width:100px">NTID</th>
-            <th style="min-width:60px">State</th>
-            <th class="gc" style="min-width:160px">Coach</th>
-            <th class="gc" style="min-width:220px">Store Assignment</th>
-            <th class="gc" style="min-width:120px">First Name</th>
-            <th class="gc" style="min-width:120px">Last Name</th>
-            <th class="gn" style="min-width:80px">Actions</th>
-          </tr></thead>
-          <tbody id="rosterBody"></tbody>
-        </table>
-      </div>
-      <!-- ADD REP FORM -->
-      <div id="addRosterForm" style="display:none;margin-top:16px;background:#FFF0F7;border:1px solid var(--pr);border-radius:10px;padding:16px">
-        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--pr);margin-bottom:12px">+ Add New Rep</div>
-        <div class="fg" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:10px">
-          <div class="fi"><label>NTID</label><input type="text" id="newNTID" placeholder="e.g. ABC12345"/></div>
-          <div class="fi"><label>First Name</label><input type="text" id="newFirst" placeholder="First"/></div>
-          <div class="fi"><label>Last Name</label><input type="text" id="newLast" placeholder="Last"/></div>
-          <div class="fi"><label>State</label>
-            <select id="newState">
-              <option value="">Select…</option>
-              <option value="TN">TN</option><option value="MA">MA</option>
-              <option value="RI">RI</option><option value="CT">CT</option><option value="AR">AR</option>
-            </select>
-          </div>
-          <div class="fi"><label>Coach</label>
-            <select id="newCoach">
-              <option value="TBD">TBD</option>
-              <option value="Ambulai Sheku">Ambulai Sheku</option>
-              <option value="Cheryl">Cheryl</option>
-              <option value="Joel Montero">Joel Montero</option>
-              <option value="Manny">Manny</option>
-              <option value="Mr. Watts">Mr. Watts</option>
-              <option value="Rose Perez">Rose Perez</option>
-            </select>
-          </div>
-          <div class="fi"><label>Store</label><select id="newRosterStore"><option value="">Select Store…</option></select></div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn bp sm" onclick="requirePin(saveNewRosterRep)">+ Add Rep</button>
-          <button class="btn bo sm" onclick="document.getElementById('addRosterForm').style.display='none'">Cancel</button>
-        </div>
-      </div>
-    </div></div>
-  </div>
-
-
-  <div class="page" id="pg-assign">
-    <div class="card"><div class="card-hdr card-hdr-dk">
-      <div class="card-title">🏪 Store Assignments</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <span style="font-size:11px;color:rgba(255,255,255,.6)">Assign stores by NTID — saves permanently, applies on every future upload</span>
-        <button class="btn bghost sm" onclick="expAssignCSV()">⬇ Export</button>
-        <button class="btn bghost sm" onclick="requirePin(clrAssign)">🗑 Clear All</button>
-      </div>
-    </div>
-    <div class="card-body">
-      <div style="background:#FFF0F7;border:1px solid var(--pr);border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:var(--se)">
-        ℹ️ Assignments save by NTID and persist across uploads. Upload your RTPOS CSV first, then assign stores here. All future uploads will auto-apply these assignments.
-      </div>
-      <div class="srch-bar" style="margin-bottom:12px">
-        <input class="srch-inp" type="text" id="assignSearch" placeholder="🔍 Search rep name or NTID…" oninput="renAssign()"/>
-        <span class="srch-count" id="assignCountLbl"></span>
-        <select id="assignFilterSt" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Stores</option></select>
-        <select id="assignFilterCo" onchange="renAssign()" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none"><option value="">All Coaches</option></select>
-      </div>
-      <div class="tw" style="border:1px solid var(--bo);border-radius:10px;overflow:hidden">
-        <table>
-          <thead><tr>
-            <th>Rep Name</th><th>NTID</th>
-            <th class="gc">Assign Store</th><th class="gc">Coach (auto)</th>
-            <th class="gc">PPD This Week</th><th class="gc">Gross $</th>
-            <th class="gn">Status</th>
-          </tr></thead>
-          <tbody id="assignBody"></tbody>
-        </table>
-      </div>
-      <!-- BULK ASSIGN -->
-      <div style="margin-top:14px;padding:12px 14px;background:#F3E8FF;border:1px solid var(--se);border-radius:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:700;color:var(--se)">Bulk Assign:</span>
-        <select id="bulkStore" style="padding:6px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none;min-width:200px"><option value="">Select Store…</option></select>
-        <button class="btn bs sm" onclick="requirePin(bulkAssign)">Apply to Unassigned Reps</button>
-        <button class="btn bp sm" onclick="requirePin(bulkAssignAll)">Apply to ALL Filtered Reps</button>
-      </div>
-    </div></div>
-  </div>
-
-
-
-
-  <div class="page" id="pg-flyers">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-    <div>
-      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px;color:var(--se)">📋 Bonus Structure</div>
-      <div style="font-size:12px;color:var(--mu)" id="flyerEffDate">Effective — current tiers</div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn bp sm" onclick="printFlyer()">🖨 Print Flyer</button>
-      <button class="btn bghost sm" onclick="printAllFlyers()">🖨 Print All 3</button>
-    </div>
-  </div>
-  <div class="sub-tabs" style="margin-bottom:16px">
-    <button class="sub-tab active" id="ft-rep" onclick="swFlyer('rep',this)">👤 Rep</button>
-    <button class="sub-tab" id="ft-coach" onclick="swFlyer('coach',this)">🎯 Coach</button>
-    <button class="sub-tab" id="ft-mgr" onclick="swFlyer('mgr',this)">🏢 Manager</button>
-  </div>
-
-  <!-- REP FLYER -->
-  <div id="flyer-rep" class="flyer-pane active">
-    <div class="flyer-card" id="printRepFlyer">
-      <div class="flyer-hdr">
-        <div>
-          <div class="flyer-co">EDGELINK INC</div>
-          <div class="flyer-title">Retail Sales Representative</div><div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:600">Bonus Structure</div>
-          <div class="flyer-sub" id="repFlyerDate">Effective April 2026</div>
-        </div>
-        <div class="flyer-badge" style="font-size:11px">👤 RSR</div>
-      </div>
-      <div class="flyer-body">
-        <!-- BOX TIERS -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">📦 Box Level Ups — Per Activation</div>
-          <div class="flyer-sec-sub">Paid on EVERY activation once tier threshold is hit</div>
-          <div class="flyer-tiers" id="repBoxTiers"></div>
-        </div>
-        <!-- ACCESSORY -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">🛍️ Accessory Levels — Weekly % of Net Profit</div>
-          <div class="flyer-sec-sub">Exact payout = your tier % × your accessory net profit</div>
-          <div class="flyer-tiers" id="repAccTiers"></div>
-        </div>
-        <!-- POWER UPS -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">⚡ Power Ups — Stack on Everything</div>
-          <div class="flyer-powerups" id="repPowerUps"></div>
-        </div>
-        <!-- MIM -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">📱 MIM Payout — Minimum 6 MM BANs to qualify</div>
-          <div class="flyer-mim" id="repMimTiers"></div>
-          <div style="font-size:11px;color:var(--da);margin-top:6px;font-weight:700">⚠ Must hit 6 MM BANs minimum — paid via Arcade by your coach</div>
-        </div>
-      </div>
-      <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops</div>
-    </div>
-  </div>
-
-  <!-- COACH FLYER -->
-  <div id="flyer-coach" class="flyer-pane">
-    <div class="flyer-card" id="printCoachFlyer">
-      <div class="flyer-hdr" style="background:linear-gradient(135deg,var(--dk),var(--se))">
-        <div>
-          <div class="flyer-co">EDGELINK INC</div>
-          <div class="flyer-title">Coach Bonus Structure</div>
-          <div class="flyer-sub" id="coachFlyerDate">Effective April 2026</div>
-        </div>
-        <div class="flyer-badge">🎯 COACH</div>
-      </div>
-      <div class="flyer-body">
-        <div class="flyer-note">All bonuses calculated per store. Coach total = sum of all assigned stores.</div>
-        <!-- ACTIVATION -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">🎯 Activation Bonus — Per Door (1 door per store)</div>
-          <div class="flyer-sec-sub">$0 if under 100% — no partial payout</div>
-          <div class="flyer-tiers" id="coachActTiers"></div>
-        </div>
-        <!-- ACCESSORY -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">🛍️ Accessory Bonus — Per Box</div>
-          <div class="flyer-sec-sub">Calculated: Acc Total $ ÷ Total Activations = $/Box → determines tier</div>
-          <div class="flyer-tiers" id="coachAccTiers"></div>
-          <div style="font-size:11px;color:var(--mu);margin-top:6px">$0 if under $50/box baseline</div>
-        </div>
-        <!-- GUARDRAILS -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">⚠️ Guardrails</div>
-          <div class="flyer-guardrails" id="coachGuardrails"></div>
-        </div>
-        <!-- KICKER -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">🚀 Company Kicker — Stacks on Everything</div>
-          <div class="flyer-tiers" id="coachKickers"></div>
-        </div>
-        <!-- MIM -->
-        <div class="flyer-section">
-          <div class="flyer-sec-hdr">📱 Coach MIM Spiff</div>
-          <div class="flyer-tiers" id="coachMimFlyer"></div>
-        </div>
-      </div>
-      <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops</div>
-    </div>
-  </div>
-
-<!-- MANAGER FLYER -->
-  <div id="flyer-mgr" class="flyer-pane">
-    <!-- Tier sub-tabs -->
-    <div class="sub-tabs" style="margin-bottom:16px">
-      <button class="sub-tab active" id="mft-1" onclick="swMgrTierFlyer(1,this)">🥇 Tier 1 — High Volume</button>
-      <button class="sub-tab" id="mft-2" onclick="swMgrTierFlyer(2,this)">🥈 Tier 2 — 2ME</button>
-      <button class="sub-tab" id="mft-3" onclick="swMgrTierFlyer(3,this)">🥉 Tier 3 — 1ME</button>
-    </div>
-    <div id="mgrTierFlyerWrap"></div>
-  </div>
-</div>
-
-  <div class="page" id="pg-employee">
-  <div style="text-align:center;padding:20px 0 10px">
-    <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--se)">💵 My Bonus</div>
-    <div style="font-size:13px;color:var(--mu)">Select your name to see your current week breakdown</div>
-  </div>
-
-  <!-- NAME SELECTOR -->
-  <div style="max-width:420px;margin:0 auto 20px;padding:0 16px">
-    <div class="fi">
-      <label style="font-size:13px;font-weight:700;color:var(--se)">Select Your Name</label>
-      <select id="empSelect" onchange="loadEmpBonus()"
-        style="width:100%;padding:12px 14px;border:2px solid var(--bo);border-radius:10px;font-family:'Nunito',sans-serif;font-size:15px;outline:none;background:#fff">
-        <option value="">— Choose your name —</option>
-      </select>
-    </div>
-    <div style="font-size:11px;color:var(--mu);margin-top:6px;text-align:center" id="empWeekLabel"></div>
-  </div>
-
-  <!-- EMPTY STATE -->
-  <div id="emp-empty" style="text-align:center;padding:60px 20px">
-    <div style="font-size:48px;margin-bottom:12px">💵</div>
-    <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:var(--se);margin-bottom:6px">Select your name above</div>
-    <div style="font-size:13px;color:var(--mu)">Your bonus breakdown for the current week will appear here</div>
-  </div>
-
-  <!-- BONUS CARD -->
-  <div id="emp-card" style="display:none;max-width:600px;margin:0 auto;padding:0 16px 40px" id="printEmpBonus">
-    <!-- HEADER -->
-    <div style="background:linear-gradient(135deg,var(--dk),var(--pr));border-radius:16px;padding:20px 24px;margin-bottom:16px;color:#fff">
-      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em">Edgelink Inc — Work Force Ops</div>
-      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;margin:4px 0" id="empName">—</div>
-      <div style="font-size:12px;opacity:.75" id="empInfo">—</div>
-      <div style="font-size:12px;opacity:.75;margin-top:2px" id="empWeekDisp">Week of —</div>
-    </div>
-
-    <!-- BREAKDOWN CARDS -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div class="kc" style="border-left:4px solid var(--pr)">
-        <div class="kl">Box Bonus</div>
-        <div class="kv" id="empBx" style="color:var(--pr)">$—</div>
-        <div class="ks" id="empBxDetail">—</div>
-      </div>
-      <div class="kc" style="border-left:4px solid var(--se)">
-        <div class="kl">Accessory Bonus</div>
-        <div class="kv" id="empAc" style="color:var(--se)">$—</div>
-        <div class="ks" id="empAcDetail">—</div>
-      </div>
-      <div class="kc" style="border-left:4px solid #00897B">
-        <div class="kl">Power Ups</div>
-        <div class="kv" id="empPu" style="color:#00897B">$—</div>
-        <div class="ks" id="empPuDetail">—</div>
-      </div>
-      <div class="kc" style="border-left:4px solid var(--ok)">
-        <div class="kl">MIM Spiff</div>
-        <div class="kv" id="empMim" style="color:var(--ok)">$—</div>
-        <div class="ks" id="empMimDetail">—</div>
-      </div>
-      <div class="kc" style="border-left:4px solid var(--ac)">
-        <div class="kl">Spiffs</div>
-        <div class="kv" id="empSp" style="color:var(--ac)">$—</div>
-        <div class="ks" id="empSpDetail">0 active</div>
-      </div>
-      <div class="kc" style="border-left:4px solid var(--da)">
-        <div class="kl">Arcade (MIM paid)</div>
-        <div class="kv" id="empArc" style="color:var(--da)">-$—</div>
-        <div class="ks">coach-paid</div>
-      </div>
-    </div>
-
-    <!-- CHARGEBACKS -->
-    <div id="empCbSection" style="display:none;background:#FFEBEE;border:1px solid var(--da);border-radius:10px;padding:12px 16px;margin-bottom:14px">
-      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;color:var(--da);margin-bottom:8px">⚡ Chargebacks This Week</div>
-      <div id="empCbList"></div>
-    </div>
-
-    <!-- NET OWED -->
-    <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:14px;padding:18px 22px;color:#fff;text-align:center;margin-bottom:16px">
-      <div style="font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Net Owed This Week</div>
-      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:36px" id="empNet">$—</div>
-      <div style="font-size:11px;opacity:.7;margin-top:4px">Gross $<span id="empGross">—</span> − Arcade $<span id="empArcAmt">—</span> − CB $<span id="empCbAmt">—</span></div>
-    </div>
-
-    <!-- ACTIONS -->
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn bp" onclick="printEmpBonus()">🖨 Print My Bonus Slip</button>
-      <button class="btn bghost" onclick="document.getElementById('empSelect').value='';loadEmpBonus()">✕ Clear</button>
-    </div>
-
-    <!-- FINE PRINT -->
-    <div style="font-size:10px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.6">
-      Questions about your bonus? See your manager or coach.<br>
-      CONFIDENTIAL — Edgelink Inc Internal Use Only
-    </div>
-  </div>
-</div>
 
 </main></div>
 <div id="pf"></div>
@@ -2231,7 +2158,6 @@ function goPage(id,el){
   if(id==="pg-coaches"){renCoachOv();renCoachMim();}
   if(id==="pg-home")initHomePage();
   if(id==="pg-roster")renRoster();
-  if(id==="pg-flyers"){renRepFlyer();}
   if(id==="pg-employee"){initEmpView();}
   if(id==="pg-admin"){
     document.body.classList.add("admin-active");
@@ -2240,6 +2166,12 @@ function goPage(id,el){
   } else {
     document.body.classList.remove("admin-active");
   }
+  // Force scroll reset - belt and suspenders approach
+  const _c=document.querySelector('.content');
+  if(_c)_c.scrollTop=0;
+  setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},0);
+  setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},50);
+  setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},150);
 }
 function swSub(prefix,id,btn){
   const pg=btn.closest(".page");
@@ -2251,22 +2183,16 @@ function swSub(prefix,id,btn){
   if(id==="overview"&&prefix==="reps")renRepOv();
   if(id==="overview"&&prefix==="coach")renCoachOv();
   if(id==="calc"&&prefix==="coach")renCoachSheet();
-  if(id==="structure"&&prefix==="reps"){renRepFlyer();const el=document.getElementById('repFlyerInline');const src=document.getElementById('printRepFlyer');if(el&&src)el.innerHTML=src.outerHTML;}
-  if(id==="structure"&&prefix==="mgr"){
-    const el=document.getElementById('mgrFlyerInline');
-    if(el){
-      el.innerHTML=`<div style="margin-bottom:12px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-          <button class="sub-tab active" id="mft-inline-1" onclick="swMgrInlineFlyer(1,this)">🥇 Tier 1</button>
-          <button class="sub-tab" id="mft-inline-2" onclick="swMgrInlineFlyer(2,this)">🥈 Tier 2</button>
-          <button class="sub-tab" id="mft-inline-3" onclick="swMgrInlineFlyer(3,this)">🥉 Tier 3</button>
-        </div>
-        <div id="mgrInlineFlyerContent"></div>
-      </div>`;
-      swMgrInlineFlyer(1, document.getElementById('mft-inline-1'));
-    }
+  if(id==="structure"&&prefix==="reps"){
+    swInlineFlyer('rep', document.getElementById('ift-rep'));
   }
-  if(id==="structure"&&prefix==="coach"){renCoachFlyer();const el=document.getElementById('coachFlyerInline');const src=document.getElementById('printCoachFlyer');if(el&&src)el.innerHTML=src.outerHTML;}
+  if(id==="structure"&&prefix==="mgr"){
+    swMgrTierFlyerTo(1, document.getElementById('mgrFlyerInline'));
+  }
+  if(id==="structure"&&prefix==="coach"){
+    const el=document.getElementById('coachFlyerInline');
+    if(el) renCoachFlyerTo(el);
+  }
   if(id==="mim"&&prefix==="coach")renCoachMim();
 }
 
@@ -4046,7 +3972,7 @@ function adminLockOut(){
   const ps=document.getElementById('pinStatus');
   if(ps){ps.textContent='🔑 Click to Enable Editing';ps.style.background='var(--wa)';ps.style.color='#1A1A1A';}
   updSheetStatus();renR();
-  goPage('pg-reps',document.querySelector('[data-page="pg-reps"]'));
+  goPage('pg-home',null);
 }
 function swAdmin(tab,btn){
   document.querySelectorAll('#adminContent .sub-pane').forEach(p=>p.classList.remove('active'));
@@ -5505,6 +5431,171 @@ function swFlyer(tab,btn){
   });
 }
 
+function swInlineFlyer(tab, btn){
+  // Update sub-tab active state
+  document.querySelectorAll('[id^="ift-"]').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else { const b=document.getElementById('ift-'+tab); if(b) b.classList.add('active'); }
+  // Update eff date
+  const n=new Date();
+  const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const effEl=document.getElementById('flyerEffDateInline');
+  if(effEl) effEl.textContent='Effective '+mo;
+  const el=document.getElementById('repFlyerInline');
+  if(!el) return;
+  if(tab==='rep') renRepFlyerTo(el);
+  else if(tab==='coach') renCoachFlyerTo(el);
+  else if(tab==='mgr') renMgrFlyerTo(el);
+}
+
+function printRepFlyerInline(){
+  const el=document.getElementById('repFlyerInline');
+  if(!el||!el.innerHTML.trim()){tst2('No flyer loaded.','wn');return;}
+  openPF(el.innerHTML,'Bonus Structure Flyer');
+}
+
+function renCoachFlyerTo(target){
+  const ct=T.coach||DT.coach;
+  const n=new Date();
+  const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const actHTML=[
+    {range:'100% – 114% to goal',rate:ct.at100},
+    {range:'115% – 124% to goal',rate:ct.at115},
+    {range:'125%+ to goal',rate:ct.at125,top:true}
+  ].map(t=>`<div class="flyer-tier ${t.top?'flyer-tier-top':''}"><div class="ft-range">${t.range}</div><div class="ft-rate"><span class="ft-dollar">$${t.rate}</span><span class="ft-unit">/door</span></div>${t.top?'<div class="ft-badge">⭐ TOP</div>':''}</div>`).join('');
+  const accHTML=[
+    {range:'$50 – $59.99/box',rate:ct.ac50},
+    {range:'$60 – $69.99/box',rate:ct.ac60},
+    {range:'$70+/box',rate:ct.ac70,top:true}
+  ].map((t,i)=>`<div class="flyer-tier ${t.top?'flyer-tier-top':''}"><div class="ft-range">${t.range}</div><div class="ft-rate"><span class="ft-dollar">$${t.rate}</span><span class="ft-unit">/box</span></div></div>`).join('');
+  target.innerHTML=`<div class="flyer-card" style="max-width:800px;margin:0 auto">
+    <div class="flyer-hdr" style="background:linear-gradient(135deg,var(--dk),var(--se))">
+      <div><div class="flyer-co">EDGELINK INC</div><div class="flyer-title">Coach Bonus Structure</div><div class="flyer-sub">Effective ${mo}</div></div>
+      <div class="flyer-badge">🎯 COACH</div>
+    </div>
+    <div class="flyer-body">
+      <div class="flyer-note">All bonuses calculated per store. Coach total = sum of all assigned stores.</div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">🎯 Activation Bonus — Per Door</div><div class="flyer-sec-sub">$0 if under 100% — no partial payout</div><div class="flyer-tiers">${actHTML}</div></div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">🛍️ Accessory Bonus — Per Box</div><div class="flyer-sec-sub">Acc Total ÷ Total Activations = $/Box → determines tier. $0 if under $50/box</div><div class="flyer-tiers">${accHTML}</div></div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">⚠️ Guardrails</div>
+        <div class="flyer-guard flyer-guard-red"><span class="fg-ic">🚫</span><div><strong>Shrink &gt;5%</strong><div>Accessory bonus = $0</div></div></div>
+        <div class="flyer-guard"><span class="fg-ic">📉</span><div><strong>Shrink 3.1–5%</strong><div>Accessory −${ct.sh2}%</div></div></div>
+        <div class="flyer-guard"><span class="fg-ic">📉</span><div><strong>Shrink 2.1–3%</strong><div>Accessory −${ct.sh1}%</div></div></div>
+        <div class="flyer-guard flyer-guard-red"><span class="fg-ic">🚫</span><div><strong>ELB Bottom 40% (Rank ≥ 3,368)</strong><div>Activation −${ct.atPen}% · Accessory drops ${ct.acElbDrop} tier</div></div></div>
+      </div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">🚀 Company Kicker</div><div class="flyer-tiers">
+        <div class="flyer-tier"><div class="ft-range">Company Acc ≥ $300,000</div><div class="ft-rate"><span class="ft-dollar">$${ct.kick1}</span><span class="ft-unit">bonus</span></div></div>
+        <div class="flyer-tier flyer-tier-top"><div class="ft-range">Company Acc ≥ $350,000</div><div class="ft-rate"><span class="ft-dollar">$${ct.kick2}</span><span class="ft-unit">bonus</span></div></div>
+      </div></div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">📱 Coach MIM Spiff</div><div class="flyer-tiers">
+        <div class="flyer-tier flyer-tier-top"><div class="ft-range">Per MM BAN (account)</div><div class="ft-rate"><span class="ft-dollar">$${ct.mimRate}</span><span class="ft-unit">/BAN — stacks on everything</span></div></div>
+      </div></div>
+    </div>
+    <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops</div>
+  </div>`;
+}
+
+function renMgrFlyerTo(target){
+  swMgrTierFlyerTo(1, target);
+  // Add tier switcher above
+  const switcher=document.createElement('div');
+  switcher.style.cssText='display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap';
+  switcher.innerHTML=`
+    <button class="sub-tab active" id="mft-to-1" onclick="swMgrTierFlyerTo(1,document.getElementById('repFlyerInline'))">🥇 Tier 1</button>
+    <button class="sub-tab" id="mft-to-2" onclick="swMgrTierFlyerTo(2,document.getElementById('repFlyerInline'))">🥈 Tier 2</button>
+    <button class="sub-tab" id="mft-to-3" onclick="swMgrTierFlyerTo(3,document.getElementById('repFlyerInline'))">🥉 Tier 3</button>`;
+  target.prepend(switcher);
+}
+
+function swMgrTierFlyerTo(tier, target){
+  [1,2,3].forEach(t=>{const b=document.getElementById('mft-to-'+t);if(b)b.classList.toggle('active',t===tier);});
+  if(!target) return;
+  const mgr=T.mgr||DT.mgr;
+  const cats={acts:'New Voice Activations',hsi:'HSI / Home Internet',bts:'Tablet (BTS) Sales',acc:'Accessories Target'};
+  const tierLabels={1:'Tier 1 — High Volume',2:'Tier 2 — 2ME',3:'Tier 3 — 1ME'};
+  const tierColors={1:'#00A651',2:'#6E2B8B',3:'#E20074'};
+  const n=new Date();
+  const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const td=mgr[tier]||DT.mgr[tier];
+  const bKey=tier===1?'t1up':tier===2?'t2up':'t3up'; // using t1up etc from backsheet
+  const bs=typeof getOrCreateBs==='function'?getOrCreateBs(n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'))):null;
+  const elbCut=bs?.qualifiers?.elbCutoff||3368;
+  const attachCut=bs?.qualifiers?.attachCutoff||60;
+  const attachPen=bs?.qualifiers?.attachPenalty||25;
+  // Keep switcher if present
+  const switcher=target.querySelector('div[style*="display:flex;gap:8px;margin-bottom:14px"]');
+  target.innerHTML=`<div class="flyer-card" style="max-width:800px;margin:0 auto">
+    <div class="flyer-hdr" style="background:linear-gradient(135deg,#1A1A2E,${tierColors[tier]})">
+      <div><div class="flyer-co">EDGELINK INC</div><div class="flyer-title">${tierLabels[tier]}</div><div class="flyer-sub">Manager Bonus · Effective ${mo}</div></div>
+      <div class="flyer-badge">🏢 MANAGER</div>
+    </div>
+    <div class="flyer-body">
+      <div class="flyer-note">Monthly bonus. $0 per category if under 100%. Upside unlocks at 125%+.</div>
+      <div class="flyer-section"><div class="flyer-sec-hdr" style="color:${tierColors[tier]}">💰 Payout by Category</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px">
+          ${Object.entries(cats).map(([key,name])=>`<div style="background:#F8F8F8;border:2px solid ${tierColors[tier]}33;border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:11px;color:var(--mu);margin-bottom:8px;font-weight:600">${name}</div>
+            <div style="display:flex;justify-content:center;gap:12px;align-items:center">
+              <div><div style="font-size:9px;color:var(--mu);text-transform:uppercase;font-weight:700">Base</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px;color:${tierColors[tier]}">$${td.cats[key]?.base||0}</div></div>
+              <div style="width:1px;height:30px;background:var(--bo)"></div>
+              <div><div style="font-size:9px;color:var(--ok);text-transform:uppercase;font-weight:700">125%+</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px;color:var(--ok)">$${td.cats[key]?.up||0}</div></div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">⚠️ Qualifying Rules</div>
+        <div class="flyer-guard flyer-guard-red"><span class="fg-ic">🚫</span><div><strong>ELB Rank ≥ ${elbCut.toLocaleString()}</strong><div>$0 bonus store-wide</div></div></div>
+        <div class="flyer-guard"><span class="fg-ic">🛡️</span><div><strong>Metro Protection Attach &lt; ${attachCut}%</strong><div>All payouts −${attachPen}%</div></div></div>
+      </div>
+      <div class="flyer-section"><div class="flyer-sec-hdr" style="color:${tierColors[tier]}">🏆 Total Potential</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:${tierColors[tier]}15;border:2px solid ${tierColors[tier]};border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:11px;color:${tierColors[tier]};font-weight:700;text-transform:uppercase">Max at 100%</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:28px;color:${tierColors[tier]}">$${td.baseMax||Object.values(td.cats).reduce((s,c)=>s+(c.base||0),0)}</div>
+          </div>
+          <div style="background:#E8F5E915;border:2px solid var(--ok);border-radius:12px;padding:16px;text-align:center">
+            <div style="font-size:11px;color:var(--ok);font-weight:700;text-transform:uppercase">Max at 125%+</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:28px;color:var(--ok)">$${td.upMax||Object.values(td.cats).reduce((s,c)=>s+(c.up||0),0)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops</div>
+  </div>`;
+  if(switcher) target.prepend(switcher);
+}
+
+function renRepFlyerTo(target){
+  // Render rep flyer directly into target element
+  const n=new Date();
+  const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  // Build tier HTML
+  const boxHTML=T.box.map((t,i)=>{
+    const isTop=i===T.box.length-1;
+    const range=isTop?t.mn+'+':(t.mn+' – '+t.mx)+' activations';
+    return`<div class="flyer-tier ${isTop?'flyer-tier-top':''}"><div class="ft-range">${range}</div><div class="ft-rate"><span class="ft-dollar">$${t.r}</span><span class="ft-unit">/activation</span></div>${isTop?'<div class="ft-badge">⭐ TOP EARNER</div>':''}</div>`;
+  }).join('');
+  const accHTML=T.acc.map((t,i)=>{
+    const isTop=i===T.acc.length-1;
+    const range=isTop?'$'+t.mp.toLocaleString()+'+':'$'+t.mp.toLocaleString()+' – $'+(t.xp||'').toLocaleString();
+    const example=Math.round((t.mp+(t.xp?t.xp:t.mp*1.5))/2);
+    return`<div class="flyer-tier ${isTop?'flyer-tier-top':''}"><div class="ft-range">${range} net profit</div><div class="ft-rate"><span class="ft-dollar">${t.p}%</span><span class="ft-unit">of net profit</span></div><div class="ft-example">e.g. $${example.toLocaleString()} net = $${(example*t.p/100).toFixed(0)} payout</div></div>`;
+  }).join('');
+  const mimLabels=['1st account','2nd line','3rd line','4th line','5th line','6th line'];
+  const cumulative=T.mi.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
+  const mimHTML='<div class="flyer-mim-grid">'+T.mi.map((v,i)=>`<div class="flyer-mim-row"><div class="fm-label">${mimLabels[i]}</div><div class="fm-add">+$${v}</div><div class="fm-total">Total: $${cumulative[i]}</div></div>`).join('')+'</div>';
+  target.innerHTML=`<div class="flyer-card" style="max-width:800px;margin:0 auto">
+    <div class="flyer-hdr"><div><div class="flyer-co">EDGELINK INC</div><div class="flyer-title">Retail Sales Representative</div><div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:600">Bonus Structure</div><div class="flyer-sub">Effective ${mo}</div></div><div class="flyer-badge" style="font-size:11px">👤 RSR</div></div>
+    <div class="flyer-body">
+      <div class="flyer-section"><div class="flyer-sec-hdr">📦 Box Level Ups — Per Activation</div><div class="flyer-sec-sub">Paid on EVERY activation once tier threshold is hit</div><div class="flyer-tiers">${boxHTML}</div></div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">🛍️ Accessory Levels — Weekly % of Net Profit</div><div class="flyer-sec-sub">Exact payout = your tier % × your accessory net profit</div><div class="flyer-tiers">${accHTML}</div></div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">⚡ Power Ups — Stack on Everything</div><div class="flyer-powerups"><div class="flyer-pu"><span class="pu-ic">💳</span><div><div class="pu-name">Affirm Sale</div><div class="pu-detail">+$${T.af} per sale</div></div><div class="pu-amt">+$${T.af}</div></div><div class="flyer-pu"><span class="pu-ic">📶</span><div><div class="pu-name">WiFi / Home Internet</div><div class="pu-detail">+$${T.hs} per unit</div></div><div class="pu-amt">+$${T.hs}</div></div></div></div>
+      <div class="flyer-section"><div class="flyer-sec-hdr">📱 MIM Payout — Minimum 6 MM BANs to qualify</div>${mimHTML}<div style="font-size:11px;color:var(--da);margin-top:6px;font-weight:700">⚠ Must hit 6 MM BANs minimum — paid via Arcade by your coach</div></div>
+    </div>
+    <div class="flyer-footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops</div>
+  </div>`;
+}
+
 function renRepFlyer(){
   const n=new Date();
   const mo=n.toLocaleDateString('en-US',{month:'long',year:'numeric'});
@@ -6309,5 +6400,26 @@ function getStoreMgrGuaranteePayout(storeName){
 </script>
 
 
+
+<!-- MOBILE BOTTOM NAV -->
+  <nav class="bnav" id="bnav">
+    <button class="bn" onclick="goPage('pg-home',this)" data-page="pg-home"><span class="bn-ic">🏠</span><span class="bn-lbl">Home</span></button>
+    <button class="bn" onclick="goPage('pg-reps',this)" data-page="pg-reps"><span class="bn-ic">👤</span><span class="bn-lbl">Reps</span></button>
+    <button class="bn" onclick="goPage('pg-managers',this)" data-page="pg-managers"><span class="bn-ic">🏢</span><span class="bn-lbl">Mgrs</span></button>
+    <button class="bn" onclick="goPage('pg-coaches',this)" data-page="pg-coaches"><span class="bn-ic">🎯</span><span class="bn-lbl">Coaches</span></button>
+    <button class="bn" onclick="goPage('pg-employee',this)" data-page="pg-employee"><span class="bn-ic">💵</span><span class="bn-lbl">My Bonus</span></button>
+    <button class="bn" onclick="toggleMobileMenu()" id="moreBtn"><span class="bn-ic">☰</span><span class="bn-lbl">More</span></button>
+  </nav>
+  <!-- MOBILE MORE MENU -->
+  <div class="mobile-more" id="mobileMore" style="display:none">
+    <div class="mm-hdr"><span>Work Force Ops</span><button onclick="toggleMobileMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">✕</button></div>
+    <div class="mm-items">
+      <button class="mm-item" onclick="goPage('pg-summary',null);toggleMobileMenu()">📊 Summary</button>
+      <button class="mm-item" onclick="goPage('pg-admin',null);toggleMobileMenu()">🔐 Admin Center</button>
+      <button class="mm-item" onclick="requirePin(()=>{goPage('pg-chargebacks',this);});toggleMobileMenu()">⚡ Chargebacks (Admin)</button>
+      <button class="mm-item" onclick="goPage('pg-leaderboard',this);toggleMobileMenu()">🏆 Leaderboard</button>
+      <button class="mm-item" onclick="goPage('pg-summary',this);toggleMobileMenu()">📊 Summary</button>
+    </div>
+  </div>
 </body>
 </html>
