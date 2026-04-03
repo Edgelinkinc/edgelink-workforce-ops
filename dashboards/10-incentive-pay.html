@@ -935,6 +935,10 @@ body.page-pg-assign .week-bar{display:none!important;}
           <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals for all stores. Targets pull from Backsheet Setup. Bonus calculates automatically per store tier and monthly rules.
           </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:#F3E8FF;border:1px solid var(--se);border-radius:8px;font-size:12px;">
+                <span>📊</span>
+                <div id="mgrELBBannerText" style="color:var(--mu)">No ELB data — upload in Admin → Data Management to auto-fill actuals</div>
+              </div>
         </div>
         <!-- SUMMARY STRIP -->
         <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:14px">
@@ -1037,6 +1041,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('coach','mim',this)">📱 MIM Spiffs</button>
+      <button class="sub-tab" onclick="swSub('coach','mimpay',this)">💵 Coach MIM Payout</button>
       <button class="sub-tab" onclick="swSub('coach','structure',this)">📋 Bonus Structure</button>
     </div>
     <div class="sub-pane active" id="coach-overview">
@@ -1076,6 +1081,10 @@ body.page-pg-assign .week-bar{display:none!important;}
         <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals per store. Each coach section shows their stores. Bonus calculates automatically.
           </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:#F0FBF4;border:1px solid var(--ok);border-radius:8px;font-size:12px;min-width:200px">
+                <span>📊</span>
+                <div id="coachELBBannerText" style="color:var(--mu)">No ELB data loaded — upload in Admin → Data Management</div>
+              </div>
         </div>
         <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:14px">
           <div class="kc kcg"><div class="kl">Total Coach Payout</div><div class="kv" id="cSheetTotal">$—</div></div>
@@ -1086,7 +1095,75 @@ body.page-pg-assign .week-bar{display:none!important;}
         <div id="coachSheetSections"></div>
       </div></div>
     </div>
-    <div class="sub-pane" id="coach-structure">
+    <div class="sub-pane" <div class="sub-pane" id="coach-mimpay">
+
+      <!-- UPLOAD INSTRUCTIONS BANNER -->
+      <div style="background:linear-gradient(135deg,#E8F5E9,#F3E8FF);border:1px solid var(--ok);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start">
+        <span style="font-size:28px;flex-shrink:0">📂</span>
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:var(--se);margin-bottom:6px">What to Upload for Coach MIM Payout</div>
+          <div style="font-size:12px;color:var(--tx);line-height:1.8">
+            <strong>1. MIM Report (Coach Period)</strong> — Metro portal → MIM report → export CSV<br>
+            &nbsp;&nbsp;&nbsp;• Must include: <code>Store Name</code>, <code>Employee Name</code>, <code>Orders</code> columns<br>
+            &nbsp;&nbsp;&nbsp;• Store rows have <code>Employee Name = "Total"</code> — that's the store BAN count<br>
+            <strong>2. Upload below</strong> — separate from the weekly rep MIM upload<br>
+            <strong>3. Set the month</strong> → verify per-store BANs → lock &amp; export when paid
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS ROW -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="fi" style="min-width:160px">
+          <label>Coach MIM Month</label>
+          <input type="month" id="coachMimPayMonth" onchange="onCoachMimPayMonth()"/>
+        </div>
+        <!-- UPLOAD -->
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:200px">
+          <label style="font-size:11px;font-weight:700;color:var(--mu)">MIM Report (Coach Period)</label>
+          <label style="cursor:pointer">
+            <input type="file" accept=".csv,.txt" style="display:none" onchange="requirePin(()=>pMIMCoach(this.files[0]))"/>
+            <div class="btn bok sm">⬆ Upload Coach MIM Report</div>
+          </label>
+          <div id="fnMIMCoach" style="font-size:11px;color:var(--ok)"></div>
+        </div>
+        <!-- RATE -->
+        <div class="fi" style="min-width:120px">
+          <label>Rate ($/BAN)</label>
+          <input type="number" id="coachMimPayRate" value="10" min="0" step="0.5" onchange="renCoachMimPay()"/>
+        </div>
+        <!-- LOCK STATUS -->
+        <div style="display:flex;align-items:center;gap:8px;margin-top:16px">
+          <div class="lk-dot open" id="coachMimPayDot"></div>
+          <span class="lk-lbl" id="coachMimPayLbl" style="font-size:13px;font-weight:700">Unlocked</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn bok sm" id="coachMimPayLkBtn" onclick="requirePin(toggleCoachMimPayLock)">🔒 Lock &amp; Mark Paid</button>
+          <button class="btn bo sm" onclick="expCoachMimPayCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+
+      <!-- SUMMARY STRIP -->
+      <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px">
+        <div class="kc"><div class="kl">Total Coaches</div><div class="kv" id="cmpTotalCoaches">—</div></div>
+        <div class="kc kcp"><div class="kl">Total BANs</div><div class="kv" id="cmpTotalBans">—</div></div>
+        <div class="kc kcg"><div class="kl">Total MIM Payout</div><div class="kv" id="cmpTotalPayout">—</div></div>
+        <div class="kc kct"><div class="kl">Avg BANs/Store</div><div class="kv" id="cmpAvgBans">—</div></div>
+        <div class="kc kcw"><div class="kl">Month</div><div class="kv" id="cmpMonth" style="font-size:13px">—</div></div>
+      </div>
+
+      <!-- PER-COACH TABLE -->
+      <div id="coachMimPayBody">
+        <div style="text-align:center;padding:40px;color:var(--mu)">
+          <div style="font-size:36px;margin-bottom:10px">📱</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--se);margin-bottom:6px">No Coach MIM data loaded</div>
+          <div style="font-size:13px">Upload the MIM Report above and set the month</div>
+        </div>
+      </div>
+
+    </div><!-- /coach-mimpay -->
+
+    id="coach-structure">
       <div id="coachFlyerInline"></div>
     </div>
     <div class="sub-pane" id="coach-mim">
@@ -1556,7 +1633,69 @@ body.page-pg-assign .week-bar{display:none!important;}
 
       <!-- BACKSHEET -->
       <div class="sub-pane" id="admin-backsheet">
-        <div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">📋 Backsheet Setup — Monthly Manager Rules</div></div>
+                <!-- ELB METRIC MAPPING -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hdr" style="background:var(--pr)">
+            <div class="card-title">📊 ELB Report Metric Mapping</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.7)">Configure which R column maps to each bonus field</div>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px">
+              <div class="fi">
+                <label>Coach: Activation R Column</label>
+                <select id="elbCoachActR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="1">R1 — New Voice Activations</option>
+                  <option value="2">R2 — BTS</option><option value="3">R3 — HSI</option>
+                  <option value="4">R4</option><option value="5">R5</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: Acts Actual R Column</label>
+                <select id="elbMgrActR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="1">R1 — New Voice Activations</option>
+                  <option value="2">R2</option><option value="3">R3</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: BTS Actual R Column</label>
+                <select id="elbMgrBtsR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="2">R2 — BTS (-HSI)</option>
+                  <option value="1">R1</option><option value="3">R3</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: HSI Actual R Column</label>
+                <select id="elbMgrHsiR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="3">R3 — HSI</option>
+                  <option value="1">R1</option><option value="2">R2</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: Protection Attach R Column</label>
+                <select id="elbMgrProtR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="5">R5 — Total Voice Protection</option>
+                  <option value="6">R6 — 95-Day Act Protection</option>
+                  <option value="7">R7 — 95-Day Feature Retention</option>
+                  <option value="4">R4</option><option value="8">R8</option>
+                  <option value="9">R9</option><option value="10">R10</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Activation % Source</label>
+                <select id="elbUseResult" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="1">Use Result % column (Metro calculated)</option>
+                  <option value="0">Calculate Actual ÷ Target ourselves</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="btn bp sm" onclick="saveELBMapFromUI()">💾 Save Mapping</button>
+              <button class="btn bo sm" onclick="resetELBMap()">↺ Reset to Defaults</button>
+              <div id="elbMapStatus" style="font-size:12px;color:var(--mu)"></div>
+            </div>
+          </div>
+        </div>
+<div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">📋 Backsheet Setup — Monthly Manager Rules</div></div>
         <div class="card-body">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
             <div class="fi" style="min-width:180px"><label>Backsheet Month</label><input type="month" id="aBsMonth" onchange="loadAdminBsMonth()"/></div>
@@ -1705,6 +1844,37 @@ body.page-pg-assign .week-bar{display:none!important;}
                 </div>
                 <div class="dz-fn" id="fnM" style="margin-top:4px;font-size:11px;color:var(--ok)"></div>
               </div>
+              <!-- METRO ELB -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo);border-left:3px solid var(--pr)">
+                <div style="font-weight:700;font-size:13px;color:var(--pr);margin-bottom:4px">📊 Metro ELB Report <span style="font-size:10px;font-weight:400;color:var(--mu)">→ Auto-fills Coach ELB Rank + Act%</span></div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">National Rank + R1 Activations per store</div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".csv,.txt,.xlsx" style="display:none" onchange="requirePin(()=>pELB(this.files[0]))"/>
+                  <div class="btn bp sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload ELB CSV</div>
+                </label>
+                <div id="fnELB" style="font-size:11px;color:var(--ok)"></div>
+                <div id="elbStatusBadge" style="font-size:11px;margin-top:4px"></div>
+              </div>
+              <!-- RTBDI STORE REPORT -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo);border-left:3px solid var(--se)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">📈 RTBDI Store Report <span style="font-size:10px;font-weight:400;color:var(--mu)">→ Coach Acc $ + Boxes</span></div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Metro KPI By Market HTML export · Acc $ and Boxes per store</div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".xls,.html,.htm" style="display:none" onchange="requirePin(()=>pRTBDI_Store(this.files[0]))"/>
+                  <div class="btn bs sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload RTBDI Store Report</div>
+                </label>
+                <div id="fnRTBDIStore" style="font-size:11px;color:var(--ok)"></div>
+              </div>
+              <!-- MIM REPORT -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo);border-left:3px solid var(--ok)">
+                <div style="font-weight:700;font-size:13px;color:var(--ok);margin-bottom:4px">📱 MIM Report <span style="font-size:10px;font-weight:400;color:var(--mu)">→ Rep BANs + Coach MIM Spiff</span></div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Metro MIM CSV · Orders = MM BANs per rep and per store</div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".csv,.txt,.xlsx" style="display:none" onchange="requirePin(()=>pMIM(this.files[0]))"/>
+                  <div class="btn bok sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload MIM Report</div>
+                </label>
+                <div id="fnMIM" style="font-size:11px;color:var(--ok)"></div>
+              </div>
               <!-- METRO MANAGER -->
               <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
                 <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">🏢 Metro CSV — Managers</div>
@@ -1738,6 +1908,8 @@ body.page-pg-assign .week-bar{display:none!important;}
             <button class="btn bd" onclick="if(confirm('Clear chargebacks?')){CBs=[];saveSession();renCBL();tst2('Cleared.','ok')}">🗑 Clear Chargebacks</button>
             <button class="btn bd" onclick="if(confirm('Clear store assignments?')){clrAssign()}">🗑 Clear Store Assignments</button>
             <button class="btn bd" onclick="if(confirm('Clear manager records?')){localStorage.removeItem('wfo_mgr_recs');renMgrHist();renMgrOverview();tst2('Cleared.','ok')}">🗑 Clear Manager Records</button>
+            <button class="btn bd" onclick="if(confirm('Clear RTBDI store data?')){localStorage.removeItem('wfo_rtbdi_store');document.getElementById('fnRTBDIStore').textContent='';tst2('Cleared.','ok')}">🗑 Clear RTBDI Store Data</button>
+            <button class="btn bd" onclick="if(confirm('Clear MIM data?')){localStorage.removeItem('wfo_mim_data');document.getElementById('fnMIM').textContent='';tst2('Cleared.','ok')}">🗑 Clear MIM Data</button>
             <button class="btn bd" onclick="if(confirm('Clear coach records?')){localStorage.removeItem('wfo_coach_recs');renCoachOv();tst2('Cleared.','ok')}">🗑 Clear Coach Records</button>
             <div style="border-top:1px solid var(--bo);padding-top:10px;margin-top:2px"><button class="btn bd" style="background:#7B0000;width:100%" onclick="clearAllData()">⚠️ Clear ALL Data</button></div>
             <button class="btn bo sm" onclick="rstT()">↺ Reset Tiers</button>
@@ -2085,6 +2257,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   initSidebar();
   updSheetStatus();
   try{initHomePage();}catch(e){console.error('Home init error:',e);}
+  // Apply ELB data if previously loaded
+  applyELBToCoachSheet();
+  applyELBToMgrSheet();
+  applyRTBDIToCoachSheet();
+  applyMIMToReps();
+  applyMIMToCoachSheet();
+  updELBStatus();
   // Load current week data from storage
   if(wk) loadWeek(wk);
   // Build week history selector
@@ -2094,6 +2273,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const _lm=new Date(_n.getFullYear(),_n.getMonth()-1,1);
   const _mn=_lm.getFullYear()+'-'+(String(_lm.getMonth()+1).padStart(2,'0'));
   const csm=document.getElementById('coachSheetMonth');if(csm&&!csm.value)csm.value=_mn;
+  const cmp=document.getElementById('coachMimPayMonth');if(cmp&&!cmp.value)cmp.value=_mn;
   const msm=document.getElementById('mgrSheetMonthIn');if(msm&&!msm.value)msm.value=_mn;
   // Also set admin lock month pickers
   const aml=document.getElementById('adminMgrLockMonth');if(aml&&!aml.value)aml.value=_mn;
@@ -2194,6 +2374,9 @@ function swSub(prefix,id,btn){
     if(el) renCoachFlyerTo(el);
   }
   if(id==="mim"&&prefix==="coach")renCoachMim();
+  if(id==="mimpay"&&prefix==="coach")renCoachMimPay();
+  if(id==="mimpay"&&prefix==="coach")renCoachMimPay();
+  if(id==="mimpay"&&prefix==="coach"){renCoachMimPay();}
 }
 
 // ── WEEK ──
@@ -2373,7 +2556,7 @@ function renCoachMim(){
       <td style="padding:4px 8px">
         <input type="number" value="${override||''}" placeholder="Override $" min="0" step="0.01"
           style="width:100px;padding:5px 8px;border:2px solid ${hasOv?'var(--wa)':'var(--bo)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none"
-          onchange="requirePin(()=>{localStorage.setItem('coachMimOv_'+\`${coach.replace(/\s+/g,'_')}\`,this.value||0);renCoachMim();})"
+          onchange="requirePin(()=>{localStorage.setItem('coachMimOv_'+(coach||'').replace(/\\s+/g,'_'),this.value||0);renCoachMim();})"
           onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${hasOv?'var(--wa)':'var(--bo)'}'"/>
         ${hasOv?`<div style="font-size:9px;color:var(--wa)">⚠ Overridden</div>`:''}
       </td>
@@ -2475,6 +2658,963 @@ function renCBL(){
   if(!CBs.length){tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--mu);font-style:italic">No chargebacks logged</td></tr>`;upK();return;}
   tb.innerHTML=CBs.map(c=>`<tr><td style="font-weight:700">${X(c.rp)}</td><td style="font-size:11px;color:var(--mu)">${X(c.st)}</td><td><span class="bdg bfl">${X(c.tp)}</span></td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--da)">$${c.a.toFixed(2)}</td><td style="font-size:11px">${X(c.by)}</td><td style="font-size:11px;color:var(--mu)">${X(c.rf)||"—"}</td><td style="font-size:11px;color:var(--mu);max-width:150px">${X(c.nt)||"—"}</td><td style="font-size:11px;color:var(--mu)">${c.at}</td><td><button class="btn bd xs" onclick="requirePin(()=>rmCB(${c.id}))">x</button></td></tr>`).join("");
   upK();
+}
+
+
+// ══════════════════════════════════════════════════════
+// METRO ELB REPORT PARSER
+// Maps HierarchyValue4PBI (store ID) → SR store name
+// Extracts: National Rank (ELB), R1 Actual, R1 MTD Target, R1 Result (act%)
+// ══════════════════════════════════════════════════════
+
+function pELB(file){
+  const fnEl=document.getElementById('fnELB');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>{
+    const txt=e.target.result;
+    parseELBCSV(txt,file.name);
+  };
+  rd.onerror=()=>tst2('Failed to read ELB file','er');
+  rd.readAsText(file);
+}
+
+function parseELBCSV(txt, fname){
+  const lines=txt.trim().split('\n');
+  if(lines.length<3){tst2('ELB file empty or missing rows','er');return;}
+
+  // Metro ELB has TWO header rows:
+  // Row 0: *, National Rank, HierarchyValue4PBI, R1, Actual, MTD Target, Result, R2, ...
+  // Row 1: sub-labels (New Voice activation data, BTS, HSI, ...)
+  // Row 2+: data rows
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr0=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const hdr1=lines[1].split(sep).map(c=>c.replace(/"/g,'').trim());
+
+  // Find fixed columns
+  const rankI=hdr0.findIndex(c=>/national.?rank/i.test(c));
+  const storeI=hdr0.findIndex(c=>/hierarchyvalue4pbi/i.test(c));
+  if(rankI<0||storeI<0){
+    tst2('Cannot find National Rank or HierarchyValue4PBI columns','er');
+    console.log('Row 0:',hdr0.slice(0,12),'Row 1:',hdr1.slice(0,12));
+    return;
+  }
+
+  // Map all R blocks: R1-R10 each followed by Actual, MTD Target, Result
+  const rBlocks={};
+  for(let i=0;i<hdr0.length;i++){
+    const m=hdr0[i].match(/^R(\d+)$/);
+    if(!m)continue;
+    const rn=+m[1];
+    let actI=-1,tgtI=-1,resI=-1;
+    for(let j=i+1;j<Math.min(i+6,hdr0.length);j++){
+      const v0=hdr0[j].toLowerCase().replace(/\s/g,'');
+      if(v0==='actual'&&actI<0){actI=j;continue;}
+      if((v0.includes('target')||v0.includes('mtd'))&&tgtI<0){tgtI=j;continue;}
+      if(v0==='result'&&resI<0){resI=j;continue;}
+    }
+    // Category name from sub-header
+    const catName=(hdr1[i]||hdr1[i+1]||'R'+rn).trim();
+    rBlocks[rn]={actI,tgtI,resI,catName};
+  }
+  console.log('ELB: rank='+rankI+' store='+storeI+' rBlocks=',rBlocks);
+
+  // Get metric mapping from Admin settings (or use defaults)
+  const map=getELBMetricMap();
+
+  // Store ID → store name lookup
+  const idMap={};
+  SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+
+  const elbData={};
+  let matched=0;
+  const unmatched=[];
+
+  const parseVal=(cols,b,useResult)=>{
+    const actual=b.actI>=0?+(cols[b.actI]||'').replace(/[",]/g,'')||0:0;
+    const target=b.tgtI>=0?+(cols[b.tgtI]||'').replace(/[",]/g,'')||0:0;
+    let pct=0;
+    if(useResult&&b.resI>=0){
+      pct=parseFloat((cols[b.resI]||'').replace(/[",]/g,''))||0;
+      if(pct>0&&pct<2)pct=Math.round(pct*1000)/10; // 1.085 → 108.5
+    } else if(actual>0&&target>0){
+      pct=Math.round((actual/target)*1000)/10;
+    }
+    return{actual,target,pct};
+  };
+
+  for(let i=2;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<4)continue;
+    const rawId=(cols[storeI]||'').replace(/"/g,'').trim();
+    if(!rawId)continue;
+    const rank=parseInt((cols[rankI]||'').replace(/[",]/g,''))||0;
+    const storeName=idMap[rawId]||idMap[String(+rawId)]||null;
+    if(!storeName){if(rawId)unmatched.push(rawId);continue;}
+
+    // Parse all R blocks for this store
+    const rData={};
+    for(let rn=1;rn<=10;rn++){
+      if(!rBlocks[rn])continue;
+      rData[rn]=parseVal(cols,rBlocks[rn],map.useResult);
+    }
+
+    elbData[storeName]={
+      elbRank    : rank,
+      storeId    : rawId,
+      // COACH fields (uses configurable mapping)
+      actPct     : rData[map.coachActR]?.pct    || 0,
+      actActual  : rData[map.coachActR]?.actual  || 0,
+      actTarget  : rData[map.coachActR]?.target  || 0,
+      // MANAGER fields (uses configurable mapping)
+      mgrActActual   : rData[map.mgrActR]?.actual   || 0,
+      mgrActTarget   : rData[map.mgrActR]?.target   || 0,
+      mgrBtsActual   : rData[map.mgrBtsR]?.actual   || 0,
+      mgrBtsTarget   : rData[map.mgrBtsR]?.target   || 0,
+      mgrHsiActual   : rData[map.mgrHsiR]?.actual   || 0,
+      mgrHsiTarget   : rData[map.mgrHsiR]?.target   || 0,
+      mgrProtPct     : rData[map.mgrProtR]?.pct     || 0,  // protection attach %
+      mgrProtActual  : rData[map.mgrProtR]?.actual  || 0,
+      mgrProtTarget  : rData[map.mgrProtR]?.target  || 0,
+      r              : rData  // all raw R data preserved
+    };
+    matched++;
+  }
+
+  // Save to localStorage
+  const catNames={};
+  Object.entries(rBlocks).forEach(([rn,b])=>{catNames[rn]=b.catName;});
+  localStorage.setItem('wfo_elb_data',JSON.stringify({
+    data:elbData, loadedAt:new Date().toLocaleString(),
+    fname, matched, unmatched:unmatched.slice(0,20), catNames, map
+  }));
+
+  // Add period to saved data via period confirm
+  const saveELBWithPeriod=(period)=>{
+    const saved=JSON.parse(localStorage.getItem('wfo_elb_data')||'{}');
+    saved.period=period;
+    localStorage.setItem('wfo_elb_data',JSON.stringify(saved));
+    applyELBToCoachSheet();
+    applyELBToMgrSheet();
+    const fnEl=document.getElementById('fnELB');
+    if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
+    updELBStatus();
+    tst2('ELB saved for '+period+' — '+matched+' stores auto-populated','ok');
+    const cs=document.getElementById('coachSheetSections');
+    if(cs&&cs.innerHTML.trim())renCoachSheet();
+    if(document.getElementById('mgrSheetBody'))renMgrSheet();
+  };
+
+  if(unmatched.length)console.warn('Unmatched store IDs:',unmatched);
+
+  showPeriodConfirm({
+    fname, count:matched, type:'elb',
+    defaultPeriod:defaultMonth(),
+    onConfirm:saveELBWithPeriod
+  });
+}
+
+// ── ELB METRIC MAP ──
+// Configurable mapping: which R column feeds which bonus field
+// Saved in localStorage so Admin can adjust without code changes
+function getELBMetricMap(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('wfo_elb_map')||'null');
+    if(saved)return saved;
+  }catch{}
+  // Defaults based on Metro ELB report structure
+  return{
+    coachActR  : 1,  // R1 = New Voice Activations (coach act% to goal)
+    mgrActR    : 1,  // R1 = New Voice Activations (manager acts actual)
+    mgrBtsR    : 2,  // R2 = BTS activations (manager BTS actual)
+    mgrHsiR    : 3,  // R3 = HSI activations (manager HSI actual)
+    mgrProtR   : 5,  // R5 = Total Voice Protection (manager attach decelerator)
+    useResult  : true // true=use Result% column, false=calculate Actual÷Target
+  };
+}
+function saveELBMapFromUI(){
+  const map={
+    coachActR : +document.getElementById('elbCoachActR')?.value||1,
+    mgrActR   : +document.getElementById('elbMgrActR')?.value||1,
+    mgrBtsR   : +document.getElementById('elbMgrBtsR')?.value||2,
+    mgrHsiR   : +document.getElementById('elbMgrHsiR')?.value||3,
+    mgrProtR  : +document.getElementById('elbMgrProtR')?.value||5,
+    useResult : document.getElementById('elbUseResult')?.value!=='0'
+  };
+  saveELBMetricMap(map);
+  const st=document.getElementById('elbMapStatus');
+  if(st){st.textContent='✅ Saved — '+new Date().toLocaleTimeString();st.style.color='var(--ok)';}
+  // Re-parse if ELB data already loaded
+  const elb=getELBData();
+  if(elb){tst2('Mapping saved — re-upload ELB CSV to apply new mapping','wn');}
+}
+function resetELBMap(){
+  localStorage.removeItem('wfo_elb_map');
+  // Reset selects to defaults
+  const defaults={elbCoachActR:1,elbMgrActR:1,elbMgrBtsR:2,elbMgrHsiR:3,elbMgrProtR:5,elbUseResult:1};
+  Object.entries(defaults).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
+  tst2('ELB mapping reset to defaults','ok');
+}
+function loadELBMapToUI(){
+  const map=getELBMetricMap();
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  set('elbCoachActR',map.coachActR);
+  set('elbMgrActR',map.mgrActR);
+  set('elbMgrBtsR',map.mgrBtsR);
+  set('elbMgrHsiR',map.mgrHsiR);
+  set('elbMgrProtR',map.mgrProtR);
+  set('elbUseResult',map.useResult?'1':'0');
+}
+
+function saveELBMetricMap(map){
+  localStorage.setItem('wfo_elb_map',JSON.stringify(map));
+  tst2('ELB metric mapping saved','ok');
+}
+
+
+function getELBData(){
+  try{const d=JSON.parse(localStorage.getItem('wfo_elb_data')||'null');return d||null;}catch{return null;}
+}
+
+function applyELBToCoachSheet(){
+  const elb=getELBData();
+  if(!elb||!elb.data)return;
+  Object.entries(elb.data).forEach(([storeName,d])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    const sd=coachSheetData[storeName];
+    if(d.elbRank)sd.elbRank=d.elbRank;
+    if(d.actPct)sd.actPct=d.actPct;
+    if(d.actActual)sd.actActual=d.actActual;
+    if(d.actTarget)sd.actTarget=d.actTarget;
+  });
+}
+
+function applyELBToMgrSheet(){
+  const elb=getELBData();
+  if(!elb||!elb.data)return;
+  // Populate mgrSheetData with actuals from ELB
+  // Targets come from backsheet — we only fill ACTUALS
+  // Also fills ELB rank and protection attach %
+  Object.entries(elb.data).forEach(([storeName,d])=>{
+    if(!mgrSheetData[storeName])mgrSheetData[storeName]={};
+    const sd=mgrSheetData[storeName];
+    // Acts actual (R1)
+    if(d.mgrActActual)sd['acts']=d.mgrActActual;
+    // BTS actual (R2)
+    if(d.mgrBtsActual)sd['bts']=d.mgrBtsActual;
+    // HSI actual (R3)
+    if(d.mgrHsiActual)sd['hsi']=d.mgrHsiActual;
+    // Protection attach % (R5 Result) → attach field for decelerator
+    if(d.mgrProtPct)sd['attach']=d.mgrProtPct;
+    // ELB rank
+    if(d.elbRank)sd['elb']=d.elbRank;
+  });
+}
+
+function updELBStatus(){
+  const elb=getELBData();
+  const el=document.getElementById('elbStatusBadge');
+  if(!el)return;
+  if(elb){
+    el.innerHTML=`<span style="color:var(--ok);font-weight:700">✅ Loaded</span> — ${elb.matched} stores · <strong>${elb.period||'period not set'}</strong> · ${elb.loadedAt} · <button class="btn bd xs" onclick="clearELBData()">Clear</button>`;
+  } else {
+    el.innerHTML=`<span style="color:var(--mu)">Not loaded — upload Metro ELB report</span>`;
+  }
+}
+
+function clearELBData(){
+  if(!confirm('Clear ELB data?'))return;
+  localStorage.removeItem('wfo_elb_data');
+  updELBStatus();
+  const fnEl=document.getElementById('fnELB');
+  if(fnEl)fnEl.textContent='';
+  tst2('ELB data cleared','ok');
+}
+
+
+// ══════════════════════════════════════════════════════
+// RTBDI STORE REPORT PARSER
+// HTML export from Metro KPI By Market report
+// Extracts: Acc $ and Boxes per store → feeds coach acc/box calculation
+// Store ID format: "MARKET ELxxxxxxx-STATE-STORENAME"
+// ══════════════════════════════════════════════════════
+
+function pRTBDI_Store(file){
+  const fnEl=document.getElementById('fnRTBDIStore');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseRTBDIStore(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read RTBDI store file','er');
+  rd.readAsText(file);
+}
+
+function extractRTBDIStoreName(raw){
+  // "BOSTON EL70857045-RI-BROADWAY" → "RI-BROADWAY"
+  if(!raw)return null;
+  const m=raw.match(/EL\d+[-\s]+(.+)/i);
+  if(!m)return null;
+  return m[1].trim().toUpperCase();
+}
+
+function matchRTBDIStore(extracted){
+  if(!extracted)return null;
+  const norm=s=>s.replace(/[\s-]/g,'').toUpperCase();
+  const en=norm(extracted);
+  // Exact match first
+  let found=SR.find(s=>norm(s.s)===en);
+  if(found)return found.s;
+  // Partial match
+  found=SR.find(s=>en.includes(norm(s.s))||norm(s.s).includes(en));
+  if(found)return found.s;
+  // Also try without state prefix
+  const noState=extracted.replace(/^[A-Z]{2}-/,'');
+  found=SR.find(s=>norm(s.s).includes(norm(noState))||norm(noState).includes(norm(s.s.replace(/^[A-Z]{2}-/,''))));
+  return found?found.s:null;
+}
+
+function parseRTBDIStore(html, fname){
+  // Parse HTML table
+  const div=document.createElement('div');
+  div.innerHTML=html;
+  const cells=[];
+  div.querySelectorAll('tr').forEach(tr=>{
+    const row=[];
+    tr.querySelectorAll('td,th').forEach(td=>row.push(td.textContent.trim()));
+    if(row.some(c=>c))cells.push(row);
+  });
+
+  // Find header row - look for "Store ID" and "Acc $"
+  let hdrRow=-1,storeCol=-1,accCol=-1,boxCol=-1,ppdCol=-1,btsCol=-1,hintCol=-1;
+  for(let i=0;i<cells.length;i++){
+    const r=cells[i];
+    const si=r.findIndex(c=>/store.?id/i.test(c));
+    const ai=r.findIndex(c=>/acc\s*\$/i.test(c));
+    if(si>=0&&ai>=0){
+      hdrRow=i;
+      storeCol=si;
+      accCol=ai;
+      boxCol=r.findIndex(c=>/^boxes$/i.test(c));
+      ppdCol=r.findIndex(c=>/^ppd$/i.test(c));
+      btsCol=r.findIndex(c=>/^bts$/i.test(c));
+      hintCol=r.findIndex(c=>/^hint$/i.test(c));
+      break;
+    }
+  }
+
+  if(hdrRow<0){tst2('Cannot find Store ID or Acc $ columns in RTBDI report','er');return;}
+  console.log('RTBDI cols: store='+storeCol+' acc='+accCol+' box='+boxCol+' ppd='+ppdCol);
+
+  const rtbdiData={};
+  let matched=0;const unmatched=[];
+
+  for(let i=hdrRow+1;i<cells.length;i++){
+    const row=cells[i];
+    const rawStore=row[storeCol]||'';
+    if(!rawStore.match(/EL\d+/i))continue; // skip non-store rows
+
+    const extracted=extractRTBDIStoreName(rawStore);
+    const storeName=matchRTBDIStore(extracted);
+    if(!storeName){if(extracted)unmatched.push(extracted);continue;}
+
+    const parseNum=v=>{
+      if(!v)return 0;
+      return +(v.replace(/[$,\s]/g,'').trim())||0;
+    };
+
+    rtbdiData[storeName]={
+      accTotal : accCol>=0?parseNum(row[accCol]):0,
+      boxes    : boxCol>=0?parseNum(row[boxCol]):0,
+      ppd      : ppdCol>=0?parseNum(row[ppdCol]):0,
+      bts      : btsCol>=0?parseNum(row[btsCol]):0,
+      hint     : hintCol>=0?parseNum(row[hintCol]):0,
+    };
+    matched++;
+  }
+
+  localStorage.setItem('wfo_rtbdi_store',JSON.stringify({
+    data:rtbdiData,loadedAt:new Date().toLocaleString(),fname,matched,unmatched:unmatched.slice(0,20)
+  }));
+
+  const saveRTBDIWithPeriod=(period)=>{
+    const existing=JSON.parse(localStorage.getItem('wfo_rtbdi_store')||'{}');
+    existing.period=period;
+    localStorage.setItem('wfo_rtbdi_store',JSON.stringify(existing));
+    applyRTBDIToCoachSheet();
+    const fnEl=document.getElementById('fnRTBDIStore');
+    if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
+    tst2('RTBDI store report saved for '+period+' — '+matched+' stores','ok');
+    const cs=document.getElementById('coachSheetSections');
+    if(cs&&cs.innerHTML.trim())renCoachSheet();
+  };
+  if(unmatched.length)console.warn('RTBDI unmatched stores:',unmatched);
+  showPeriodConfirm({
+    fname, count:matched, type:'rtbdi',
+    defaultPeriod:defaultMonth(),
+    onConfirm:saveRTBDIWithPeriod
+  });
+}
+
+function getRTBDIStoreData(){
+  try{return JSON.parse(localStorage.getItem('wfo_rtbdi_store')||'null');}catch{return null;}
+}
+
+function applyRTBDIToCoachSheet(){
+  const d=getRTBDIStoreData();
+  if(!d||!d.data)return;
+  Object.entries(d.data).forEach(([storeName,v])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    const sd=coachSheetData[storeName];
+    if(v.accTotal)sd.accTotal=v.accTotal;
+    // PPD = total activations = divisor for acc/box calculation
+    if(v.ppd)sd.totalBoxes=v.ppd;
+    else if(v.boxes)sd.totalBoxes=v.boxes; // fallback to Boxes column
+    // acc/box is calculated in renCoachSheet from accTotal ÷ totalBoxes (PPD)
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// MIM REPORT PARSER
+// Metro MIM CSV/Excel export
+// Store rows: Store Name has value, Employee Name is blank
+// Rep rows: both Store Name and Employee Name have values
+// Store Name format: "10198293 : 190 Newport Ave" → extract store ID
+// Orders column = MM BANs count
+// ══════════════════════════════════════════════════════
+
+function pMIM(file){
+  const fnEl=document.getElementById('fnMIM');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseMIM(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read MIM file','er');
+  rd.readAsText(file);
+}
+
+function extractMIMStoreId(raw){
+  // "10198293 : 190 Newport Ave" → "10198293"
+  if(!raw)return null;
+  const m=raw.match(/^(\d{8})/);
+  return m?m[1]:null;
+}
+
+function parseMIM(txt, fname){
+  const lines=txt.trim().split('\n');
+  if(lines.length<2){tst2('MIM file appears empty','er');return;}
+
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+
+  // Find columns
+  const fc=(...names)=>hdr.findIndex(c=>names.some(n=>c.toLowerCase().replace(/\s/g,'').includes(n.toLowerCase().replace(/\s/g,''))));
+  const storeNameI  = fc('Store Name','storename');
+  const empNameI    = fc('Employee Name','employeename');
+  const ordersI     = fc('Orders');
+  const eligBansI   = fc('Eligible BANs','eligiblebans');
+  const migrI       = fc('Migrations');
+  const migrTgtI    = fc('Migration Target');
+  const migrPctI    = fc('Migrations % to Tgt','migrationspct');
+
+  if(storeNameI<0||ordersI<0){
+    tst2('Cannot find Store Name or Orders columns in MIM report','er');
+    console.log('MIM headers:',hdr);
+    return;
+  }
+
+  // Build store ID → store name map from SR
+  const idMap={};
+  SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+
+  const mimStoreData={};
+  const mimRepData={};  // keyed by NTID (lowercase)
+  let storeMatched=0,repRows=0;
+  const unmatched=[];
+
+  const pn=v=>+(v||'').replace(/[",\s%]/g,'')||0;
+
+  for(let i=1;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<2)continue;
+
+    const rawStore=(cols[storeNameI]||'').replace(/"/g,'').trim();
+    const rawEmp=empNameI>=0?(cols[empNameI]||'').replace(/"/g,'').trim():'';
+
+    if(!rawStore)continue;
+
+    // Extract store ID from "10198293 : 190 Newport Ave"
+    const storeIdM=rawStore.match(/^(\d{7,8})/);
+    if(!storeIdM)continue;
+    const storeId=storeIdM[1];
+    const storeName=idMap[storeId]||idMap[String(+storeId)]||null;
+
+    const orders   = pn(cols[ordersI]);
+    const eligBans = eligBansI>=0?pn(cols[eligBansI]):0;
+    const migr     = migrI>=0?pn(cols[migrI]):0;
+    const migrTgt  = migrTgtI>=0?pn(cols[migrTgtI]):0;
+    const migrPct  = migrPctI>=0?parseFloat((cols[migrPctI]||'').replace(/[",]/g,''))||0:0;
+
+    if(rawEmp==='Total'){
+      // STORE-LEVEL ROW
+      if(!storeName){unmatched.push(storeId);continue;}
+      mimStoreData[storeName]={orders,eligBans,migrations:migr,migrationTarget:migrTgt,migrationPct:migrPct};
+      storeMatched++;
+
+    } else if(rawEmp&&!rawEmp.startsWith('~')){
+      // REP-LEVEL ROW — extract NTID from "Last, First : (ntid)"
+      const ntidM=rawEmp.match(/\(([^)]+)\)\s*$/);
+      const ntid=ntidM?ntidM[1].toLowerCase().trim():null;
+      if(ntid&&ntid!=='~'){
+        mimRepData[ntid]={storeName,orders,eligBans,migrations:migr};
+        repRows++;
+      }
+    }
+    // Skip "~, ~ : (~)" rows silently
+  }
+
+  localStorage.setItem('wfo_mim_data',JSON.stringify({
+    storeData:mimStoreData, repData:mimRepData,
+    loadedAt:new Date().toLocaleString(), fname,
+    storeMatched, repRows, unmatched:unmatched.slice(0,20)
+  }));
+
+  applyMIMToReps();
+  applyMIMToCoachSheet();
+
+  const saveMIMWithPeriod=(period)=>{
+    const existing=JSON.parse(localStorage.getItem('wfo_mim_data')||'{}');
+    existing.period=period;
+    localStorage.setItem('wfo_mim_data',JSON.stringify(existing));
+    applyMIMToReps();
+    applyMIMToCoachSheet();
+    const fnEl=document.getElementById('fnMIM');
+    if(fnEl)fnEl.textContent='✅ '+fname+' — '+storeMatched+' stores + '+repRows+' reps · Week of '+period;
+    tst2('MIM saved for week of '+period+' — '+storeMatched+' stores + '+repRows+' reps','ok');
+    renR();
+    const cs=document.getElementById('coachSheetSections');
+    if(cs&&cs.innerHTML.trim())renCoachSheet();
+  };
+  if(unmatched.length)console.warn('MIM unmatched store IDs:',unmatched);
+  showPeriodConfirm({
+    fname, count:storeMatched+repRows, type:'mim',
+    defaultPeriod:defaultWeek(),
+    onConfirm:saveMIMWithPeriod
+  });
+}
+
+
+function getMIMData(){
+  try{return JSON.parse(localStorage.getItem('wfo_mim_data')||'null');}catch{return null;}
+}
+
+function applyMIMToReps(){
+  const mim=getMIMData();
+  if(!mim||!mim.repData)return;
+  // Match by NTID (most reliable) — NTID stored lowercase in mimRepData
+  reps.forEach(r=>{
+    const ntid=(r.ri||'').toLowerCase().trim();
+    const repRow=ntid?mim.repData[ntid]:null;
+    if(repRow){
+      r.mb=repRow.orders||0;  // Orders = MM BANs count
+    }
+  });
+  saveSession();
+}
+
+function applyMIMToCoachSheet(){
+  const mim=getMIMData();
+  if(!mim||!mim.storeData)return;
+  // Store-level Orders = coach MIM spiff basis
+  Object.entries(mim.storeData).forEach(([storeName,d])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    coachSheetData[storeName].mimOrders=d.orders||0;
+    coachSheetData[storeName].eligBans=d.eligBans||0;
+  });
+}
+
+
+// ══════════════════════════════════════════════════════
+// COACH MIM PAYOUT SHEET
+// Separate monthly period from rep weekly MIM
+// Uses its own MIM report upload → pMIMCoach()
+// Storage: wfo_coach_mim_pay_{YYYY-MM}
+// ══════════════════════════════════════════════════════
+
+let coachMimPayLocked = false;
+
+function pMIMCoach(file){
+  const fnEl=document.getElementById('fnMIMCoach');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseMIMCoach(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read coach MIM file','er');
+  rd.readAsText(file);
+}
+
+function parseMIMCoach(txt, fname){
+  const lines=txt.trim().split('\n');
+  if(lines.length<2){tst2('Coach MIM file appears empty','er');return;}
+
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+
+  const fc=(...names)=>hdr.findIndex(c=>names.some(n=>c.toLowerCase().replace(/\s/g,'').includes(n.toLowerCase().replace(/\s/g,''))));
+  const storeNameI = fc('Store Name','storename');
+  const empNameI   = fc('Employee Name','employeename');
+  const ordersI    = fc('Orders');
+
+  if(storeNameI<0||ordersI<0){
+    tst2('Cannot find Store Name or Orders columns','er');
+    console.log('Headers:',hdr);
+    return;
+  }
+
+  const idMap={};
+  SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+
+  // Collect store-level orders (Employee Name = "Total" rows)
+  const storeOrders={};  // storeName → orders
+  let matched=0;const unmatched=[];
+
+  for(let i=1;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<2)continue;
+    const rawStore=(cols[storeNameI]||'').replace(/"/g,'').trim();
+    const rawEmp=empNameI>=0?(cols[empNameI]||'').replace(/"/g,'').trim():'';
+    if(!rawStore||rawEmp!=='Total')continue;
+
+    const storeIdM=rawStore.match(/^(\d{7,8})/);
+    if(!storeIdM)continue;
+    const storeName=idMap[storeIdM[1]]||idMap[String(+storeIdM[1])]||null;
+    if(!storeName){unmatched.push(storeIdM[1]);continue;}
+
+    const orders=+(cols[ordersI]||'').replace(/[",]/g,'')||0;
+    storeOrders[storeName]=orders;
+    matched++;
+  }
+
+  // Save raw store orders for this coach MIM period
+  const mn=document.getElementById('coachMimPayMonth')?.value||
+    new Date().toISOString().slice(0,7);
+
+  const existing=getCoachMimPayData(mn)||{stores:{},locked:false};
+  // Merge — preserve manual overrides
+  Object.entries(storeOrders).forEach(([store,orders])=>{
+    if(!existing.stores[store])existing.stores[store]={orders,overrideOrders:null};
+    else existing.stores[store].orders=orders;
+  });
+  existing.fname=fname;
+  existing.loadedAt=new Date().toLocaleString();
+  existing.matched=matched;
+
+  saveCoachMimPayData(mn,existing);
+
+  const fnEl=document.getElementById('fnMIMCoach');
+  if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores matched'+(unmatched.length?' ('+unmatched.length+' unmatched)':'');
+  if(unmatched.length)console.warn('Coach MIM unmatched:',unmatched);
+  showPeriodConfirm({
+    fname, count:matched, type:'mimcoach',
+    defaultPeriod:document.getElementById('coachMimPayMonth')?.value||defaultMonth(),
+    onConfirm:(period)=>{
+      // Update the month picker and re-save under confirmed period
+      const monthEl=document.getElementById('coachMimPayMonth');
+      if(monthEl)monthEl.value=period;
+      // Move data to confirmed period key if different
+      const existing=getCoachMimPayData(period)||{stores:{},locked:false};
+      const loaded=JSON.parse(localStorage.getItem('wfo_coach_mim_pay_'+period)||'null');
+      if(!loaded){
+        // Data was saved under mn in parseMIMCoach - retrieve and re-key
+        const tempMn=document.getElementById('coachMimPayMonth')?.value||defaultMonth();
+        const tempData=getCoachMimPayData(tempMn);
+        if(tempData)saveCoachMimPayData(period,{...tempData,period});
+      }
+      const fnEl=document.getElementById('fnMIMCoach');
+      if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
+      tst2('Coach MIM saved for '+period+' — '+matched+' stores','ok');
+      onCoachMimPayMonth();
+    }
+  });
+}
+
+function getCoachMimPayData(month){
+  try{return JSON.parse(localStorage.getItem('wfo_coach_mim_pay_'+month)||'null');}catch{return null;}
+}
+function saveCoachMimPayData(month,data){
+  localStorage.setItem('wfo_coach_mim_pay_'+month,JSON.stringify(data));
+}
+
+function onCoachMimPayMonth(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  if(!mn)return;
+  const data=getCoachMimPayData(mn);
+  coachMimPayLocked=data?.locked||false;
+  updCoachMimPayLock();
+  renCoachMimPay();
+}
+
+function renCoachMimPay(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  const rate=+document.getElementById('coachMimPayRate')?.value||10;
+  const body=document.getElementById('coachMimPayBody');
+  if(!body)return;
+
+  // Update month display
+  const mnEl=document.getElementById('cmpMonth');
+  if(mnEl)mnEl.textContent=mn||'—';
+
+  if(!mn){
+    body.innerHTML='<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:36px">📅</div><div style="margin-top:10px;font-weight:700;color:var(--se)">Select a month above</div></div>';
+    return;
+  }
+
+  const data=getCoachMimPayData(mn);
+  if(!data||!Object.keys(data.stores||{}).length){
+    body.innerHTML=`<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--se);margin-bottom:6px">No data for ${mn}</div><div style="font-size:13px">Upload the Coach MIM Report above</div></div>`;
+    return;
+  }
+
+  const srBs=getSR_BS();
+  let totalBans=0,totalPayout=0,totalStores=0;
+
+  // Group stores by coach
+  const byCoach={};
+  COACHES.forEach(c=>{byCoach[c]={stores:[],totalBans:0,totalPayout:0};});
+
+  SR.forEach(store=>{
+    const coach=srBs[store.s]?.coach||store.c||'TBD';
+    const sd=data.stores[store.s];
+    if(!sd)return;
+    const bans=sd.overrideOrders??sd.orders??0;
+    const payout=bans*rate;
+    if(!byCoach[coach])byCoach[coach]={stores:[],totalBans:0,totalPayout:0};
+    byCoach[coach].stores.push({storeName:store.s,bans,payout,orders:sd.orders,overrideOrders:sd.overrideOrders,mgr:srBs[store.s]?.mgr||store.mgr});
+    byCoach[coach].totalBans+=bans;
+    byCoach[coach].totalPayout+=payout;
+    totalBans+=bans;totalPayout+=payout;totalStores++;
+  });
+
+  // Update summary
+  const u=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  u('cmpTotalCoaches',COACHES.length);
+  u('cmpTotalBans',totalBans);
+  u('cmpTotalPayout','$'+totalPayout.toFixed(2));
+  u('cmpAvgBans',totalStores?(totalBans/totalStores).toFixed(1):'—');
+
+  const locked=coachMimPayLocked;
+
+  body.innerHTML=COACHES.map(coach=>{
+    const cg=byCoach[coach];
+    if(!cg||!cg.stores.length)return'';
+    return`<div style="margin-bottom:20px;border:1px solid var(--bo);border-radius:12px;overflow:hidden">
+      <!-- COACH HEADER -->
+      <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">${coach}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${cg.stores.length} stores · ${cg.totalBans} BANs</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em">MIM Payout</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:#fff">$${cg.totalPayout.toFixed(2)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.65)">${cg.totalBans} BANs × $${rate}/BAN</div>
+        </div>
+      </div>
+      <!-- STORE ROWS -->
+      <div class="tw">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--thb)">
+            <th style="padding:7px 12px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Store</th>
+            <th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Manager</th>
+            <th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">BANs (Report)</th>
+            <th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr)">Override ✎</th>
+            <th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">BANs Used</th>
+            <th style="padding:7px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr)">Payout</th>
+          </tr></thead>
+          <tbody>
+            ${cg.stores.map((s,si)=>`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}">
+              <td style="padding:7px 12px;font-weight:700;color:var(--se);font-size:12px">${X(s.storeName)}</td>
+              <td style="padding:7px 10px;font-size:11px;color:var(--mu)">${X(s.mgr==='TBD'?'—':s.mgr)}</td>
+              <td style="padding:7px 10px;text-align:center;font-weight:700">${s.orders??'—'}</td>
+              <td style="padding:4px 8px;text-align:center">
+                ${locked?
+                  `<span style="font-size:12px;color:var(--mu)">${s.overrideOrders??'—'}</span>`:
+                  `<input type="number" value="${s.overrideOrders??''}" placeholder="—" min="0"
+                    style="width:70px;padding:4px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center"
+                    onchange="setCoachMimOverride('${mn}','${s.storeName}',this.value)"
+                    onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`
+                }
+              </td>
+              <td style="padding:7px 10px;text-align:center;font-weight:800;color:var(--se)">${s.bans}</td>
+              <td style="padding:7px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;color:var(--ok)">$${s.payout.toFixed(2)}</td>
+            </tr>`).join('')}
+            <tr style="background:linear-gradient(135deg,var(--dk),var(--se))">
+              <td colspan="4" style="padding:9px 12px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#fff">${coach} Total</td>
+              <td style="padding:9px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:800;color:#fff">${cg.totalBans}</td>
+              <td style="padding:9px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">$${cg.totalPayout.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setCoachMimOverride(mn,storeName,val){
+  const data=getCoachMimPayData(mn);
+  if(!data||!data.stores[storeName])return;
+  data.stores[storeName].overrideOrders=val===''||val===null?null:+val;
+  saveCoachMimPayData(mn,data);
+  renCoachMimPay();
+}
+
+function toggleCoachMimPayLock(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  if(!mn){tst2('Select a month first','er');return;}
+  const data=getCoachMimPayData(mn)||{stores:{},locked:false};
+  if(coachMimPayLocked){
+    if(!confirm('Unlock coach MIM for '+mn+' to make corrections?'))return;
+    coachMimPayLocked=false;
+    data.locked=false;
+    data.unlockedAt=new Date().toLocaleString();
+    tst2('Coach MIM unlocked','ok');
+  } else {
+    if(!confirm('Lock coach MIM payout for '+mn+'? This marks it as paid.'))return;
+    coachMimPayLocked=true;
+    data.locked=true;
+    data.lockedAt=new Date().toLocaleString();
+    tst2('Coach MIM locked & marked paid ✅','ok');
+  }
+  saveCoachMimPayData(mn,data);
+  updCoachMimPayLock();
+  renCoachMimPay();
+}
+
+function updCoachMimPayLock(){
+  const dot=document.getElementById('coachMimPayDot');
+  const lbl=document.getElementById('coachMimPayLbl');
+  const btn=document.getElementById('coachMimPayLkBtn');
+  if(dot)dot.className='lk-dot'+(coachMimPayLocked?' locked':' open');
+  if(lbl){lbl.className='lk-lbl'+(coachMimPayLocked?' locked':' open');lbl.textContent=coachMimPayLocked?'Locked — Paid':'Unlocked';}
+  if(btn){btn.textContent=coachMimPayLocked?'🔓 Unlock':'🔒 Lock & Mark Paid';btn.className=coachMimPayLocked?'btn bd sm':'btn bok sm';}
+}
+
+function expCoachMimPayCSV(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  const rate=+document.getElementById('coachMimPayRate')?.value||10;
+  if(!mn){tst2('Select a month first','er');return;}
+  const data=getCoachMimPayData(mn);
+  if(!data||!Object.keys(data.stores||{}).length){tst2('No data to export','wn');return;}
+  const srBs=getSR_BS();
+  const hd=['Coach','Store','Manager','BANs (Report)','BANs (Override)','BANs Used','Rate $','MIM Payout $','Month','Status'];
+  const rows=[];
+  COACHES.forEach(coach=>{
+    SR.forEach(store=>{
+      const storeCoach=srBs[store.s]?.coach||store.c;
+      if(storeCoach!==coach)return;
+      const sd=data.stores[store.s];
+      if(!sd)return;
+      const bans=sd.overrideOrders??sd.orders??0;
+      rows.push([coach,store.s,srBs[store.s]?.mgr||store.mgr,sd.orders??'',sd.overrideOrders??'',bans,rate,(bans*rate).toFixed(2),mn,data.locked?'Paid':'Open']);
+    });
+    // Coach total row
+    const coachStores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+    const coachBans=coachStores.reduce((sum,s)=>{const sd=data.stores[s.s];return sum+(sd?(sd.overrideOrders??sd.orders??0):0);},0);
+    if(coachBans>0)rows.push([coach,'— TOTAL —','','',' ',coachBans,rate,(coachBans*rate).toFixed(2),mn,'']);
+  });
+  dlC([hd,...rows],'WFO_CoachMIM_'+mn+'.csv');
+  tst2('Coach MIM CSV exported','ok');
+}
+
+
+// ══════════════════════════════════════════════════════
+// PERIOD CONFIRM MODAL
+// Shows after every upload to confirm the month/week
+// the data belongs to before saving it
+// ══════════════════════════════════════════════════════
+
+function showPeriodConfirm({fname, count, type, defaultPeriod, onConfirm}){
+  // type: 'month' | 'week'
+  const existing = document.getElementById('periodConfirmModal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'periodConfirmModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(74,26,107,.75);z-index:960;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+
+  const isMonth = type === 'month';
+  const inputType = isMonth ? 'month' : 'date';
+  const labelText = isMonth ? 'Which month is this data for?' : 'Which week does this data belong to?';
+  const inputId = 'periodConfirmInput';
+
+  const typeLabels = {
+    elb:        { icon:'📊', title:'Metro ELB Report',       desc:'ELB ranks + activations per store' },
+    rtbdi:      { icon:'📈', title:'RTBDI Store Report',     desc:'Acc $ + PPD (activations) per store' },
+    mim:        { icon:'📱', title:'MIM Report (Reps)',       desc:'MM BANs per rep and per store' },
+    mimcoach:   { icon:'💵', title:'MIM Report (Coach Pay)',  desc:'Store-level BANs for coach MIM payout' },
+    metro_mgr:  { icon:'🏢', title:'Metro CSV — Managers',   desc:'Manager actuals' },
+    metro_coach:{ icon:'🎯', title:'Metro CSV — Coaches',    desc:'Coach actuals' },
+    rtpos:      { icon:'📂', title:'RTPOS Rep Data',         desc:'Rep activations + accessories' },
+  };
+  const lbl = typeLabels[type] || { icon:'📁', title:'Data Upload', desc:'' };
+
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px 32px;max-width:460px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,.25)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <span style="font-size:36px">${lbl.icon}</span>
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--se)">${lbl.title}</div>
+          <div style="font-size:12px;color:var(--mu)">${lbl.desc}</div>
+        </div>
+      </div>
+      <div style="background:var(--thb);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:12px;color:var(--se)">
+        ✅ <strong>${fname}</strong> — ${count} records loaded
+      </div>
+      <div style="margin-bottom:18px">
+        <label style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);display:block;margin-bottom:8px">${labelText}</label>
+        <input type="${inputType}" id="${inputId}" value="${defaultPeriod||''}"
+          style="width:100%;padding:11px 13px;border:2px solid var(--bo);border-radius:9px;font-family:'Nunito',sans-serif;font-size:15px;outline:none;box-sizing:border-box"
+          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+        <div style="font-size:11px;color:var(--mu);margin-top:6px">
+          ${isMonth ? 'This determines which month\'s bonus period this data applies to.' : 'This determines which week\'s payout this data applies to.'}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn bp" style="flex:1;justify-content:center" onclick="confirmPeriodAndSave()">✅ Confirm &amp; Save</button>
+        <button class="btn bo" style="flex:1;justify-content:center" onclick="document.getElementById('periodConfirmModal').remove();if(window._periodCancelCb)window._periodCancelCb()">Cancel</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  window._periodConfirmCb = onConfirm;
+
+  // Focus input
+  setTimeout(()=>document.getElementById(inputId)?.focus(), 100);
+}
+
+function confirmPeriodAndSave(){
+  const val = document.getElementById('periodConfirmInput')?.value;
+  if(!val){ 
+    const el = document.getElementById('periodConfirmInput');
+    if(el){ el.style.borderColor='var(--da)'; el.focus(); }
+    tst2('Please select a period first','er');
+    return;
+  }
+  document.getElementById('periodConfirmModal')?.remove();
+  if(window._periodConfirmCb) window._periodConfirmCb(val);
+  window._periodConfirmCb = null;
+}
+
+// Helper: get default month (last month)
+function defaultMonth(){
+  const n=new Date(), lm=new Date(n.getFullYear(),n.getMonth()-1,1);
+  return lm.getFullYear()+'-'+(String(lm.getMonth()+1).padStart(2,'0'));
+}
+// Helper: get default week (last Monday)
+function defaultWeek(){
+  const t=new Date(), d=t.getDay();
+  const thisMonday=new Date(t); thisMonday.setDate(t.getDate()-d+(d===0?-6:1));
+  const lastMonday=new Date(thisMonday); lastMonday.setDate(thisMonday.getDate()-7);
+  return lastMonday.toISOString().split('T')[0];
 }
 
 // ── CSV UPLOAD ──
@@ -3438,6 +4578,16 @@ function onMgrSheetMonth(){
   renMgrSheet();
 }
 function renMgrSheet(){
+  // Apply ELB data before rendering
+  applyELBToMgrSheet();
+  const elbLoaded=!!getELBData();
+  const elbObj=getELBData();
+  // Update ELB banner if present
+  const mgrElbBanner=document.getElementById('mgrELBBannerText');
+  if(mgrElbBanner){
+    if(elbLoaded){mgrElbBanner.textContent='✅ ELB loaded — '+elbObj.matched+' stores auto-filled (Acts, BTS, HSI, Protection, ELB Rank) — '+elbObj.loadedAt;mgrElbBanner.style.color='var(--ok)';}
+    else{mgrElbBanner.textContent='No ELB data — upload in Admin → Data Management to auto-fill actuals';mgrElbBanner.style.color='var(--mu)';}
+  }
   const mn=document.getElementById('mgrSheetMonthIn')?.value;
   const hdrEl=document.getElementById('mgrSheetHdr'),bodyEl=document.getElementById('mgrSheetBody');
   if(!hdrEl||!bodyEl)return;
@@ -3594,6 +4744,14 @@ function printMgrSheet(){
 let coachSheetData={}; // {coachName: {actPct, accPerBox, shrinkPct, elbPctile, totalBoxes}}
 
 function renCoachSheet(){
+  // Apply ELB data before rendering
+  applyELBToCoachSheet();
+  applyRTBDIToCoachSheet();
+  applyMIMToCoachSheet();
+  const elbLoaded=!!getELBData();
+  const elbObj=getELBData();
+  const elbBanner=document.getElementById('coachELBBannerText');
+  if(elbBanner){if(elbLoaded){elbBanner.textContent='✅ ELB loaded — '+elbObj.matched+' stores — '+elbObj.loadedAt;elbBanner.style.color='var(--ok)';}else{elbBanner.textContent='No ELB data — upload in Admin → Data Management';elbBanner.style.color='var(--mu)';}}
   const el=document.getElementById('coachSheetSections');if(!el)return;
   const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
   const ct=T.coach||DT.coach;
@@ -3602,7 +4760,13 @@ function renCoachSheet(){
   el.innerHTML=COACHES.map(coach=>{
     const sd=coachSheetData[coach]||{};
     const stores=SR.filter(s=>s.c===coach);
-    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    // MIM BANs: sum from MIM store report (store-level Orders) for this coach's stores
+    // Falls back to rep-level mb if MIM report not loaded
+    const mimFromReport=stores.reduce((sum,store)=>{
+      return sum+(coachSheetData[store.s]?.mimOrders||0);
+    },0);
+    const mimFromReps=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    const mimBans=mimFromReport||mimFromReps;
     const mimSpiff=mimBans*ct.mimRate;
     // Calculate bonus
     const doors=+sd.doors||stores.length;
@@ -3986,7 +5150,7 @@ function swAdmin(tab,btn){
   if(tab==='data')renAdminSysInfo();
   if(tab==='datastatus'){refreshDataStatus();initDataStatus();}
   if(tab==='history'){renWkHist();}
-  if(tab==='backsheet'){const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
+  if(tab==='backsheet'){loadELBMapToUI();const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
 }
 
 function initAdminCenter(){
@@ -4516,6 +5680,16 @@ function calcStoreCoachBonus(storeName, sd){
 
 function renCoachSheet(){
   const el=document.getElementById('coachSheetSections');if(!el)return;
+  // Apply ELB data before rendering
+  applyELBToCoachSheet();
+  const elbLoaded=!!getELBData();
+  const elbObj=getELBData();
+  // Update ELB banner
+  const elbBanner=document.getElementById('coachELBBannerText');
+  if(elbBanner){
+    if(elbLoaded){elbBanner.textContent='✅ ELB loaded — '+elbObj.matched+' stores — '+elbObj.loadedAt;elbBanner.style.color='var(--ok)';}
+    else{elbBanner.textContent='No ELB data — upload in Admin → Data Management';elbBanner.style.color='var(--mu)';}
+  }
   const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
   const ct=T.coach||DT.coach;
   const srBs=getSR_BS(); // Live store roster
@@ -4578,7 +5752,7 @@ function renCoachSheet(){
             <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Acc Total $ ✎</th>
             <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Shrink % ✎</th>
             <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">ELB Rank ✎</th>
-            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">Total Acts ✎</th>
+            <th style="padding:6px 8px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#FFFDF0">PPD / Total Acts ✎</th>
             <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#E8F5E9">Act $</th>
             <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr);background:#E8F5E9">Acc $</th>
             <th style="padding:6px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:#fff;text-transform:uppercase;border-bottom:2px solid var(--pr);background:var(--dk)">Store Total</th>
@@ -4595,19 +5769,24 @@ function renCoachSheet(){
               <td style="padding:5px 8px;text-align:center"><span class="bdg ${store.tier===1?'bok2':store.tier===2?'bt1':'bt2'}">${store.me}</span></td>
               <td style="padding:5px 10px;font-size:10px;color:var(--mu);white-space:nowrap">${X(storeMgr==='TBD'?'—':storeMgr)}</td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                <input type="number"  value="${sd.actPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.actPct>=100?'#F0FBF4':+sd.actPct>0?'#FFF5F5':'#fff'}" onchange="setCoachSheet('${store.s}','actPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                <input type="number" value="${sd.actPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.actPct>=100?'#F0FBF4':+sd.actPct>0?'#FFF5F5':'#fff'}" onchange="setCoachSheet('${store.s}','actPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                ${sd.actActual||sd.actTarget?`<div style="font-size:8px;color:var(--mu);margin-top:1px">${sd.actActual||0}/${sd.actTarget||0} Metro</div>`:''}
+                ${elbLoaded&&!sd.actPct?`<div style="font-size:8px;color:var(--da);font-weight:700">⚠ No ELB match</div>`:''}
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                <input type="number"  value="${sd.accTotal||''}" placeholder="Acc $ Total" min="0" step="0.01" style="${inpStyle}" onchange="setCoachSheet('${store.s}','accTotal',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                <input type="number" value="${sd.accTotal||''}" placeholder="Acc $ Total" min="0" step="0.01" style="${inpStyle};background:${sd.accTotal?'#F0FBF4':'#fff'}" onchange="setCoachSheet('${store.s}','accTotal',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                ${sd.accTotal&&getRTBDIStoreData()?`<div style="font-size:8px;color:var(--ok);font-weight:700">✓ RTBDI</div>`:''}
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
                 <input type="number"  value="${sd.shrinkPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.shrinkPct>5?'#FFEBEE':+sd.shrinkPct>2?'#FFF8E1':'#fff'}" onchange="setCoachSheet('${store.s}','shrinkPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                <input type="number"  value="${sd.elbRank||''}" placeholder="ELB Rank" min="1" style="${inpStyle};background:${+sd.elbRank>=3368?'#FFEBEE':'#fff'}" onchange="setCoachSheet('${store.s}','elbRank',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                <input type="number" value="${sd.elbRank||''}" placeholder="ELB Rank" min="1" style="${inpStyle};background:${+sd.elbRank>=3368?'#FFEBEE':'#fff'}" onchange="setCoachSheet('${store.s}','elbRank',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                ${elbLoaded&&sd.elbRank?`<div style="font-size:8px;color:${+sd.elbRank>=3368?'var(--da)':'var(--ok)'};font-weight:700">${+sd.elbRank>=3368?'🚫 DQ':'✓ Metro'}</div>`:''}
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                <input type="number"  value="${sd.totalBoxes||''}" placeholder="0" min="0" style="${inpStyle}" onchange="setCoachSheet('${store.s}','totalBoxes',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                <input type="number" value="${sd.totalBoxes||''}" placeholder="PPD" min="0" style="${inpStyle};background:${sd.totalBoxes?'#F0FBF4':'#fff'}" onchange="setCoachSheet('${store.s}','totalBoxes',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                ${sd.totalBoxes&&getRTBDIStoreData()?`<div style="font-size:8px;color:var(--ok);font-weight:700">✓ PPD (RTBDI)</div>`:''}
               </td>
               <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--ok)">$${res.actBonus.toFixed(2)}</strong>${res.actPct>0&&res.actPct<100?`<div style="font-size:8px;color:var(--da)">Under 100%</div>`:''}</td>
               <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--se)">$${res.accBonus.toFixed(2)}</strong><div style="font-size:8px;color:var(--mu)">${res.accPerBox>0?'$'+res.accPerBox.toFixed(2)+'/box':''}</div></td>
