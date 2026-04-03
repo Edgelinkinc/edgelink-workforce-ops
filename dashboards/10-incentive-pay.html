@@ -33,9 +33,9 @@ body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--tx);min-he
 .si:hover{background:rgba(255,255,255,.07);color:#fff}
 .si.active{background:rgba(226,0,116,.2);color:#fff;border-left-color:var(--pr)}
 .si .ic{font-size:15px;width:20px;text-align:center}
-.content{flex:1;min-width:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;height:calc(100vh - 60px)}
+.content{flex:1;min-width:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;height:calc(100vh - 60px);scroll-behavior:auto}
 #adminContent .sub-tab{font-size:11px!important;padding:6px 11px!important;white-space:nowrap!important;flex-shrink:0!important}
-.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%;padding:16px;box-sizing:border-box;position:relative;top:0}
+.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%;padding:16px;box-sizing:border-box}
 .sub-tabs{display:flex;gap:8px;margin-bottom:16px}
 .sub-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--bo);background:var(--sf);color:var(--mu);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
 .sub-tab:hover{border-color:var(--se);color:var(--se)}.sub-tab.active{background:var(--se);color:#fff;border-color:var(--se)}
@@ -1022,125 +1022,8 @@ body.page-pg-assign .week-bar{display:none!important;}
       </div>
       <div id="mgrFlyerInline"></div>
     </div>
-    <div class="sub-pane" id="coach-calc">
-      <div class="card"><div class="card-hdr" style="background:var(--dk)">
-        <div class="card-title">🎯 Coach Actuals — By Coach / By Store</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn bghost sm" onclick="requirePin(saveCoachSheet)">💾 Save All</button>
-          <button class="btn bghost sm" onclick="expCoachSheet()">⬇ Export CSV</button>
-        <button class="btn bghost sm" onclick="generateAllCoachSlips()">🖨 All Pay Slips</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-          <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth" onchange="onCoachSheetMonth()"/></div>
-          <div class="fi" style="min-width:160px"><label>Company Acc Total ($)</label><input type="number" id="coachSheetCoAcc" placeholder="e.g. 310000" min="0" onchange="renCoachSheet()"/></div>
-          
-        <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
-            ⚡ Enter actuals per store. Each coach section shows their stores. Bonus calculates automatically.
-          </div>
-              <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:#F0FBF4;border:1px solid var(--ok);border-radius:8px;font-size:12px;min-width:200px">
-                <span>📊</span>
-                <div id="coachELBBannerText" style="color:var(--mu)">No ELB data loaded — upload in Admin → Data Management</div>
-              </div>
-        </div>
-        <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:14px">
-          <div class="kc kcg"><div class="kl">Total Coach Payout</div><div class="kv" id="cSheetTotal">$—</div></div>
-          <div class="kc kct"><div class="kl">MIM Spiff Total</div><div class="kv" id="cSheetMim">$—</div></div>
-          <div class="kc kcw"><div class="kl">Guardrails Hit</div><div class="kv" id="cSheetGuard">0</div></div>
-          <div class="kc kcp"><div class="kl">Kicker Earned</div><div class="kv" id="cSheetKick">$—</div></div>
-        </div>
-        <div id="coachSheetSections"></div>
-      </div></div>
-    </div>
-    <div class="sub-pane" <div class="sub-pane" id="coach-mimpay">
-
-      <!-- UPLOAD INSTRUCTIONS BANNER -->
-      <div style="background:linear-gradient(135deg,#E8F5E9,#F3E8FF);border:1px solid var(--ok);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start">
-        <span style="font-size:28px;flex-shrink:0">📂</span>
-        <div>
-          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:var(--se);margin-bottom:6px">What to Upload for Coach MIM Payout</div>
-          <div style="font-size:12px;color:var(--tx);line-height:1.8">
-            <strong>1. MIM Report (Coach Period)</strong> — Metro portal → MIM report → export CSV<br>
-            &nbsp;&nbsp;&nbsp;• Must include: <code>Store Name</code>, <code>Employee Name</code>, <code>Orders</code> columns<br>
-            &nbsp;&nbsp;&nbsp;• Store rows have <code>Employee Name = "Total"</code> — that's the store BAN count<br>
-            <strong>2. Upload below</strong> — separate from the weekly rep MIM upload<br>
-            <strong>3. Set the month</strong> → verify per-store BANs → lock &amp; export when paid
-          </div>
-        </div>
-      </div>
-
-      <!-- CONTROLS ROW -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-        <div class="fi" style="min-width:160px">
-          <label>Coach MIM Month</label>
-          <input type="month" id="coachMimPayMonth" onchange="onCoachMimPayMonth()"/>
-        </div>
-        <!-- UPLOAD -->
-        <div style="display:flex;flex-direction:column;gap:4px;min-width:200px">
-          <label style="font-size:11px;font-weight:700;color:var(--mu)">MIM Report (Coach Period)</label>
-          <label style="cursor:pointer">
-            <input type="file" accept=".csv,.txt" style="display:none" onchange="requirePin(()=>pMIMCoach(this.files[0]))"/>
-            <div class="btn bok sm">⬆ Upload Coach MIM Report</div>
-          </label>
-          <div id="fnMIMCoach" style="font-size:11px;color:var(--ok)"></div>
-        </div>
-        <!-- RATE -->
-        <div class="fi" style="min-width:120px">
-          <label>Rate ($/BAN)</label>
-          <input type="number" id="coachMimPayRate" value="10" min="0" step="0.5" onchange="renCoachMimPay()"/>
-        </div>
-        <!-- LOCK STATUS -->
-        <div style="display:flex;align-items:center;gap:8px;margin-top:16px">
-          <div class="lk-dot open" id="coachMimPayDot"></div>
-          <span class="lk-lbl" id="coachMimPayLbl" style="font-size:13px;font-weight:700">Unlocked</span>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
-          <button class="btn bok sm" id="coachMimPayLkBtn" onclick="requirePin(toggleCoachMimPayLock)">🔒 Lock &amp; Mark Paid</button>
-          <button class="btn bo sm" onclick="expCoachMimPayCSV()">⬇ Export CSV</button>
-        </div>
-      </div>
-
-      <!-- SUMMARY STRIP -->
-      <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px">
-        <div class="kc"><div class="kl">Total Coaches</div><div class="kv" id="cmpTotalCoaches">—</div></div>
-        <div class="kc kcp"><div class="kl">Total BANs</div><div class="kv" id="cmpTotalBans">—</div></div>
-        <div class="kc kcg"><div class="kl">Total MIM Payout</div><div class="kv" id="cmpTotalPayout">—</div></div>
-        <div class="kc kct"><div class="kl">Avg BANs/Store</div><div class="kv" id="cmpAvgBans">—</div></div>
-        <div class="kc kcw"><div class="kl">Month</div><div class="kv" id="cmpMonth" style="font-size:13px">—</div></div>
-      </div>
-
-      <!-- PER-COACH TABLE -->
-      <div id="coachMimPayBody">
-        <div style="text-align:center;padding:40px;color:var(--mu)">
-          <div style="font-size:36px;margin-bottom:10px">📱</div>
-          <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--se);margin-bottom:6px">No Coach MIM data loaded</div>
-          <div style="font-size:13px">Upload the MIM Report above and set the month</div>
-        </div>
-      </div>
-
-    </div><!-- /coach-mimpay -->
-
-    id="coach-structure">
-      <div id="coachFlyerInline"></div>
-    </div>
-    <div class="sub-pane" id="coach-mim">
-      <div class="card"><div class="card-hdr"><div class="card-title">📱 Coach MIM Spiffs</div><button class="btn bghost sm" onclick="doMimExp('coach')">⬇ CSV</button></div>
-        <div class="card-body">
-          <p style="font-size:12px;color:var(--mu);margin-bottom:14px">$<span id="coachMimRateDisp">10</span>/BAN (account) — stacks on all other coach bonuses. Rate editable in Tier Editor.</p>
-          <div class="tw"><table>
-            <thead><tr><th>Coach</th><th>Stores</th><th class="gc">Total MM BANs</th><th class="gc">Rate $/BAN</th><th class="gc">MIM Spiff $</th><th class="gn">HR Override $</th><th class="gn">Final $</th></tr></thead>
-            <tbody id="mim-coach-body"></tbody>
-          </table></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: CHARGEBACKS -->
-  
-  <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
-  <div class="page" id="pg-coaches">
+      <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
+  <div class="page" id="pg-coaches" style="overflow-y:auto;height:calc(100vh - 60px)">
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
@@ -2491,6 +2374,10 @@ function updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+
 
 // ── PAGE NAV ──
 function goPage(id,el){
+  // Disable browser scroll restoration and reset immediately
+  if(history.scrollRestoration)history.scrollRestoration='manual';
+  const _cont=document.querySelector('.content');
+  if(_cont)_cont.scrollTop=0;
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".si").forEach(s=>s.classList.remove("active"));
   document.querySelectorAll(".bn").forEach(b=>b.classList.remove("active"));
@@ -2504,8 +2391,16 @@ function goPage(id,el){
   sessionStorage.setItem("wfo_page",id);
   if(id==="pg-leaderboard")renLB();
   if(id==="pg-summary")renSum();
-  if(id==="pg-managers")renMgrOverview();
-  if(id==="pg-coaches"){const _cc=document.querySelector('.content');if(_cc)_cc.scrollTop=0;renCoachOv();renCoachMim();setTimeout(()=>{const _cc2=document.querySelector('.content');if(_cc2)_cc2.scrollTop=0;},300);setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},200);}
+  if(id==="pg-managers"){const _cm=document.querySelector('.content');if(_cm)_cm.scrollTop=0;renMgrOverview();requestAnimationFrame(()=>{if(_cm)_cm.scrollTop=0;});}
+  if(id==="pg-coaches"){
+    renCoachOv();
+    renCoachMim();
+    // Reset scroll on both the content wrapper and the coaches page itself
+    [0,50,200].forEach(t=>setTimeout(()=>{
+      const c=document.querySelector('.content');if(c)c.scrollTop=0;
+      const p=document.getElementById('pg-coaches');if(p)p.scrollTop=0;
+    },t));
+  }
   if(id==="pg-home")initHomePage();
   if(id==="pg-roster")renRoster();
   if(id==="pg-employee"){initEmpView();}
@@ -2516,12 +2411,9 @@ function goPage(id,el){
   } else {
     document.body.classList.remove("admin-active");
   }
-  // Force scroll reset - belt and suspenders approach
+  // Force scroll reset
   const _c=document.querySelector('.content');
   if(_c)_c.scrollTop=0;
-  setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},0);
-  setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},50);
-  setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},150);
 }
 function swSub(prefix,id,btn){
   const pg=btn.closest(".page");
@@ -2692,7 +2584,7 @@ function renCoachMim(){
   const ct=T.coach||DT.coach;
   const rate=ct.mimRate||10;
   const rd=document.getElementById('coachMimRateDisp');if(rd)rd.textContent=rate;
-  if(!COACHES.length){cb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--mu)">No coach data</td></tr>';return;}
+  if(!COACHES.length){cb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--mu)">No coach data</td></tr>';return;}
   cb.innerHTML=COACHES.map(coach=>{
     const stores=SR.filter(s=>s.c===coach);
     const coachReps=reps.filter(r=>r.c===coach);
@@ -2708,13 +2600,7 @@ function renCoachMim(){
       <td style="text-align:center;font-weight:700;font-size:16px">${totalBans}</td>
       <td style="text-align:center">$${rate}/BAN</td>
       <td style="font-weight:700;color:var(--ok)">$${mimSpiff.toFixed(2)}</td>
-      <td style="padding:4px 8px">
-        <input type="number" value="${override||''}" placeholder="Override $" min="0" step="0.01"
-          style="width:100px;padding:5px 8px;border:2px solid ${hasOv?'var(--wa)':'var(--bo)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none"
-          onchange="requirePin(()=>{localStorage.setItem('coachMimOv_'+(coach||'').replace(/\\s+/g,'_'),this.value||0);renCoachMim();})"
-          onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${hasOv?'var(--wa)':'var(--bo)'}'""/>
-        ${hasOv?`<div style="font-size:9px;color:var(--wa)">⚠ Overridden</div>`:''}
-      </td>
+
       <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${final.toFixed(2)}</td>
     </tr>`;
   }).join('');
