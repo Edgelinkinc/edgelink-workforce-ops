@@ -445,6 +445,9 @@ body.page-pg-assign .week-bar{display:none!important;}
   .page.active{background:#F8F8F8!important}
 }
 </style>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 </head>
 <body>
 <header class="topbar">
@@ -1023,7 +1026,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <div id="mgrFlyerInline"></div>
     </div>
       <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
-  <div class="page" id="pg-coaches" style="overflow-y:auto;height:calc(100vh - 60px)">
+  <div class="page" id="pg-coaches">
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
@@ -1036,6 +1039,9 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="sub-pane active" id="coach-overview">
       <div class="card"><div class="card-hdr"><div class="card-title">🎯 Coach Bonus Overview</div></div>
         <div class="card-body" style="min-height:200px">
+          <div id="coachOvDataBanner" style="display:none;background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#8a6000">
+            ⚡ Upload ELB + RTBDI reports in Admin → Data Management to populate bonus data. Select a month in Breakdown &amp; Payouts first.
+          </div>
           <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:16px">
             <div class="kc kcg"><div class="kl">Total Coach Gross</div><div class="kv" id="ck-gross">$—</div><div class="ks">all coaches</div></div>
             <div class="kc kct"><div class="kl">MIM Spiff Total</div><div class="kv" id="ck-mim">$—</div><div class="ks">$10/BAN</div></div>
@@ -2612,6 +2618,10 @@ function renMgrOv(){
 
 function renCoachOv(){
   const body=document.getElementById('coach-ov-body');if(!body)return;
+  // Show upload banner if no data loaded
+  const hasUploads=getELBData()||getRTBDIStoreData();
+  const banner=document.getElementById('coachOvDataBanner');
+  if(banner)banner.style.display=hasUploads?'none':'block';
   const srBs=getSR_BS();
   const ct=T.coach||DT.coach;
   applyELBToCoachSheet();applyRTBDIToCoachSheet();applyMIMToCoachSheet();
