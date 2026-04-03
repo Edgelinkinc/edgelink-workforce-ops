@@ -3024,37 +3024,44 @@ function parseRTBDIStore(content, fname){
       });
     });
   } else {
-    // CSV format — find header row then parse data rows
+    // CSV format — scan all rows for EL##### store pattern
+    // Then use fixed column offsets based on the known Metro KPI column order:
+    // SAP ID, Store ID(EL#), Hours, Boxes, New All, New Voice, Upg, React, PPD, Box/Hr, Acc $...
+    // Offsets from Store ID cell: +1=Hours, +2=Boxes, +7=PPD, +9=Acc $, +21=BTS, +24=HINT
     const lines=content.trim().split('\n');
     const isTab=lines[0].split('\t').length>lines[0].split(',').length;
     const sep=isTab?'\t':',';
-    // Find header row — look for "Store ID" and "PPD" and "Acc $"
-    let hdrRow=-1,storeCol=-1,ppdCol=-1,accCol=-1,boxCol=-1,btsCol=-1,hintCol=-1;
-    for(let i=0;i<Math.min(lines.length,10);i++){
+
+    // First try to find header row to get exact column positions
+    let hdrRow=-1,storeCol=-1,ppdCol=-1,accCol=-1,boxCol=-1;
+    for(let i=0;i<Math.min(lines.length,5);i++){
       const cols=lines[i].split(sep).map(c=>c.replace(/"/g,'').trim());
-      const si=cols.findIndex(c=>/store.?id/i.test(c)||c==='Store ID');
+      const si=cols.findIndex(c=>/store.?id/i.test(c));
       const pi=cols.findIndex(c=>/^ppd$/i.test(c));
-      const ai=cols.findIndex(c=>/^acc\s*\$$/i.test(c));
-      if(si>=0&&(pi>=0||ai>=0)){
-        hdrRow=i; storeCol=si; ppdCol=pi; accCol=ai;
-        boxCol=cols.findIndex(c=>/^boxes$/i.test(c));
-        btsCol=cols.findIndex(c=>/^bts$/i.test(c));
-        hintCol=cols.findIndex(c=>/^hint$/i.test(c));
-        break;
-      }
+      const ai=cols.findIndex(c=>/acc.*\$/i.test(c)||/\$.*acc/i.test(c));
+      if(si>=0&&pi>=0){hdrRow=i;storeCol=si;ppdCol=pi;accCol=ai;boxCol=cols.findIndex(c=>/^boxes$/i.test(c));break;}
     }
-    if(hdrRow<0){tst2('Cannot find Store ID or Acc $ columns in RTBDI CSV','er');return;}
-    for(let i=hdrRow+1;i<lines.length;i++){
+
+    for(let i=Math.max(hdrRow+1,1);i<lines.length;i++){
       const cols=lines[i].split(sep).map(c=>c.replace(/"/g,'').trim());
-      const rawStore=cols[storeCol]||'';
-      if(!/EL\d+/i.test(rawStore))continue;
+      // Find EL##### in this row
+      const storeIdx=cols.findIndex(c=>/EL\d+/i.test(c));
+      if(storeIdx<0)continue;
+      const rawStore=cols[storeIdx];
       if(storeMap[rawStore])continue;
+
+      // Use header-based cols if found, else fixed offsets
+      const get=offset=>{const idx=storeIdx+offset;return(idx>=0&&idx<cols.length)?cols[idx]:'';};
+      const getPP=()=>ppdCol>=0?cols[ppdCol]||'':get(7);
+      const getAcc=()=>accCol>=0?cols[accCol]||'':get(9);
+      const getBox=()=>boxCol>=0?cols[boxCol]||'':get(2);
+
       storeMap[rawStore]={
-        boxes   :boxCol>=0?parseNum(cols[boxCol]):0,
-        ppd     :ppdCol>=0?parseNum(cols[ppdCol]):0,
-        accTotal:accCol>=0?parseNum(cols[accCol]):0,
-        bts     :btsCol>=0?parseNum(cols[btsCol]):0,
-        hint    :hintCol>=0?parseNum(cols[hintCol]):0,
+        boxes   :parseNum(getBox()),
+        ppd     :parseNum(getPP()),
+        accTotal:parseNum(getAcc()),
+        bts     :parseNum(get(21)),
+        hint    :parseNum(get(24)),
       };
     }
   }
