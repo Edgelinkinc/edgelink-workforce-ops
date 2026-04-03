@@ -1865,25 +1865,14 @@ body.page-pg-assign .week-bar{display:none!important;}
                 </label>
                 <div id="fnMIM" style="font-size:11px;color:var(--ok)"></div>
               </div>
-              <!-- METRO MANAGER -->
-              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
-                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">🏢 Metro CSV — Managers</div>
-                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Manager actuals from Metro Power BI</div>
-                <label style="cursor:pointer;display:block">
-                  <input type="file" accept=".csv,.xlsx" style="display:none" onchange="requirePin(()=>pF(this.files[0],'mgr_metro'))"/>
-                  <div class="btn bp sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload Manager CSV</div>
-                </label>
-                <div id="fnMgr" style="font-size:11px;color:var(--ok)"></div>
-              </div>
-              <!-- METRO COACH -->
-              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
-                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">🎯 Metro CSV — Coaches</div>
-                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Coach store data from Metro Power BI</div>
-                <label style="cursor:pointer;display:block">
-                  <input type="file" accept=".csv,.xlsx" style="display:none" onchange="requirePin(()=>pF(this.files[0],'coach_metro'))"/>
-                  <div class="btn bs sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload Coach CSV</div>
-                </label>
-                <div id="fnCoach" style="font-size:11px;color:var(--ok)"></div>
+              <!-- ELB NOTE -->
+              <div style="background:#F3E8FF;border-radius:8px;padding:12px;border:1px solid var(--se)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">ℹ️ Manager &amp; Coach Metro Data</div>
+                <div style="font-size:12px;color:var(--tx);line-height:1.7">
+                  The <strong>Metro ELB Report</strong> above already feeds all manager and coach data:<br>
+                  Acts · BTS · HSI · Protection Attach · ELB Rank<br>
+                  <span style="color:var(--pr);font-weight:700">Upload that same file in the ELB zone above.</span>
+                </div>
               </div>
             </div>
           </div>
@@ -2671,27 +2660,35 @@ function pELB(file){
 
 function parseELBCSV(txt, fname){
   const lines=txt.trim().split('\n');
-  if(lines.length<3){tst2('ELB file empty or missing rows','er');return;}
+  if(lines.length<2){tst2('ELB file empty or missing rows','er');return;}
 
-  // Metro ELB has TWO header rows:
-  // Row 0: *, National Rank, HierarchyValue4PBI, R1, Actual, MTD Target, Result, R2, ...
-  // Row 1: sub-labels (New Voice activation data, BTS, HSI, ...)
-  // Row 2+: data rows
   const isTab=lines[0].split('\t').length>lines[0].split(',').length;
   const sep=isTab?'\t':',';
   const hdr0=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
-  const hdr1=lines[1].split(sep).map(c=>c.replace(/"/g,'').trim());
 
-  // Find fixed columns
+  // AUTO-DETECT format:
+  // Format A: HierarchyValue4PBI column exists → 2 header rows, EL store IDs
+  // Format B: No HierarchyValue4PBI → 1 header row, "10216464: 734 Western Ave" store IDs
+  const hasHierarchy=hdr0.some(c=>/hierarchyvalue4pbi/i.test(c));
+  const dataStartRow=hasHierarchy?2:1;
+  const hdr1=hasHierarchy?lines[1].split(sep).map(c=>c.replace(/"/g,'').trim()):[];
+
+  // Find fixed columns in header row 0
   const rankI=hdr0.findIndex(c=>/national.?rank/i.test(c));
-  const storeI=hdr0.findIndex(c=>/hierarchyvalue4pbi/i.test(c));
-  if(rankI<0||storeI<0){
-    tst2('Cannot find National Rank or HierarchyValue4PBI columns','er');
-    console.log('Row 0:',hdr0.slice(0,12),'Row 1:',hdr1.slice(0,12));
+  // Store column: either HierarchyValue4PBI or the 3rd column (index 2)
+  const storeI=hasHierarchy
+    ? hdr0.findIndex(c=>/hierarchyvalue4pbi/i.test(c))
+    : hdr0.findIndex(c=>/hierarchyvalue4pbi/i.test(c))>=0
+      ? hdr0.findIndex(c=>/hierarchyvalue4pbi/i.test(c))
+      : 2; // default: 3rd column
+
+  if(rankI<0){
+    tst2('Cannot find National Rank column in ELB report','er');
+    console.log('Headers:',hdr0.slice(0,8));
     return;
   }
 
-  // Map all R blocks: R1-R10 each followed by Actual, MTD Target, Result
+  // Map R1-R10 blocks
   const rBlocks={};
   for(let i=0;i<hdr0.length;i++){
     const m=hdr0[i].match(/^R(\d+)$/);
@@ -2704,16 +2701,16 @@ function parseELBCSV(txt, fname){
       if((v0.includes('target')||v0.includes('mtd'))&&tgtI<0){tgtI=j;continue;}
       if(v0==='result'&&resI<0){resI=j;continue;}
     }
-    // Category name from sub-header
-    const catName=(hdr1[i]||hdr1[i+1]||'R'+rn).trim();
+    const catName=(hdr1[i]||hdr1[i+1]||'R'+rn).trim()||'R'+rn;
     rBlocks[rn]={actI,tgtI,resI,catName};
   }
-  console.log('ELB: rank='+rankI+' store='+storeI+' rBlocks=',rBlocks);
+  console.log('ELB format:'+(hasHierarchy?'A (HierarchyValue4PBI)':'B (Store ID:Address)'));
+  console.log('ELB cols: rank='+rankI+' store='+storeI+' blocks=',rBlocks);
 
-  // Get metric mapping from Admin settings (or use defaults)
+  // Get metric mapping
   const map=getELBMetricMap();
 
-  // Store ID → store name lookup
+  // Build store ID lookup map
   const idMap={};
   SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
 
@@ -2726,24 +2723,39 @@ function parseELBCSV(txt, fname){
     const target=b.tgtI>=0?+(cols[b.tgtI]||'').replace(/[",]/g,'')||0:0;
     let pct=0;
     if(useResult&&b.resI>=0){
-      pct=parseFloat((cols[b.resI]||'').replace(/[",]/g,''))||0;
-      if(pct>0&&pct<2)pct=Math.round(pct*1000)/10; // 1.085 → 108.5
+      const raw=(cols[b.resI]||'').replace(/[",]/g,'').replace(/%/g,'').trim();
+      pct=parseFloat(raw)||0;
+      if(pct>0&&pct<2)pct=Math.round(pct*1000)/10;
     } else if(actual>0&&target>0){
       pct=Math.round((actual/target)*1000)/10;
     }
     return{actual,target,pct};
   };
 
-  for(let i=2;i<lines.length;i++){
+  for(let i=dataStartRow;i<lines.length;i++){
     const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
     if(!cols||cols.length<4)continue;
-    const rawId=(cols[storeI]||'').replace(/"/g,'').trim();
-    if(!rawId)continue;
-    const rank=parseInt((cols[rankI]||'').replace(/[",]/g,''))||0;
-    const storeName=idMap[rawId]||idMap[String(+rawId)]||null;
-    if(!storeName){if(rawId)unmatched.push(rawId);continue;}
 
-    // Parse all R blocks for this store
+    // Extract store ID — handle both formats
+    const rawStore=(cols[storeI]||'').replace(/"/g,'').trim();
+    if(!rawStore)continue;
+
+    let storeId=null;
+    if(hasHierarchy){
+      // Format A: rawStore is the EL store ID number directly
+      storeId=rawStore.replace(/[^0-9]/g,'').slice(0,10)||null;
+    } else {
+      // Format B: "10216464: 734 Western Ave" → extract digits before colon
+      const m=rawStore.match(/^(\d{7,10})/);
+      storeId=m?m[1]:null;
+    }
+    if(!storeId)continue;
+
+    // National Rank — strip commas e.g. "1,211" → 1211
+    const rank=parseInt((cols[rankI]||'').replace(/[",]/g,'').trim())||0;
+    const storeName=idMap[storeId]||idMap[String(+storeId)]||null;
+    if(!storeName){if(storeId)unmatched.push(storeId+' ('+rawStore+')');continue;}
+
     const rData={};
     for(let rn=1;rn<=10;rn++){
       if(!rBlocks[rn])continue;
@@ -2752,27 +2764,24 @@ function parseELBCSV(txt, fname){
 
     elbData[storeName]={
       elbRank    : rank,
-      storeId    : rawId,
-      // COACH fields (uses configurable mapping)
+      storeId    : storeId,
       actPct     : rData[map.coachActR]?.pct    || 0,
       actActual  : rData[map.coachActR]?.actual  || 0,
       actTarget  : rData[map.coachActR]?.target  || 0,
-      // MANAGER fields (uses configurable mapping)
       mgrActActual   : rData[map.mgrActR]?.actual   || 0,
       mgrActTarget   : rData[map.mgrActR]?.target   || 0,
       mgrBtsActual   : rData[map.mgrBtsR]?.actual   || 0,
       mgrBtsTarget   : rData[map.mgrBtsR]?.target   || 0,
       mgrHsiActual   : rData[map.mgrHsiR]?.actual   || 0,
       mgrHsiTarget   : rData[map.mgrHsiR]?.target   || 0,
-      mgrProtPct     : rData[map.mgrProtR]?.pct     || 0,  // protection attach %
+      mgrProtPct     : rData[map.mgrProtR]?.pct     || 0,
       mgrProtActual  : rData[map.mgrProtR]?.actual  || 0,
       mgrProtTarget  : rData[map.mgrProtR]?.target  || 0,
-      r              : rData  // all raw R data preserved
+      r              : rData
     };
     matched++;
   }
 
-  // Save to localStorage
   const catNames={};
   Object.entries(rBlocks).forEach(([rn,b])=>{catNames[rn]=b.catName;});
   localStorage.setItem('wfo_elb_data',JSON.stringify({
@@ -2780,7 +2789,6 @@ function parseELBCSV(txt, fname){
     fname, matched, unmatched:unmatched.slice(0,20), catNames, map
   }));
 
-  // Add period to saved data via period confirm
   const saveELBWithPeriod=(period)=>{
     const saved=JSON.parse(localStorage.getItem('wfo_elb_data')||'{}');
     saved.period=period;
@@ -2790,13 +2798,13 @@ function parseELBCSV(txt, fname){
     const fnEl=document.getElementById('fnELB');
     if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
     updELBStatus();
-    tst2('ELB saved for '+period+' — '+matched+' stores auto-populated','ok');
+    tst2('ELB saved for '+period+' — '+matched+' stores → Coach + Manager auto-populated','ok');
     const cs=document.getElementById('coachSheetSections');
     if(cs&&cs.innerHTML.trim())renCoachSheet();
     if(document.getElementById('mgrSheetBody'))renMgrSheet();
   };
 
-  if(unmatched.length)console.warn('Unmatched store IDs:',unmatched);
+  if(unmatched.length)console.warn('ELB unmatched:',unmatched);
 
   showPeriodConfirm({
     fname, count:matched, type:'elb',
@@ -2804,6 +2812,7 @@ function parseELBCSV(txt, fname){
     onConfirm:saveELBWithPeriod
   });
 }
+
 
 // ── ELB METRIC MAP ──
 // Configurable mapping: which R column feeds which bonus field
@@ -3681,8 +3690,31 @@ function pC(txt,src,fn){
   if(src==='rtbdi'||src==='metro'){const newCount=checkAndAutoAddNewReps(reps);}
   saveSession();
   const wkDisplay=document.getElementById('wkb')?.textContent||'selected week';
-  st2("✅ "+fn+" loaded — "+ad+" new, "+up+" updated — Data for: "+wkDisplay+"","ok");
-  showWeekConfirm(fn,ad+up);
+  st2("✅ "+fn+" loaded — "+ad+" new, "+up+" updated","ok");
+  // Period confirm — reps are weekly, managers/coaches are monthly
+  if(src==='mgr_metro'){
+    showPeriodConfirm({fname:fn,count:ad+up,type:'metro_mgr',defaultPeriod:defaultMonth(),
+      onConfirm:(period)=>{
+        const fnEl=document.getElementById('fnMgr');
+        if(fnEl)fnEl.textContent='✅ '+fn+' — '+(ad+up)+' records · '+period;
+        tst2('Manager data saved for '+period,'ok');
+        if(document.getElementById('mgrSheetBody'))renMgrSheet();
+      }
+    });
+  } else if(src==='coach_metro'){
+    showPeriodConfirm({fname:fn,count:ad+up,type:'metro_coach',defaultPeriod:defaultMonth(),
+      onConfirm:(period)=>{
+        const fnEl=document.getElementById('fnCoach');
+        if(fnEl)fnEl.textContent='✅ '+fn+' — '+(ad+up)+' records · '+period;
+        tst2('Coach data saved for '+period,'ok');
+        const cs=document.getElementById('coachSheetSections');
+        if(cs&&cs.innerHTML.trim())renCoachSheet();
+      }
+    });
+  } else {
+    // Reps — weekly confirm
+    showWeekConfirm(fn,ad+up);
+  }
 }
 function csvSp(l){const r=[];let c="",q=false;for(const ch of l){if(ch==='"'){q=!q;continue;}if(ch===","&&!q){r.push(c);c="";continue;}c+=ch;}r.push(c);return r;}
 
