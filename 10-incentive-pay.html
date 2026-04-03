@@ -1045,7 +1045,6 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
-      <button class="sub-tab" onclick="swSub('coach','mim',this)">📱 MIM Spiffs</button>
       <button class="sub-tab" onclick="swSub('coach','mimpay',this)">💵 Coach MIM Payout</button>
       <button class="sub-tab" onclick="swSub('coach','structure',this)">📋 Bonus Structure</button>
     </div>
@@ -2960,7 +2959,8 @@ function renCoachOv(){
   const srBs=getSR_BS();
   const ct=T.coach||DT.coach;
   // Apply only if upload period matches the selected month
-  const _ovMn=document.getElementById('coachSheetMonth')?.value||window._coachSheetCurrentMonth||'';
+    const _ovMn=document.getElementById('coachOvBonusMonth')?.value||document.getElementById('coachSheetMonth')?.value||window._coachSheetCurrentMonth||'';
+  const _ovMimMn=document.getElementById('coachOvMimMonth')?.value||_ovMn;
   const _spEp=getELBData()?.period,_spRp=getRTBDIStoreData()?.period,_spMp=getMIMData()?.period;
   if(_ovMn&&_spEp===_ovMn)applyELBToCoachSheet();
   if(_ovMn&&_spRp===_ovMn)applyRTBDIToCoachSheet();
@@ -2977,9 +2977,12 @@ function renCoachOv(){
       actBonus+=res.actBonus;accBonus+=res.accBonus;kicker+=res.kicker||0;
       guardrails=[...guardrails,...res.guardrails];
     });
-    const mimFromStores=stores.reduce((sum,s)=>sum+(coachSheetData[s.s]?.mimOrders||0),0);
-    const mimFromReps=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
-    const mimBans=mimFromStores||mimFromReps;
+    // MIM: read from monthly Coach MIM Payout data (wfo_coach_mim_pay_YYYY-MM)
+    const _monthlyMimD=_ovMimMn?getCoachMimPayData(_ovMimMn):null;
+    const mimBans=_monthlyMimD
+      ?stores.reduce((sum,s)=>{const sd=_monthlyMimD.stores?.[s.s];return sum+(sd?(sd.overrideOrders??sd.orders??0):0);},0)
+      :stores.reduce((sum,s)=>sum+(coachSheetData[s.s]?.mimOrders||0),0)
+      ||reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
     const mimSpiff=mimBans*(ct.mimRate||10);
     const gross=actBonus+accBonus;const total=gross+mimSpiff+kicker;
     const hasGuard=guardrails.length>0;
@@ -3437,8 +3440,17 @@ function parseELBCSV(txt,fname){
     if(!storeId){const elM=rawStore.match(/^(\d{7,10})$/);storeId=elM?elM[1]:null;}
     if(!storeId)continue;
     const rank=parseInt((cols[rankI>=0?rankI:1]||'').replace(/[",]/g,''))||0;
-    const storeName=idMap[storeId]||idMap[String(+storeId)]||null;
-    if(!storeName){if(storeId)unmatched.push(storeId);continue;}
+    let storeName=idMap[storeId]||idMap[String(+storeId)]||null;
+    // Fallback: fuzzy match by store name text in the raw ELB row
+    if(!storeName&&rawStore){
+      const rawUp=rawStore.toUpperCase();
+      const nameMatch=SR.find(s=>{
+        const sn=s.s.replace(/^[A-Z]{2}-/,'').toUpperCase();
+        return rawUp.includes(sn)||sn.split(' ').filter(w=>w.length>3).every(w=>rawUp.includes(w));
+      });
+      if(nameMatch)storeName=nameMatch.s;
+    }
+    if(!storeName){if(storeId)unmatched.push(storeId+'|'+rawStore.slice(0,30));continue;}
     const rData={};
     for(let rn=1;rn<=10;rn++){if(!rBlocks[rn])continue;rData[rn]=parseVal(cols,rBlocks[rn]);}
     elbData[storeName]={
@@ -3933,7 +3945,18 @@ function renCoachPayout(){
   stores.forEach(s=>{
     if(!bsd[s.s])bsd[s.s]={};
     const live=coachSheetData[s.s]||{};
-    if(elbPeriod===bonusMn)Object.assign(bsd[s.s],live);
+    // Apply live data fields selectively based on which upload matches
+    if(elbPeriod===bonusMn){
+      if(live.actPct!==undefined)bsd[s.s].actPct=live.actPct;
+      if(live.elbRank)bsd[s.s].elbRank=live.elbRank;
+      if(live.actActual)bsd[s.s].actActual=live.actActual;
+    }
+    if(rtbdiPeriod===bonusMn){
+      if(live.accTotal!==undefined)bsd[s.s].accTotal=live.accTotal;
+      if(live.totalBoxes)bsd[s.s].totalBoxes=live.totalBoxes;
+    }
+    // Always merge manually-entered data from saved period
+    // (manual entries are in bsd already from localStorage load)
   });
 
   // ── STORE BONUS TABLE ──
