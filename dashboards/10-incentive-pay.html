@@ -2806,9 +2806,9 @@ function parseELBCSV(txt, fname){
     applyELBToCoachSheet();
     applyELBToMgrSheet();
     const fnEl=document.getElementById('fnELB');
-    if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
+    if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+formatPeriod(period);
     updELBStatus();
-    tst2('ELB saved for '+period+' — '+matched+' stores → Coach + Manager auto-populated','ok');
+    tst2('ELB saved for '+formatPeriod(period)+' — '+matched+' stores → Coach + Manager auto-populated','ok');
     const cs=document.getElementById('coachSheetSections');
     if(cs&&cs.innerHTML.trim())renCoachSheet();
     if(document.getElementById('mgrSheetBody'))renMgrSheet();
@@ -2926,7 +2926,7 @@ function updELBStatus(){
   const el=document.getElementById('elbStatusBadge');
   if(!el)return;
   if(elb){
-    el.innerHTML=`<span style="color:var(--ok);font-weight:700">✅ Loaded</span> — ${elb.matched} stores · <strong>${elb.period||'period not set'}</strong> · ${elb.loadedAt} · <button class="btn bd xs" onclick="clearELBData()">Clear</button>`;
+    el.innerHTML=`<span style="color:var(--ok);font-weight:700">✅ Loaded</span> — ${elb.matched} stores · <strong>${formatPeriod(elb.period)||'period not set'}</strong> · ${elb.loadedAt} · <button class="btn bd xs" onclick="clearELBData()">Clear</button>`;
   } else {
     el.innerHTML=`<span style="color:var(--mu)">Not loaded — upload Metro ELB report</span>`;
   }
@@ -2982,60 +2982,71 @@ function matchRTBDIStore(extracted){
   return found?found.s:null;
 }
 
-function parseRTBDIStore(html, fname){
-  // The Metro KPI By Market report uses a cumulative HTML table structure:
-  // Each row contains ALL headers repeated + ALL stores seen so far
-  // Row N = headers + store_1 + store_2 + ... + store_N
-  // So we scan ALL cells in ALL rows for EL##### store name pattern
-  // and extract data at fixed offsets relative to that cell
-  //
-  // Column offsets from Store Name cell:
-  //  -1 = SAP ID (before store name)
-  //   0 = Store Name (EL#####-STATE-NAME)
-  //  +1 = Hours
-  //  +2 = Boxes
-  //  +3 = New All
-  //  +4 = New Voice (No BTS)
-  //  +5 = Upg
-  //  +6 = React
-  //  +7 = PPD
-  //  +8 = Box/Hr
-  //  +9 = Acc $
-  //  +10 = Acc Qty
-  //  +11 = Acc/PPD
-  //  +12 = Acc/Box
-
-  const div=document.createElement('div');
-  div.innerHTML=html;
-
+function parseRTBDIStore(content, fname){
+  // Handles both HTML (.xls export) and CSV formats of Metro KPI By Market report
   const parseNum=v=>{
     if(!v)return 0;
     return +(v.replace(/[$,\s%]/g,'').trim())||0;
   };
+  const storeMap={};
 
-  const storeMap={};  // raw store name → data (deduped)
+  const isHTML=content.trim().startsWith('<') || /<table/i.test(content.slice(0,500));
 
-  div.querySelectorAll('tr').forEach(tr=>{
-    const cells=Array.from(tr.querySelectorAll('td,th')).map(td=>td.textContent.trim());
-    cells.forEach((cell,i)=>{
-      if(!/EL\d+/i.test(cell))return;  // not a store name cell
-      // Extract at fixed offsets
-      const get=offset=>{
-        const idx=i+offset;
-        return(idx>=0&&idx<cells.length)?cells[idx]:'';
-      };
-      const storeName=cell;
-      if(storeMap[storeName])return;  // already have this store
-
-      storeMap[storeName]={
-        boxes    : parseNum(get(2)),   // Boxes
-        ppd      : parseNum(get(7)),   // PPD = total activations
-        accTotal : parseNum(get(9)),   // Acc $ (net)
-        bts      : parseNum(get(26)),  // BTS (offset from store name)
-        hint     : parseNum(get(29)),  // HINT
-      };
+  if(isHTML){
+    // HTML table — cumulative rows, scan all cells for EL##### pattern
+    const div=document.createElement('div');
+    div.innerHTML=content;
+    div.querySelectorAll('tr').forEach(tr=>{
+      const cells=Array.from(tr.querySelectorAll('td,th')).map(td=>td.textContent.trim());
+      cells.forEach((cell,i)=>{
+        if(!/EL\d+/i.test(cell))return;
+        const get=offset=>{const idx=i+offset;return(idx>=0&&idx<cells.length)?cells[idx]:'';};
+        if(storeMap[cell])return;
+        storeMap[cell]={
+          boxes   :parseNum(get(2)),
+          ppd     :parseNum(get(7)),
+          accTotal:parseNum(get(9)),
+          bts     :parseNum(get(26)),
+          hint    :parseNum(get(29)),
+        };
+      });
     });
-  });
+  } else {
+    // CSV format — find header row then parse data rows
+    const lines=content.trim().split('\n');
+    const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+    const sep=isTab?'\t':',';
+    // Find header row — look for "Store ID" and "PPD" and "Acc $"
+    let hdrRow=-1,storeCol=-1,ppdCol=-1,accCol=-1,boxCol=-1,btsCol=-1,hintCol=-1;
+    for(let i=0;i<Math.min(lines.length,10);i++){
+      const cols=lines[i].split(sep).map(c=>c.replace(/"/g,'').trim());
+      const si=cols.findIndex(c=>/store.?id/i.test(c)||c==='Store ID');
+      const pi=cols.findIndex(c=>/^ppd$/i.test(c));
+      const ai=cols.findIndex(c=>/^acc\s*\$$/i.test(c));
+      if(si>=0&&(pi>=0||ai>=0)){
+        hdrRow=i; storeCol=si; ppdCol=pi; accCol=ai;
+        boxCol=cols.findIndex(c=>/^boxes$/i.test(c));
+        btsCol=cols.findIndex(c=>/^bts$/i.test(c));
+        hintCol=cols.findIndex(c=>/^hint$/i.test(c));
+        break;
+      }
+    }
+    if(hdrRow<0){tst2('Cannot find Store ID or Acc $ columns in RTBDI CSV','er');return;}
+    for(let i=hdrRow+1;i<lines.length;i++){
+      const cols=lines[i].split(sep).map(c=>c.replace(/"/g,'').trim());
+      const rawStore=cols[storeCol]||'';
+      if(!/EL\d+/i.test(rawStore))continue;
+      if(storeMap[rawStore])continue;
+      storeMap[rawStore]={
+        boxes   :boxCol>=0?parseNum(cols[boxCol]):0,
+        ppd     :ppdCol>=0?parseNum(cols[ppdCol]):0,
+        accTotal:accCol>=0?parseNum(cols[accCol]):0,
+        bts     :btsCol>=0?parseNum(cols[btsCol]):0,
+        hint    :hintCol>=0?parseNum(cols[hintCol]):0,
+      };
+    }
+  }
+  console.log('RTBDI: found '+Object.keys(storeMap).length+' stores ('+( isHTML?'HTML':'CSV')+' format)');
 
   console.log('RTBDI: found '+Object.keys(storeMap).length+' unique stores');
 
@@ -3062,8 +3073,8 @@ function parseRTBDIStore(html, fname){
     localStorage.setItem('wfo_rtbdi_store',JSON.stringify(existing));
     applyRTBDIToCoachSheet();
     const fnEl=document.getElementById('fnRTBDIStore');
-    if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
-    tst2('RTBDI store report saved for '+period+' — '+matched+' stores → Acc $ + PPD auto-filled','ok');
+    if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+formatPeriod(period);
+    tst2('RTBDI store report saved for '+formatPeriod(period)+' — '+matched+' stores → Acc $ + PPD auto-filled','ok');
     const cs=document.getElementById('coachSheetSections');
     if(cs&&cs.innerHTML.trim())renCoachSheet();
   };
@@ -3212,7 +3223,7 @@ function parseMIM(txt, fname){
     applyMIMToCoachSheet();
     const fnEl=document.getElementById('fnMIM');
     if(fnEl)fnEl.textContent='✅ '+fname+' — '+storeMatched+' stores + '+repRows+' reps · Week of '+period;
-    tst2('MIM saved for week of '+period+' — '+storeMatched+' stores + '+repRows+' reps','ok');
+    tst2('MIM saved for week of '+formatPeriod(period)+' — '+storeMatched+' stores + '+repRows+' reps','ok');
     renR();
     const cs=document.getElementById('coachSheetSections');
     if(cs&&cs.innerHTML.trim())renCoachSheet();
@@ -3354,7 +3365,7 @@ function parseMIMCoach(txt, fname){
       }
       const fnEl=document.getElementById('fnMIMCoach');
       if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
-      tst2('Coach MIM saved for '+period+' — '+matched+' stores','ok');
+      tst2('Coach MIM saved for '+formatPeriod(period)+' — '+matched+' stores','ok');
       onCoachMimPayMonth();
     }
   });
@@ -3642,6 +3653,23 @@ function defaultMonth(){
   const n=new Date(), lm=new Date(n.getFullYear(),n.getMonth()-1,1);
   return lm.getFullYear()+'-'+(String(lm.getMonth()+1).padStart(2,'0'));
 }
+// Helper: format "2026-02" → "February 2026", "2026-03-10" → "Week of Mar 10, 2026"
+function formatPeriod(p){
+  if(!p)return'—';
+  if(p.match(/^\d{4}-\d{2}$/)){
+    // Month format
+    const [y,m]=p.split('-');
+    const d=new Date(+y,+m-1,1);
+    return d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  }
+  if(p.match(/^\d{4}-\d{2}-\d{2}$/)){
+    // Week format
+    const d=new Date(p+'T12:00:00');
+    const e=new Date(d); e.setDate(e.getDate()+6);
+    return'Week of '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  }
+  return p;
+}
 // Helper: get default week (last Monday)
 function defaultWeek(){
   const t=new Date(), d=t.getDay();
@@ -3717,7 +3745,7 @@ function pC(txt,src,fn){
       onConfirm:(period)=>{
         const fnEl=document.getElementById('fnMgr');
         if(fnEl)fnEl.textContent='✅ '+fn+' — '+(ad+up)+' records · '+period;
-        tst2('Manager data saved for '+period,'ok');
+        tst2('Manager data saved for '+formatPeriod(period),'ok');
         if(document.getElementById('mgrSheetBody'))renMgrSheet();
       }
     });
@@ -3726,7 +3754,7 @@ function pC(txt,src,fn){
       onConfirm:(period)=>{
         const fnEl=document.getElementById('fnCoach');
         if(fnEl)fnEl.textContent='✅ '+fn+' — '+(ad+up)+' records · '+period;
-        tst2('Coach data saved for '+period,'ok');
+        tst2('Coach data saved for '+formatPeriod(period),'ok');
         const cs=document.getElementById('coachSheetSections');
         if(cs&&cs.innerHTML.trim())renCoachSheet();
       }
