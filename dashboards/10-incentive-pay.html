@@ -2629,17 +2629,17 @@ document.addEventListener("DOMContentLoaded",()=>{
   const _initElbP=getELBData()?.period;
   const _initRtbdiP=getRTBDIStoreData()?.period;
   const _initMimP=getMIMData()?.period;
-  if(_initElbP===_mn)applyELBToCoachSheet();
-  if(_initRtbdiP===_mn)applyRTBDIToCoachSheet();
-  if(!_initMimP||_initMimP===_mn)applyMIMToCoachSheet();
+  if(_mn&&_initElbP===_mn)applyELBToCoachSheet();
+  if(_mn&&_initRtbdiP===_mn)applyRTBDIToCoachSheet();
+  if(_mn&&_initMimP&&_initMimP===_mn)applyMIMToCoachSheet();
   // Manager sheet
   const mgrIn=document.getElementById('mgrSheetMonthIn');
   if(mgrIn&&!mgrIn.value)mgrIn.value=_mn;
   window._mgrSheetCurrentMonth=_mn;
   loadMgrSheetForPeriod(_mn);
-  if(_initElbP===_mn)applyELBToMgrSheet();
-  if(_initRtbdiP===_mn)applyRTBDIToMgrSheet();
-  if(!_initMimP||_initMimP===_mn)applyMIMToMgrSheet();
+  if(_mn&&_initElbP===_mn)applyELBToMgrSheet();
+  if(_mn&&_initRtbdiP===_mn)applyRTBDIToMgrSheet();
+  if(_mn&&_initMimP&&_initMimP===_mn)applyMIMToMgrSheet();
   const mgrLbl=document.getElementById('mgrSheetMonth');
   if(mgrLbl)mgrLbl.textContent=formatPeriod(_mn);
 
@@ -2942,9 +2942,9 @@ function renCoachOv(){
   // Apply only if upload period matches the selected month
   const _ovMn=document.getElementById('coachSheetMonth')?.value||window._coachSheetCurrentMonth||'';
   const _spEp=getELBData()?.period,_spRp=getRTBDIStoreData()?.period,_spMp=getMIMData()?.period;
-  if(!_ovMn||_spEp===_ovMn)applyELBToCoachSheet();
-  if(!_ovMn||_spRp===_ovMn)applyRTBDIToCoachSheet();
-  if(!_ovMn||!_spMp||_spMp===_ovMn)applyMIMToCoachSheet();
+  if(_ovMn&&_spEp===_ovMn)applyELBToCoachSheet();
+  if(_ovMn&&_spRp===_ovMn)applyRTBDIToCoachSheet();
+  if(_ovMn&&_spMp&&_spMp===_ovMn)applyMIMToCoachSheet();
   let tGross=0,tMim=0,tKick=0,tGuard=0;
   body.innerHTML=COACHES.map(coach=>{
     const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
@@ -3338,33 +3338,13 @@ function clearELBData(){
 function applyELBToCoachSheet(){
   const elb=getELBData();
   if(!elb||!elb.data)return;
-  // Write per-store data for store-level access
   Object.entries(elb.data).forEach(([storeName,d])=>{
     if(!coachSheetData[storeName])coachSheetData[storeName]={};
     const sd=coachSheetData[storeName];
     if(d.elbRank)sd.elbRank=d.elbRank;
-    if(d.actPct!==undefined)sd.actPct=d.actPct;
+    if(d.actPct!==undefined&&d.actPct>0)sd.actPct=d.actPct;
     if(d.actActual)sd.actActual=d.actActual;
     if(d.actTarget)sd.actTarget=d.actTarget;
-  });
-  // Aggregate per-store up to coach level (actPct = avg across stores, elbPctile from rank)
-  const elbCutoff=T.elbDQ||DT.elbDQ||3368;
-  COACHES.forEach(coach=>{
-    const stores=SR.filter(s=>s.c===coach);
-    if(!stores.length)return;
-    if(!coachSheetData[coach])coachSheetData[coach]={};
-    const cd=coachSheetData[coach];
-    // Aggregate actPct: average across stores with data
-    // Only auto-fill if no manual entry exists
-    const storePcts=stores.map(s=>coachSheetData[s.s]?.actPct||0).filter(v=>v>0);
-    if(storePcts.length&&!cd._manualActPct)cd.actPct=storePcts.reduce((a,b)=>a+b,0)/storePcts.length;
-    // ELB percentile: use median store rank / cutoff
-    const ranks=stores.map(s=>coachSheetData[s.s]?.elbRank||0).filter(v=>v>0);
-    if(ranks.length){
-      const avgRank=ranks.reduce((a,b)=>a+b,0)/ranks.length;
-      cd.elbPctile=Math.round((avgRank/elbCutoff)*100);
-      cd.elbRank=Math.round(avgRank);
-    }
   });
 }
 function applyELBToMgrSheet(){
@@ -3499,29 +3479,11 @@ function clearRTBDIData(){
 }
 function applyRTBDIToCoachSheet(){
   const d=getRTBDIStoreData();if(!d||!d.data)return;
-  // Write per-store data
   Object.entries(d.data).forEach(([storeName,v])=>{
     if(!coachSheetData[storeName])coachSheetData[storeName]={};
     const sd=coachSheetData[storeName];
     if(v.accTotal!==undefined)sd.accTotal=v.accTotal;
     if(v.ppd)sd.totalBoxes=v.ppd;else if(v.boxes)sd.totalBoxes=v.boxes;
-  });
-  // Aggregate per-store acc$ and boxes up to coach level
-  COACHES.forEach(coach=>{
-    const stores=SR.filter(s=>s.c===coach);
-    if(!stores.length)return;
-    if(!coachSheetData[coach])coachSheetData[coach]={};
-    const cd=coachSheetData[coach];
-    let totalAcc=0,totalBoxes=0;
-    stores.forEach(store=>{
-      const sd=coachSheetData[store.s]||{};
-      totalAcc+=(+sd.accTotal||0);
-      totalBoxes+=(+sd.totalBoxes||0);
-    });
-    if(totalBoxes>0){
-      cd.totalBoxes=totalBoxes;
-      if(!cd._manualAccPerBox)cd.accPerBox=totalAcc/totalBoxes;
-    }
   });
 }
 function pRTBDI_Store(file){
@@ -5468,7 +5430,7 @@ function onMgrSheetMonth(){
   const mimPeriodM=getMIMData()?.period;
   if(elbPeriodM===mn)applyELBToMgrSheet();
   if(rtbdiPeriodM===mn)applyRTBDIToMgrSheet();
-  if(mimPeriodM===mn||!mimPeriodM)applyMIMToMgrSheet();
+  if(mimPeriodM===mn)applyMIMToMgrSheet();
   renMgrSheet();
   tst2('Loaded manager data for '+formatPeriod(mn),'ok');
 }
@@ -5476,9 +5438,9 @@ function renMgrSheet(){
   // Only apply upload data if it matches the selected month
   const _msMn2=document.getElementById('mgrSheetMonthIn')?.value||window._mgrSheetCurrentMonth||'';
   const _mep2=getELBData()?.period; const _mrp2=getRTBDIStoreData()?.period; const _mmp2=getMIMData()?.period;
-  if(!_msMn2||_mep2===_msMn2)applyELBToMgrSheet();
-  if(!_msMn2||_mrp2===_msMn2)applyRTBDIToMgrSheet();
-  if(!_msMn2||!_mmp2||_mmp2===_msMn2)applyMIMToMgrSheet();
+  if(_msMn2&&_mep2===_msMn2)applyELBToMgrSheet();
+  if(_msMn2&&_mrp2===_msMn2)applyRTBDIToMgrSheet();
+  if(_msMn2&&_mmp2&&_mmp2===_msMn2)applyMIMToMgrSheet();
   const elbLoaded=!!getELBData();
   const elbObj=getELBData();
   // Update ELB banner if present
@@ -5663,7 +5625,7 @@ function clearMgrPeriod(){
   if(!mn){tst2('Select a month first','er');return;}
   if(!confirm('Clear manager actuals for '+formatPeriod(mn)+'?'))return;
   localStorage.removeItem(getMgrSheetKey(mn));
-  if(window._mgrSheetCurrentMonth===mn)mgrSheetData={};
+  if(window._mgrSheetCurrentMonth===mn){mgrSheetData={};window._mgrSheetCurrentMonth=null;}
   tst2('Manager data for '+formatPeriod(mn)+' cleared','ok');
   renMgrSheet();
 }
@@ -5671,10 +5633,10 @@ function clearBothPeriod(){
   const mn=document.getElementById('clearPeriodPicker')?.value;
   if(!mn){tst2('Select a month first','er');return;}
   if(!confirm('Clear ALL coach and manager actuals for '+formatPeriod(mn)+'?'))return;
-  localStorage.removeItem('wfo_coach_sheet_'+mn);
-  localStorage.removeItem('wfo_mgr_sheet_'+mn);
-  if(window._coachSheetCurrentMonth===mn)coachSheetData={};
-  if(window._mgrSheetCurrentMonth===mn)mgrSheetData={};
+  localStorage.removeItem(getCoachSheetKey(mn));
+  localStorage.removeItem(getMgrSheetKey(mn));
+  if(window._coachSheetCurrentMonth===mn){coachSheetData={};window._coachSheetCurrentMonth=null;}
+  if(window._mgrSheetCurrentMonth===mn){mgrSheetData={};window._mgrSheetCurrentMonth=null;}
   tst2('Coach + Manager data for '+formatPeriod(mn)+' cleared','ok');
   renCoachSheet();renMgrSheet();
 }
@@ -5708,7 +5670,7 @@ function onCoachSheetMonth(){
   const mimPeriod=getMIMData()?.period;
   if(elbPeriod===mn)applyELBToCoachSheet();
   if(rtbdiPeriod===mn)applyRTBDIToCoachSheet();
-  if(mimPeriod===mn||!mimPeriod)applyMIMToCoachSheet();
+  if(mimPeriod===mn)applyMIMToCoachSheet();
   renCoachSheet();
   tst2('Loaded coach data for '+formatPeriod(mn),'ok');
 }
@@ -6577,9 +6539,9 @@ function renCoachSheet(){
   // Only apply upload data if it matches the selected month
   const _csMn2=document.getElementById('coachSheetMonth')?.value||window._coachSheetCurrentMonth||'';
   const _ep2=getELBData()?.period; const _rp2=getRTBDIStoreData()?.period; const _mp2=getMIMData()?.period;
-  if(!_csMn2||_ep2===_csMn2)applyELBToCoachSheet();
-  if(!_csMn2||_rp2===_csMn2)applyRTBDIToCoachSheet();
-  if(!_csMn2||!_mp2||_mp2===_csMn2)applyMIMToCoachSheet();
+  if(_csMn2&&_ep2===_csMn2)applyELBToCoachSheet();
+  if(_csMn2&&_rp2===_csMn2)applyRTBDIToCoachSheet();
+  if(_csMn2&&_mp2&&_mp2===_csMn2)applyMIMToCoachSheet();
   const elbLoaded=!!getELBData();
   const elbObj=getELBData();
   // Update ELB banner
@@ -6599,7 +6561,14 @@ function renCoachSheet(){
     const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
     if(!stores.length)return'';
 
-    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    // MIM: prefer monthly coach MIM payout data, then rep-level
+    const _shMn=document.getElementById('coachSheetMonth')?.value||window._coachSheetCurrentMonth||'';
+    const _shMimData=_shMn?getCoachMimPayData(_shMn):null;
+    const mimFromMonthlySheet=_shMimData?stores.reduce((sum,s)=>{
+      const sd=_shMimData.stores?.[s.s];
+      return sum+(sd?(sd.overrideOrders??sd.orders??0):0);
+    },0):0;
+    const mimBans=mimFromMonthlySheet||reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
     const mimSpiff=mimBans*ct.mimRate;
 
     // Calculate per-store bonuses
