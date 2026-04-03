@@ -3934,30 +3934,39 @@ function renCoachPayout(){
   const ct=T.coach||DT.coach;
 
   // ── Load coach sheet data for bonus month ──
+  // bsd = manual entries saved for this period only
   let bsd={};
   try{bsd=JSON.parse(localStorage.getItem('wfo_coach_sheet_'+bonusMn)||'{}');}catch{}
-  // Apply uploads if matching period
+
+  // Strip any upload-sourced fields that may have been baked into the saved sheet
+  // These must come fresh from uploads to prevent bleed
+  const _uploadFields=['elbRank','actPct','actActual','actTarget','accTotal','totalBoxes'];
+  stores.forEach(s=>{if(bsd[s.s])_uploadFields.forEach(f=>delete bsd[s.s][f]);});
+
+  // Overlay ELB data ONLY if upload period matches selected bonus month
   const elbPeriod=getELBData()?.period;
   const rtbdiPeriod=getRTBDIStoreData()?.period;
-  if(elbPeriod===bonusMn)applyELBToCoachSheet();
-  if(rtbdiPeriod===bonusMn)applyRTBDIToCoachSheet();
-  // Merge: uploaded data takes priority for matching period
-  stores.forEach(s=>{
-    if(!bsd[s.s])bsd[s.s]={};
-    const live=coachSheetData[s.s]||{};
-    // Apply live data fields selectively based on which upload matches
-    if(elbPeriod===bonusMn){
-      if(live.actPct!==undefined)bsd[s.s].actPct=live.actPct;
-      if(live.elbRank)bsd[s.s].elbRank=live.elbRank;
-      if(live.actActual)bsd[s.s].actActual=live.actActual;
-    }
-    if(rtbdiPeriod===bonusMn){
-      if(live.accTotal!==undefined)bsd[s.s].accTotal=live.accTotal;
-      if(live.totalBoxes)bsd[s.s].totalBoxes=live.totalBoxes;
-    }
-    // Always merge manually-entered data from saved period
-    // (manual entries are in bsd already from localStorage load)
-  });
+  if(elbPeriod===bonusMn){
+    const elbData=getELBData()?.data||{};
+    stores.forEach(s=>{
+      const ed=elbData[s.s];if(!ed)return;
+      if(!bsd[s.s])bsd[s.s]={};
+      if(ed.actPct!==undefined)bsd[s.s].actPct=ed.actPct;
+      if(ed.elbRank)bsd[s.s].elbRank=ed.elbRank;
+      if(ed.actActual)bsd[s.s].actActual=ed.actActual;
+      if(ed.actTarget)bsd[s.s].actTarget=ed.actTarget;
+    });
+  }
+  if(rtbdiPeriod===bonusMn){
+    const rtbdiData=getRTBDIStoreData()?.data||{};
+    stores.forEach(s=>{
+      const rd=rtbdiData[s.s];if(!rd)return;
+      if(!bsd[s.s])bsd[s.s]={};
+      if(rd.accTotal!==undefined)bsd[s.s].accTotal=rd.accTotal;
+      if(rd.ppd)bsd[s.s].totalBoxes=rd.ppd;
+      else if(rd.boxes)bsd[s.s].totalBoxes=rd.boxes;
+    });
+  }
 
   // ── STORE BONUS TABLE ──
   const bonusLabel=document.getElementById('cpBonusPeriodLabel');
@@ -5694,8 +5703,17 @@ function loadCoachSheetForPeriod(mn){
   if(!mn)return;
   try{
     const saved=JSON.parse(localStorage.getItem(getCoachSheetKey(mn))||'null');
-    if(saved)coachSheetData=saved;
-    else coachSheetData={};
+    if(saved){
+      coachSheetData=saved;
+      // Strip upload-sourced fields — they must come fresh from period-matched uploads
+      // to prevent data from one month bleeding into another
+      const _upFields=['elbRank','actPct','actActual','actTarget','accTotal','totalBoxes'];
+      Object.keys(coachSheetData).forEach(key=>{
+        if(coachSheetData[key]&&typeof coachSheetData[key]==='object'){
+          _upFields.forEach(f=>delete coachSheetData[key][f]);
+        }
+      });
+    }else coachSheetData={};
   }catch{coachSheetData={};}
 }
 function onCoachSheetMonth(){
@@ -5728,8 +5746,16 @@ function loadMgrSheetForPeriod(mn){
   if(!mn)return;
   try{
     const saved=JSON.parse(localStorage.getItem(getMgrSheetKey(mn))||'null');
-    if(saved)mgrSheetData=saved;
-    else mgrSheetData={};
+    if(saved){
+      mgrSheetData=saved;
+      // Strip upload-sourced fields to prevent bleed
+      const _mUpFields=['acts','bts','hsi','attach','elb','acc'];
+      Object.keys(mgrSheetData).forEach(key=>{
+        if(mgrSheetData[key]&&typeof mgrSheetData[key]==='object'){
+          _mUpFields.forEach(f=>delete mgrSheetData[key][f]);
+        }
+      });
+    }else mgrSheetData={};
   }catch{mgrSheetData={};}
 }
 
