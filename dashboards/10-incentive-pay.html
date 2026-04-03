@@ -825,7 +825,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
         
         <div class="spiff-ban" id="spb"><div class="spiff-ban-t">⚡ Active Spiffs This Week — Stack on All Payouts</div><div class="spiff-pills" id="spp"></div></div>
-        <div class="emp" id="re"><div class="emp-ic">📂</div><div class="emp-t">Drop CSV files above to get started</div><div class="emp-s">Upload RTPOS and Metro exports. All calculations are automatic.</div><div style="margin-top:14px"><button class="btn bp" onclick="requirePin(loadSmp)">▶ Load Sample Data</button></div></div>
+        <div class="emp" id="re"><div class="emp-ic">📂</div><div class="emp-t">Drop CSV files above to get started</div><div class="emp-s">Upload RTPOS CSV and MIM Report. All calculations are automatic.</div><div style="margin-top:14px"><button class="btn bp" onclick="requirePin(loadSmp)">▶ Load Sample Data</button></div></div>
         <div id="rw" style="display:none">
           <div style="font-size:11px;color:var(--mu);margin-bottom:6px;font-style:italic">💡 Click any row to edit — requires Admin PIN</div>
           <div class="srch-bar">
@@ -1833,17 +1833,7 @@ body.page-pg-assign .week-bar{display:none!important;}
                 </div>
                 <div class="dz-fn" id="fnR" style="margin-top:4px;font-size:11px;color:var(--ok)"></div>
               </div>
-              <!-- METRO REPS -->
-              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
-                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">📡 Metro CSV — Reps</div>
-                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Activations, upgrades from Metro Power BI</div>
-                <div class="dz" id="dzM" ondragover="dzo(event,'dzM')" ondragleave="dzl('dzM')" ondrop="requirePin(()=>dzd(event,'metro'))">
-                  <input type="file" accept=".csv,.txt" onchange="requirePin(()=>dzfs(event,'metro'))"/>
-                  <div class="dz-ic">📂</div>
-                  <div class="dz-txt">Drop Metro CSV or click</div>
-                </div>
-                <div class="dz-fn" id="fnM" style="margin-top:4px;font-size:11px;color:var(--ok)"></div>
-              </div>
+
               <!-- METRO ELB -->
               <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo);border-left:3px solid var(--pr)">
                 <div style="font-weight:700;font-size:13px;color:var(--pr);margin-bottom:4px">📊 Metro ELB Report <span style="font-size:10px;font-weight:400;color:var(--mu)">→ Auto-fills Coach ELB Rank + Act%</span></div>
@@ -2974,66 +2964,77 @@ function matchRTBDIStore(extracted){
 }
 
 function parseRTBDIStore(html, fname){
-  // Parse HTML table
+  // The Metro KPI By Market report uses a cumulative HTML table structure:
+  // Each row contains ALL headers repeated + ALL stores seen so far
+  // Row N = headers + store_1 + store_2 + ... + store_N
+  // So we scan ALL cells in ALL rows for EL##### store name pattern
+  // and extract data at fixed offsets relative to that cell
+  //
+  // Column offsets from Store Name cell:
+  //  -1 = SAP ID (before store name)
+  //   0 = Store Name (EL#####-STATE-NAME)
+  //  +1 = Hours
+  //  +2 = Boxes
+  //  +3 = New All
+  //  +4 = New Voice (No BTS)
+  //  +5 = Upg
+  //  +6 = React
+  //  +7 = PPD
+  //  +8 = Box/Hr
+  //  +9 = Acc $
+  //  +10 = Acc Qty
+  //  +11 = Acc/PPD
+  //  +12 = Acc/Box
+
   const div=document.createElement('div');
   div.innerHTML=html;
-  const cells=[];
+
+  const parseNum=v=>{
+    if(!v)return 0;
+    return +(v.replace(/[$,\s%]/g,'').trim())||0;
+  };
+
+  const storeMap={};  // raw store name → data (deduped)
+
   div.querySelectorAll('tr').forEach(tr=>{
-    const row=[];
-    tr.querySelectorAll('td,th').forEach(td=>row.push(td.textContent.trim()));
-    if(row.some(c=>c))cells.push(row);
+    const cells=Array.from(tr.querySelectorAll('td,th')).map(td=>td.textContent.trim());
+    cells.forEach((cell,i)=>{
+      if(!/EL\d+/i.test(cell))return;  // not a store name cell
+      // Extract at fixed offsets
+      const get=offset=>{
+        const idx=i+offset;
+        return(idx>=0&&idx<cells.length)?cells[idx]:'';
+      };
+      const storeName=cell;
+      if(storeMap[storeName])return;  // already have this store
+
+      storeMap[storeName]={
+        boxes    : parseNum(get(2)),   // Boxes
+        ppd      : parseNum(get(7)),   // PPD = total activations
+        accTotal : parseNum(get(9)),   // Acc $ (net)
+        bts      : parseNum(get(26)),  // BTS (offset from store name)
+        hint     : parseNum(get(29)),  // HINT
+      };
+    });
   });
 
-  // Find header row - look for "Store ID" and "Acc $"
-  let hdrRow=-1,storeCol=-1,accCol=-1,boxCol=-1,ppdCol=-1,btsCol=-1,hintCol=-1;
-  for(let i=0;i<cells.length;i++){
-    const r=cells[i];
-    const si=r.findIndex(c=>/store.?id/i.test(c));
-    const ai=r.findIndex(c=>/acc\s*\$/i.test(c));
-    if(si>=0&&ai>=0){
-      hdrRow=i;
-      storeCol=si;
-      accCol=ai;
-      boxCol=r.findIndex(c=>/^boxes$/i.test(c));
-      ppdCol=r.findIndex(c=>/^ppd$/i.test(c));
-      btsCol=r.findIndex(c=>/^bts$/i.test(c));
-      hintCol=r.findIndex(c=>/^hint$/i.test(c));
-      break;
-    }
-  }
-
-  if(hdrRow<0){tst2('Cannot find Store ID or Acc $ columns in RTBDI report','er');return;}
-  console.log('RTBDI cols: store='+storeCol+' acc='+accCol+' box='+boxCol+' ppd='+ppdCol);
+  console.log('RTBDI: found '+Object.keys(storeMap).length+' unique stores');
 
   const rtbdiData={};
-  let matched=0;const unmatched=[];
+  let matched=0;
+  const unmatched=[];
 
-  for(let i=hdrRow+1;i<cells.length;i++){
-    const row=cells[i];
-    const rawStore=row[storeCol]||'';
-    if(!rawStore.match(/EL\d+/i))continue; // skip non-store rows
-
+  Object.entries(storeMap).forEach(([rawStore,data])=>{
     const extracted=extractRTBDIStoreName(rawStore);
     const storeName=matchRTBDIStore(extracted);
-    if(!storeName){if(extracted)unmatched.push(extracted);continue;}
-
-    const parseNum=v=>{
-      if(!v)return 0;
-      return +(v.replace(/[$,\s]/g,'').trim())||0;
-    };
-
-    rtbdiData[storeName]={
-      accTotal : accCol>=0?parseNum(row[accCol]):0,
-      boxes    : boxCol>=0?parseNum(row[boxCol]):0,
-      ppd      : ppdCol>=0?parseNum(row[ppdCol]):0,
-      bts      : btsCol>=0?parseNum(row[btsCol]):0,
-      hint     : hintCol>=0?parseNum(row[hintCol]):0,
-    };
+    if(!storeName){if(extracted)unmatched.push(extracted);return;}
+    rtbdiData[storeName]=data;
     matched++;
-  }
+  });
 
   localStorage.setItem('wfo_rtbdi_store',JSON.stringify({
-    data:rtbdiData,loadedAt:new Date().toLocaleString(),fname,matched,unmatched:unmatched.slice(0,20)
+    data:rtbdiData, fname, matched,
+    unmatched:unmatched.slice(0,20)
   }));
 
   const saveRTBDIWithPeriod=(period)=>{
@@ -3043,17 +3044,20 @@ function parseRTBDIStore(html, fname){
     applyRTBDIToCoachSheet();
     const fnEl=document.getElementById('fnRTBDIStore');
     if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+period;
-    tst2('RTBDI store report saved for '+period+' — '+matched+' stores','ok');
+    tst2('RTBDI store report saved for '+period+' — '+matched+' stores → Acc $ + PPD auto-filled','ok');
     const cs=document.getElementById('coachSheetSections');
     if(cs&&cs.innerHTML.trim())renCoachSheet();
   };
-  if(unmatched.length)console.warn('RTBDI unmatched stores:',unmatched);
+
+  if(unmatched.length)console.warn('RTBDI unmatched:',unmatched);
+
   showPeriodConfirm({
     fname, count:matched, type:'rtbdi',
     defaultPeriod:defaultMonth(),
     onConfirm:saveRTBDIWithPeriod
   });
 }
+
 
 function getRTBDIStoreData(){
   try{return JSON.parse(localStorage.getItem('wfo_rtbdi_store')||'null');}catch{return null;}
