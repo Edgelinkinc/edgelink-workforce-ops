@@ -1041,6 +1041,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('coach','mim',this)">📱 MIM Spiffs</button>
+      <button class="sub-tab" onclick="swSub('coach','mimpay',this)">💵 Coach MIM Payout</button>
       <button class="sub-tab" onclick="swSub('coach','structure',this)">📋 Bonus Structure</button>
     </div>
     <div class="sub-pane active" id="coach-overview">
@@ -1094,7 +1095,75 @@ body.page-pg-assign .week-bar{display:none!important;}
         <div id="coachSheetSections"></div>
       </div></div>
     </div>
-    <div class="sub-pane" id="coach-structure">
+    <div class="sub-pane" <div class="sub-pane" id="coach-mimpay">
+
+      <!-- UPLOAD INSTRUCTIONS BANNER -->
+      <div style="background:linear-gradient(135deg,#E8F5E9,#F3E8FF);border:1px solid var(--ok);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start">
+        <span style="font-size:28px;flex-shrink:0">📂</span>
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:var(--se);margin-bottom:6px">What to Upload for Coach MIM Payout</div>
+          <div style="font-size:12px;color:var(--tx);line-height:1.8">
+            <strong>1. MIM Report (Coach Period)</strong> — Metro portal → MIM report → export CSV<br>
+            &nbsp;&nbsp;&nbsp;• Must include: <code>Store Name</code>, <code>Employee Name</code>, <code>Orders</code> columns<br>
+            &nbsp;&nbsp;&nbsp;• Store rows have <code>Employee Name = "Total"</code> — that's the store BAN count<br>
+            <strong>2. Upload below</strong> — separate from the weekly rep MIM upload<br>
+            <strong>3. Set the month</strong> → verify per-store BANs → lock &amp; export when paid
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS ROW -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="fi" style="min-width:160px">
+          <label>Coach MIM Month</label>
+          <input type="month" id="coachMimPayMonth" onchange="onCoachMimPayMonth()"/>
+        </div>
+        <!-- UPLOAD -->
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:200px">
+          <label style="font-size:11px;font-weight:700;color:var(--mu)">MIM Report (Coach Period)</label>
+          <label style="cursor:pointer">
+            <input type="file" accept=".csv,.txt" style="display:none" onchange="requirePin(()=>pMIMCoach(this.files[0]))"/>
+            <div class="btn bok sm">⬆ Upload Coach MIM Report</div>
+          </label>
+          <div id="fnMIMCoach" style="font-size:11px;color:var(--ok)"></div>
+        </div>
+        <!-- RATE -->
+        <div class="fi" style="min-width:120px">
+          <label>Rate ($/BAN)</label>
+          <input type="number" id="coachMimPayRate" value="10" min="0" step="0.5" onchange="renCoachMimPay()"/>
+        </div>
+        <!-- LOCK STATUS -->
+        <div style="display:flex;align-items:center;gap:8px;margin-top:16px">
+          <div class="lk-dot open" id="coachMimPayDot"></div>
+          <span class="lk-lbl" id="coachMimPayLbl" style="font-size:13px;font-weight:700">Unlocked</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn bok sm" id="coachMimPayLkBtn" onclick="requirePin(toggleCoachMimPayLock)">🔒 Lock &amp; Mark Paid</button>
+          <button class="btn bo sm" onclick="expCoachMimPayCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+
+      <!-- SUMMARY STRIP -->
+      <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px">
+        <div class="kc"><div class="kl">Total Coaches</div><div class="kv" id="cmpTotalCoaches">—</div></div>
+        <div class="kc kcp"><div class="kl">Total BANs</div><div class="kv" id="cmpTotalBans">—</div></div>
+        <div class="kc kcg"><div class="kl">Total MIM Payout</div><div class="kv" id="cmpTotalPayout">—</div></div>
+        <div class="kc kct"><div class="kl">Avg BANs/Store</div><div class="kv" id="cmpAvgBans">—</div></div>
+        <div class="kc kcw"><div class="kl">Month</div><div class="kv" id="cmpMonth" style="font-size:13px">—</div></div>
+      </div>
+
+      <!-- PER-COACH TABLE -->
+      <div id="coachMimPayBody">
+        <div style="text-align:center;padding:40px;color:var(--mu)">
+          <div style="font-size:36px;margin-bottom:10px">📱</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--se);margin-bottom:6px">No Coach MIM data loaded</div>
+          <div style="font-size:13px">Upload the MIM Report above and set the month</div>
+        </div>
+      </div>
+
+    </div><!-- /coach-mimpay -->
+
+    id="coach-structure">
       <div id="coachFlyerInline"></div>
     </div>
     <div class="sub-pane" id="coach-mim">
@@ -2204,6 +2273,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const _lm=new Date(_n.getFullYear(),_n.getMonth()-1,1);
   const _mn=_lm.getFullYear()+'-'+(String(_lm.getMonth()+1).padStart(2,'0'));
   const csm=document.getElementById('coachSheetMonth');if(csm&&!csm.value)csm.value=_mn;
+  const cmp=document.getElementById('coachMimPayMonth');if(cmp&&!cmp.value)cmp.value=_mn;
   const msm=document.getElementById('mgrSheetMonthIn');if(msm&&!msm.value)msm.value=_mn;
   // Also set admin lock month pickers
   const aml=document.getElementById('adminMgrLockMonth');if(aml&&!aml.value)aml.value=_mn;
@@ -2304,6 +2374,9 @@ function swSub(prefix,id,btn){
     if(el) renCoachFlyerTo(el);
   }
   if(id==="mim"&&prefix==="coach")renCoachMim();
+  if(id==="mimpay"&&prefix==="coach")renCoachMimPay();
+  if(id==="mimpay"&&prefix==="coach")renCoachMimPay();
+  if(id==="mimpay"&&prefix==="coach"){renCoachMimPay();}
 }
 
 // ── WEEK ──
@@ -2483,7 +2556,7 @@ function renCoachMim(){
       <td style="padding:4px 8px">
         <input type="number" value="${override||''}" placeholder="Override $" min="0" step="0.01"
           style="width:100px;padding:5px 8px;border:2px solid ${hasOv?'var(--wa)':'var(--bo)'};border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;outline:none"
-          onchange="requirePin(()=>{localStorage.setItem('coachMimOv_'+\`${coach.replace(/\s+/g,'_')}\`,this.value||0);renCoachMim();})"
+          onchange="requirePin(()=>{localStorage.setItem('coachMimOv_'+(coach||'').replace(/\\s+/g,'_'),this.value||0);renCoachMim();})"
           onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='${hasOv?'var(--wa)':'var(--bo)'}'"/>
         ${hasOv?`<div style="font-size:9px;color:var(--wa)">⚠ Overridden</div>`:''}
       </td>
@@ -3127,6 +3200,279 @@ function applyMIMToCoachSheet(){
     coachSheetData[storeName].mimOrders=d.orders||0;
     coachSheetData[storeName].eligBans=d.eligBans||0;
   });
+}
+
+
+// ══════════════════════════════════════════════════════
+// COACH MIM PAYOUT SHEET
+// Separate monthly period from rep weekly MIM
+// Uses its own MIM report upload → pMIMCoach()
+// Storage: wfo_coach_mim_pay_{YYYY-MM}
+// ══════════════════════════════════════════════════════
+
+let coachMimPayLocked = false;
+
+function pMIMCoach(file){
+  const fnEl=document.getElementById('fnMIMCoach');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseMIMCoach(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read coach MIM file','er');
+  rd.readAsText(file);
+}
+
+function parseMIMCoach(txt, fname){
+  const lines=txt.trim().split('\n');
+  if(lines.length<2){tst2('Coach MIM file appears empty','er');return;}
+
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+
+  const fc=(...names)=>hdr.findIndex(c=>names.some(n=>c.toLowerCase().replace(/\s/g,'').includes(n.toLowerCase().replace(/\s/g,''))));
+  const storeNameI = fc('Store Name','storename');
+  const empNameI   = fc('Employee Name','employeename');
+  const ordersI    = fc('Orders');
+
+  if(storeNameI<0||ordersI<0){
+    tst2('Cannot find Store Name or Orders columns','er');
+    console.log('Headers:',hdr);
+    return;
+  }
+
+  const idMap={};
+  SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+
+  // Collect store-level orders (Employee Name = "Total" rows)
+  const storeOrders={};  // storeName → orders
+  let matched=0;const unmatched=[];
+
+  for(let i=1;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<2)continue;
+    const rawStore=(cols[storeNameI]||'').replace(/"/g,'').trim();
+    const rawEmp=empNameI>=0?(cols[empNameI]||'').replace(/"/g,'').trim():'';
+    if(!rawStore||rawEmp!=='Total')continue;
+
+    const storeIdM=rawStore.match(/^(\d{7,8})/);
+    if(!storeIdM)continue;
+    const storeName=idMap[storeIdM[1]]||idMap[String(+storeIdM[1])]||null;
+    if(!storeName){unmatched.push(storeIdM[1]);continue;}
+
+    const orders=+(cols[ordersI]||'').replace(/[",]/g,'')||0;
+    storeOrders[storeName]=orders;
+    matched++;
+  }
+
+  // Save raw store orders for this coach MIM period
+  const mn=document.getElementById('coachMimPayMonth')?.value||
+    new Date().toISOString().slice(0,7);
+
+  const existing=getCoachMimPayData(mn)||{stores:{},locked:false};
+  // Merge — preserve manual overrides
+  Object.entries(storeOrders).forEach(([store,orders])=>{
+    if(!existing.stores[store])existing.stores[store]={orders,overrideOrders:null};
+    else existing.stores[store].orders=orders;
+  });
+  existing.fname=fname;
+  existing.loadedAt=new Date().toLocaleString();
+  existing.matched=matched;
+
+  saveCoachMimPayData(mn,existing);
+
+  const fnEl=document.getElementById('fnMIMCoach');
+  if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores matched'+(unmatched.length?' ('+unmatched.length+' unmatched)':'');
+  if(unmatched.length)console.warn('Coach MIM unmatched:',unmatched);
+  tst2('Coach MIM report loaded — '+matched+' stores','ok');
+  renCoachMimPay();
+}
+
+function getCoachMimPayData(month){
+  try{return JSON.parse(localStorage.getItem('wfo_coach_mim_pay_'+month)||'null');}catch{return null;}
+}
+function saveCoachMimPayData(month,data){
+  localStorage.setItem('wfo_coach_mim_pay_'+month,JSON.stringify(data));
+}
+
+function onCoachMimPayMonth(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  if(!mn)return;
+  const data=getCoachMimPayData(mn);
+  coachMimPayLocked=data?.locked||false;
+  updCoachMimPayLock();
+  renCoachMimPay();
+}
+
+function renCoachMimPay(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  const rate=+document.getElementById('coachMimPayRate')?.value||10;
+  const body=document.getElementById('coachMimPayBody');
+  if(!body)return;
+
+  // Update month display
+  const mnEl=document.getElementById('cmpMonth');
+  if(mnEl)mnEl.textContent=mn||'—';
+
+  if(!mn){
+    body.innerHTML='<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:36px">📅</div><div style="margin-top:10px;font-weight:700;color:var(--se)">Select a month above</div></div>';
+    return;
+  }
+
+  const data=getCoachMimPayData(mn);
+  if(!data||!Object.keys(data.stores||{}).length){
+    body.innerHTML=`<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--se);margin-bottom:6px">No data for ${mn}</div><div style="font-size:13px">Upload the Coach MIM Report above</div></div>`;
+    return;
+  }
+
+  const srBs=getSR_BS();
+  let totalBans=0,totalPayout=0,totalStores=0;
+
+  // Group stores by coach
+  const byCoach={};
+  COACHES.forEach(c=>{byCoach[c]={stores:[],totalBans:0,totalPayout:0};});
+
+  SR.forEach(store=>{
+    const coach=srBs[store.s]?.coach||store.c||'TBD';
+    const sd=data.stores[store.s];
+    if(!sd)return;
+    const bans=sd.overrideOrders??sd.orders??0;
+    const payout=bans*rate;
+    if(!byCoach[coach])byCoach[coach]={stores:[],totalBans:0,totalPayout:0};
+    byCoach[coach].stores.push({storeName:store.s,bans,payout,orders:sd.orders,overrideOrders:sd.overrideOrders,mgr:srBs[store.s]?.mgr||store.mgr});
+    byCoach[coach].totalBans+=bans;
+    byCoach[coach].totalPayout+=payout;
+    totalBans+=bans;totalPayout+=payout;totalStores++;
+  });
+
+  // Update summary
+  const u=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  u('cmpTotalCoaches',COACHES.length);
+  u('cmpTotalBans',totalBans);
+  u('cmpTotalPayout','$'+totalPayout.toFixed(2));
+  u('cmpAvgBans',totalStores?(totalBans/totalStores).toFixed(1):'—');
+
+  const locked=coachMimPayLocked;
+
+  body.innerHTML=COACHES.map(coach=>{
+    const cg=byCoach[coach];
+    if(!cg||!cg.stores.length)return'';
+    return`<div style="margin-bottom:20px;border:1px solid var(--bo);border-radius:12px;overflow:hidden">
+      <!-- COACH HEADER -->
+      <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">${coach}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${cg.stores.length} stores · ${cg.totalBans} BANs</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em">MIM Payout</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:#fff">$${cg.totalPayout.toFixed(2)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.65)">${cg.totalBans} BANs × $${rate}/BAN</div>
+        </div>
+      </div>
+      <!-- STORE ROWS -->
+      <div class="tw">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--thb)">
+            <th style="padding:7px 12px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Store</th>
+            <th style="padding:7px 10px;text-align:left;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Manager</th>
+            <th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">BANs (Report)</th>
+            <th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr)">Override ✎</th>
+            <th style="padding:7px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">BANs Used</th>
+            <th style="padding:7px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:700;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr)">Payout</th>
+          </tr></thead>
+          <tbody>
+            ${cg.stores.map((s,si)=>`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}">
+              <td style="padding:7px 12px;font-weight:700;color:var(--se);font-size:12px">${X(s.storeName)}</td>
+              <td style="padding:7px 10px;font-size:11px;color:var(--mu)">${X(s.mgr==='TBD'?'—':s.mgr)}</td>
+              <td style="padding:7px 10px;text-align:center;font-weight:700">${s.orders??'—'}</td>
+              <td style="padding:4px 8px;text-align:center">
+                ${locked?
+                  `<span style="font-size:12px;color:var(--mu)">${s.overrideOrders??'—'}</span>`:
+                  `<input type="number" value="${s.overrideOrders??''}" placeholder="—" min="0"
+                    style="width:70px;padding:4px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;font-family:'Nunito',sans-serif;outline:none;text-align:center"
+                    onchange="setCoachMimOverride('${mn}','${s.storeName}',this.value)"
+                    onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>`
+                }
+              </td>
+              <td style="padding:7px 10px;text-align:center;font-weight:800;color:var(--se)">${s.bans}</td>
+              <td style="padding:7px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;color:var(--ok)">$${s.payout.toFixed(2)}</td>
+            </tr>`).join('')}
+            <tr style="background:linear-gradient(135deg,var(--dk),var(--se))">
+              <td colspan="4" style="padding:9px 12px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#fff">${coach} Total</td>
+              <td style="padding:9px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:800;color:#fff">${cg.totalBans}</td>
+              <td style="padding:9px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">$${cg.totalPayout.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setCoachMimOverride(mn,storeName,val){
+  const data=getCoachMimPayData(mn);
+  if(!data||!data.stores[storeName])return;
+  data.stores[storeName].overrideOrders=val===''||val===null?null:+val;
+  saveCoachMimPayData(mn,data);
+  renCoachMimPay();
+}
+
+function toggleCoachMimPayLock(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  if(!mn){tst2('Select a month first','er');return;}
+  const data=getCoachMimPayData(mn)||{stores:{},locked:false};
+  if(coachMimPayLocked){
+    if(!confirm('Unlock coach MIM for '+mn+' to make corrections?'))return;
+    coachMimPayLocked=false;
+    data.locked=false;
+    data.unlockedAt=new Date().toLocaleString();
+    tst2('Coach MIM unlocked','ok');
+  } else {
+    if(!confirm('Lock coach MIM payout for '+mn+'? This marks it as paid.'))return;
+    coachMimPayLocked=true;
+    data.locked=true;
+    data.lockedAt=new Date().toLocaleString();
+    tst2('Coach MIM locked & marked paid ✅','ok');
+  }
+  saveCoachMimPayData(mn,data);
+  updCoachMimPayLock();
+  renCoachMimPay();
+}
+
+function updCoachMimPayLock(){
+  const dot=document.getElementById('coachMimPayDot');
+  const lbl=document.getElementById('coachMimPayLbl');
+  const btn=document.getElementById('coachMimPayLkBtn');
+  if(dot)dot.className='lk-dot'+(coachMimPayLocked?' locked':' open');
+  if(lbl){lbl.className='lk-lbl'+(coachMimPayLocked?' locked':' open');lbl.textContent=coachMimPayLocked?'Locked — Paid':'Unlocked';}
+  if(btn){btn.textContent=coachMimPayLocked?'🔓 Unlock':'🔒 Lock & Mark Paid';btn.className=coachMimPayLocked?'btn bd sm':'btn bok sm';}
+}
+
+function expCoachMimPayCSV(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  const rate=+document.getElementById('coachMimPayRate')?.value||10;
+  if(!mn){tst2('Select a month first','er');return;}
+  const data=getCoachMimPayData(mn);
+  if(!data||!Object.keys(data.stores||{}).length){tst2('No data to export','wn');return;}
+  const srBs=getSR_BS();
+  const hd=['Coach','Store','Manager','BANs (Report)','BANs (Override)','BANs Used','Rate $','MIM Payout $','Month','Status'];
+  const rows=[];
+  COACHES.forEach(coach=>{
+    SR.forEach(store=>{
+      const storeCoach=srBs[store.s]?.coach||store.c;
+      if(storeCoach!==coach)return;
+      const sd=data.stores[store.s];
+      if(!sd)return;
+      const bans=sd.overrideOrders??sd.orders??0;
+      rows.push([coach,store.s,srBs[store.s]?.mgr||store.mgr,sd.orders??'',sd.overrideOrders??'',bans,rate,(bans*rate).toFixed(2),mn,data.locked?'Paid':'Open']);
+    });
+    // Coach total row
+    const coachStores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+    const coachBans=coachStores.reduce((sum,s)=>{const sd=data.stores[s.s];return sum+(sd?(sd.overrideOrders??sd.orders??0):0);},0);
+    if(coachBans>0)rows.push([coach,'— TOTAL —','','',' ',coachBans,rate,(coachBans*rate).toFixed(2),mn,'']);
+  });
+  dlC([hd,...rows],'WFO_CoachMIM_'+mn+'.csv');
+  tst2('Coach MIM CSV exported','ok');
 }
 
 // ── CSV UPLOAD ──
