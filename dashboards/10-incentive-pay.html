@@ -1076,7 +1076,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       </div>
       <div class="card-body">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-          <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth"/></div>
+          <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth" onchange="onCoachSheetMonth()"/></div>
           <div class="fi" style="min-width:160px"><label>Company Acc Total ($)</label><input type="number" id="coachSheetCoAcc" placeholder="e.g. 310000" min="0" onchange="renCoachSheet()"/></div>
           
         <div id="coachSheetStatus" style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
@@ -4004,7 +4004,7 @@ function calcMgrBonus(storeName, sd){
   const bs=getBacksheet(store.tier);
   const T2=T.mgr||DT.mgr;
   const elbRank=+sd.elb||0;
-  const elbDQ=elbRank>0&&elbRank>=(T2.elbCutoff||3368);
+  const elbDQ=elbRank>0&&elbRank>=(T.elbDQ||DT.elbDQ||3368);
   const protPct=+sd.attach||0;
   const protPen=protPct>0&&protPct<(T2.protThresh||60);
 
@@ -5384,7 +5384,6 @@ function loadMgrSheetForPeriod(mn){
 
 function setCoachSheet(coach,field,val){
   if(!_pinUnlocked){tst2('Enter PIN in Admin Center to edit.','wn');return;}
-  if(wkLocked){tst2('Period is locked.','wn');return;}
   if(!coachSheetData[coach])coachSheetData[coach]={};
   coachSheetData[coach][field]=val;
   clearTimeout(window._coachSheetTimer);
@@ -6185,7 +6184,8 @@ function expStoreRoster(){
 function calcStoreCoachBonus(storeName, sd){
   const ct=T.coach||DT.coach;
   const elbRank=+sd.elbRank||0;
-  const elbBottom40=elbRank>0&&elbRank>=3368;
+  const elbCutoff=(T.elbDQ||DT.elbDQ||3368);
+  const elbBottom40=elbRank>0&&elbRank>=elbCutoff;
   let actBonus=0, accBonus=0;
   const guardrails=[];
   const actPct=+sd.actPct||0;
