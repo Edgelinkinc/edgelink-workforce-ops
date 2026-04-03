@@ -2882,6 +2882,7 @@ function confirmPeriodAndSave(){
   window._periodConfirmCb=null;
 }
 function defaultMonth(){const n=new Date(),lm=new Date(n.getFullYear(),n.getMonth()-1,1);return lm.getFullYear()+'-'+(String(lm.getMonth()+1).padStart(2,'0'));}
+function defaultMonthCurrent(){const n=new Date();return n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}
 function formatPeriod(p){if(!p)return'—';if(p.match(/^\d{4}-\d{2}$/)){const[y,m]=p.split('-');const d=new Date(+y,+m-1,1);return d.toLocaleDateString('en-US',{month:'long',year:'numeric'});}if(p.match(/^\d{4}-\d{2}-\d{2}$/)){const d=new Date(p+'T12:00:00');const e=new Date(d);e.setDate(e.getDate()+6);return'Week of '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}return p;}
 function defaultWeek(){const t=new Date(),d=t.getDay();const tm=new Date(t);tm.setDate(t.getDate()-d+(d===0?-6:1));const lm=new Date(tm);lm.setDate(tm.getDate()-7);return lm.toISOString().split('T')[0];}
 
@@ -2954,7 +2955,7 @@ function generateMgrSlipPDF(storeName){
   if(!store)return;
   const sd=mgrSheetData[storeName]||{};
   const elb=getELBData()?.data?.[storeName]||{};
-  const bs=getBacksheet(store.tier);
+  const bs=getBacksheet(store.tier, storeName);
   const period=mn?formatPeriod(mn):'—';
 
   // Calc payout
@@ -3064,8 +3065,17 @@ function calcMgrBonus(storeName, sd){
     </tr>`;
   }).join('');
 
+  // Manager MIM spiff (if enabled in backsheet)
+  const mn=document.getElementById('mgrSheetMonthIn')?.value||new Date().toISOString().slice(0,7);
+  const mimCfg=getMgrMimForStore(storeName, mn);
+  const mgrMimOrders=+sd.mimOrders||0;
+  const mgrMimSpiff=mimCfg.enabled&&mgrMimOrders>0?mgrMimOrders*mimCfg.rate:0;
+  if(mgrMimSpiff>0)notes.push('📱 MIM Spiff: '+mgrMimOrders+' BANs × $'+mimCfg.rate+' = $'+mgrMimSpiff.toFixed(2));
+
   return{
-    total:totalEarned,
+    total:totalEarned+mgrMimSpiff,
+    bonusOnly:totalEarned,
+    mgrMimSpiff,
     actsEarned:earned[0]||0,
     btsEarned:earned[1]||0,
     hsiEarned:earned[2]||0,
@@ -3104,20 +3114,22 @@ function upK(){
 // ══════════════════════════════════════════════════════
 
 // ── BACKSHEET ACCESSOR ──
-function getBacksheet(tier){
-  // Returns the current month's backsheet categories filtered for a tier
-  // tier: 1, 2, or 3
+function getBacksheet(tier, storeName){
+  // Returns the current month's backsheet data for a tier + optional store
   const month=document.getElementById('mgrSheetMonthIn')?.value||
     document.getElementById('bsMonth')?.value||
     new Date().toISOString().slice(0,7);
   const bs=getOrCreateBs(month);
   const tKey=tier===1?'t1':tier===2?'t2':'t3';
   const uKey=tKey+'up'; const bKey=tKey+'base';
-  // Build a flat object: {actsTarget, actsBase, actsUpside, btsTarget...}
   const result={qualifiers:bs.qualifiers,targets:bs.targets||{},categories:bs.categories};
   bs.categories.forEach(cat=>{
     result[cat.id+'Base']=cat[bKey]||0;
     result[cat.id+'Upside']=cat[uKey]||0;
+    // Per-store targets from backsheet (editable in admin)
+    const storeTarget=storeName&&bs.targets?.[storeName]?.[cat.id];
+    // Fallback: use tier base as target if no per-store target set
+    result[cat.id+'Target']=storeTarget||(cat[bKey]||0);
   });
   return result;
 }
@@ -3275,7 +3287,7 @@ function parseELBCSV(txt,fname){
     if(document.getElementById('mgrSheetBody'))renMgrSheet();
   };
   if(unmatched.length)console.warn('ELB unmatched:',unmatched);
-  showPeriodConfirm({fname,count:matched,type:'elb',defaultPeriod:defaultMonth(),onConfirm:saveELBWithPeriod});
+  showPeriodConfirm({fname,count:matched,type:'elb',defaultPeriod:defaultMonthCurrent(),onConfirm:saveELBWithPeriod});
 }
 
 // ── RTBDI STORE ACCESSORS + UPLOAD ──
@@ -3406,7 +3418,7 @@ function parseRTBDIStore(content,fname){
   };
   if(unmatched.length)console.warn('RTBDI unmatched:',unmatched);
   console.log('RTBDI: matched='+matched+' storeMap='+Object.keys(storeMap).length);
-  showPeriodConfirm({fname,count:matched,type:'rtbdi',defaultPeriod:defaultMonth(),onConfirm:saveRTBDIWithPeriod});
+  showPeriodConfirm({fname,count:matched,type:'rtbdi',defaultPeriod:defaultMonthCurrent(),onConfirm:saveRTBDIWithPeriod});
 }
 
 // ── MIM UPLOAD + PARSER ──
@@ -3529,7 +3541,7 @@ function parseMIMCoach(txt,fname){
   if(unmatched.length)console.warn('Coach MIM unmatched:',unmatched);
   showPeriodConfirm({
     fname,count:matched,type:'mimcoach',
-    defaultPeriod:document.getElementById('coachMimPayMonth')?.value||defaultMonth(),
+    defaultPeriod:document.getElementById('coachMimPayMonth')?.value||defaultMonthCurrent(),
     onConfirm:(period)=>{
       const monthEl=document.getElementById('coachMimPayMonth');if(monthEl)monthEl.value=period;
       const fnEl=document.getElementById('fnMIMCoach');
@@ -3946,7 +3958,7 @@ function pC(txt,src,fn){
   st2("✅ "+fn+" loaded — "+ad+" new, "+up+" updated","ok");
   // Period confirm — reps are weekly, managers/coaches are monthly
   if(src==='mgr_metro'){
-    showPeriodConfirm({fname:fn,count:ad+up,type:'metro_mgr',defaultPeriod:defaultMonth(),
+    showPeriodConfirm({fname:fn,count:ad+up,type:'metro_mgr',defaultPeriod:defaultMonthCurrent(),
       onConfirm:(period)=>{
         const fnEl=document.getElementById('fnMgr');
         if(fnEl)fnEl.textContent='✅ '+fn+' — '+(ad+up)+' records · '+period;
@@ -3955,7 +3967,7 @@ function pC(txt,src,fn){
       }
     });
   } else if(src==='coach_metro'){
-    showPeriodConfirm({fname:fn,count:ad+up,type:'metro_coach',defaultPeriod:defaultMonth(),
+    showPeriodConfirm({fname:fn,count:ad+up,type:'metro_coach',defaultPeriod:defaultMonthCurrent(),
       onConfirm:(period)=>{
         const fnEl=document.getElementById('fnCoach');
         if(fnEl)fnEl.textContent='✅ '+fn+' — '+(ad+up)+' records · '+period;
