@@ -2256,6 +2256,19 @@ document.addEventListener("DOMContentLoaded",()=>{
   const _lm=new Date(_n.getFullYear(),_n.getMonth()-1,1);
   const _mn=_lm.getFullYear()+'-'+(String(_lm.getMonth()+1).padStart(2,'0'));
   const csm=document.getElementById('coachSheetMonth');if(csm&&!csm.value)csm.value=_mn;
+  // Load coach sheet data for current month
+  window._coachSheetCurrentMonth=_mn;
+  loadCoachSheetForPeriod(_mn);
+  applyELBToCoachSheet();applyRTBDIToCoachSheet();applyMIMToCoachSheet();
+
+  const mgrIn=document.getElementById('mgrSheetMonthIn');if(mgrIn&&!mgrIn.value)mgrIn.value=_mn;
+  // Load manager sheet data for current month  
+  window._mgrSheetCurrentMonth=_mn;
+  loadMgrSheetForPeriod(_mn);
+  applyELBToMgrSheet();
+  const mgrLbl=document.getElementById('mgrSheetMonth');
+  if(mgrLbl)mgrLbl.textContent=formatPeriod(_mn);
+
   const cmp=document.getElementById('coachMimPayMonth');if(cmp&&!cmp.value)cmp.value=_mn;
   const msm=document.getElementById('mgrSheetMonthIn');if(msm&&!msm.value)msm.value=_mn;
   // Also set admin lock month pickers
@@ -2856,6 +2869,9 @@ function parseELBCSV(txt, fname){
     if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+formatPeriod(period);
     updELBStatus();
     tst2('ELB saved for '+formatPeriod(period)+' — '+matched+' stores → Coach + Manager auto-populated','ok');
+    // Auto-set month pickers to match upload period
+    const csm2=document.getElementById('coachSheetMonth');if(csm2&&!csm2.value)csm2.value=period;
+    const mgrIn2=document.getElementById('mgrSheetMonthIn');if(mgrIn2&&!mgrIn2.value)mgrIn2.value=period;
     const cs=document.getElementById('coachSheetSections');
     if(cs&&cs.innerHTML.trim())renCoachSheet();
     if(document.getElementById('mgrSheetBody'))renMgrSheet();
@@ -3034,8 +3050,16 @@ function extractRTBDIStoreName(raw){
 
 function matchRTBDIStore(extracted){
   if(!extracted)return null;
+  // 0. Known Metro typo corrections
+  const typos={
+    'MA-CAPE CODE MALL':'MA-CAPE COD MALL',
+    'TN-NORTH BROARDWAY':'TN-NORTH BROADWAY',
+    'MA- SOUTH SHORE MALL':'MA-SOUTH SHORE MALL',
+    'MA-EXCHANGE ST.':'MA-EXCHANGE ST',
+  };
+  const corrected=typos[extracted.trim()]||extracted;
   const norm=s=>s.replace(/[\s\-\.]/g,'').toUpperCase();
-  const en=norm(extracted);
+  const en=norm(corrected);
   // 1. Exact match
   let found=SR.find(s=>norm(s.s)===en);
   if(found)return found.s;
@@ -3175,6 +3199,9 @@ function parseRTBDIStore(content, fname){
       console.error('RTBDI storeMap keys:', Object.keys(storeMap).slice(0,5));
     }
     updRTBDIStatus();
+    // Auto-set coach month picker to match upload period
+    const csmR=document.getElementById('coachSheetMonth');
+    if(csmR&&!csmR.value){csmR.value=period;window._coachSheetCurrentMonth=period;loadCoachSheetForPeriod(period);}
     const cs=document.getElementById('coachSheetSections');
     if(cs&&cs.innerHTML.trim())renCoachSheet();
   };
@@ -5023,8 +5050,19 @@ let mgrSheetData={}; // {storeName: {catId: actual, elb, attach}}
 function onMgrSheetMonth(){
   const mn=document.getElementById('mgrSheetMonthIn')?.value;
   if(!mn)return;
-  const b=document.getElementById('mgrSheetMonth');if(b)b.textContent=mn;
+  // Save current period
+  const prev=window._mgrSheetCurrentMonth;
+  if(prev)saveMgrSheetForPeriod(prev);
+  // Load new period
+  loadMgrSheetForPeriod(mn);
+  window._mgrSheetCurrentMonth=mn;
+  // Update display label
+  const b=document.getElementById('mgrSheetMonth');
+  if(b)b.textContent=formatPeriod(mn);
+  // Re-apply ELB data for this period
+  applyELBToMgrSheet();
   renMgrSheet();
+  tst2('Loaded manager data for '+formatPeriod(mn),'ok');
 }
 function renMgrSheet(){
   // Apply ELB data before rendering
@@ -5101,8 +5139,10 @@ function renMgrSheet(){
         const pct=tgt>0?(act/tgt)*100:0;
         const hit=pct>=(cat.baseThresh||100);
         return`<td style="padding:4px 6px;text-align:center">
-          <input type="number" min="0" step="0.01" value="${sd[cat.id]||''}" placeholder="${tgt||'No target'}" style="width:80px;padding:4px 6px;border:1px solid var(--bo);border-radius:5px;font-size:11px;font-family:'Nunito',sans-serif;outline:none;text-align:center;background:${act>0?(hit?'#F0FBF4':'#FFF5F5'):'#fff'}" onchange="setMgrSheet('${store.s}','${cat.id}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+          <input type="number" min="0" step="0.01" value="${sd[cat.id]||''}" placeholder="actual" style="width:80px;padding:4px 6px;border:1px solid ${act>0?'var(--bo)':'var(--wa)'};border-radius:5px;font-size:11px;font-family:'Nunito',sans-serif;outline:none;text-align:center;background:${act>0?(hit?'#F0FBF4':'#FFF5F5'):'#fff'}" onchange="setMgrSheet('${store.s}','${cat.id}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
           ${tgt?`<div style="font-size:8px;color:var(--mu);margin-top:1px">tgt: ${tgt}</div>`:''}
+          ${act>0&&cat.id!=='acc'?`<div style="font-size:8px;color:var(--ok);font-weight:700">✓ ELB</div>`:''}
+          ${cat.id==='acc'&&!act?`<div style="font-size:8px;color:var(--wa);font-weight:700">Enter actual ↑</div>`:''}
         </td>`;
       }).join('')}
       <td style="padding:5px 10px;text-align:center;background:${bonus>0?'#F0FBF4':'#FFF5F5'}"><strong style="font-family:'Poppins',sans-serif;font-size:13px;color:${isGuar?'var(--pr)':bonus>0?'var(--ok)':'var(--mu)'}">$${bonus.toFixed(2)}</strong>
@@ -5126,7 +5166,11 @@ function setMgrSheet(store,field,val){
   mgrSheetData[store][field]=val;
   // Debounce re-render
   clearTimeout(window._mgrSheetTimer);
-  window._mgrSheetTimer=setTimeout(()=>{renMgrSheet();updMgrSheetBonuses();},200);
+  window._mgrSheetTimer=setTimeout(()=>{
+    renMgrSheet();updMgrSheetBonuses();
+    const mn=document.getElementById('mgrSheetMonthIn')?.value;
+    if(mn)saveMgrSheetForPeriod(mn);
+  },500);
 }
 function updMgrSheetBonuses(){
   // Already handled in renMgrSheet - bonus column updates inline
@@ -5292,13 +5336,63 @@ function renCoachSheet(){
   u('cSheetGuard',guardCount);
   u('cSheetKick','$'+totalKick.toFixed(2));
 }
+// ── COACH SHEET PERIOD PERSISTENCE ──
+function getCoachSheetKey(mn){return 'wfo_coach_sheet_'+(mn||'draft');}
+function saveCoachSheetForPeriod(mn){
+  if(!mn)return;
+  localStorage.setItem(getCoachSheetKey(mn),JSON.stringify(coachSheetData));
+}
+function loadCoachSheetForPeriod(mn){
+  if(!mn)return;
+  try{
+    const saved=JSON.parse(localStorage.getItem(getCoachSheetKey(mn))||'null');
+    if(saved)coachSheetData=saved;
+    else coachSheetData={};
+  }catch{coachSheetData={};}
+}
+function onCoachSheetMonth(){
+  const mn=document.getElementById('coachSheetMonth')?.value;
+  if(!mn)return;
+  // Save current period first
+  const prev=window._coachSheetCurrentMonth;
+  if(prev)saveCoachSheetForPeriod(prev);
+  // Load new period
+  loadCoachSheetForPeriod(mn);
+  window._coachSheetCurrentMonth=mn;
+  // Re-apply upload data for this period
+  applyELBToCoachSheet();
+  applyRTBDIToCoachSheet();
+  applyMIMToCoachSheet();
+  renCoachSheet();
+  tst2('Loaded coach data for '+formatPeriod(mn),'ok');
+}
+
+// ── MGR SHEET PERIOD PERSISTENCE ──
+function getMgrSheetKey(mn){return 'wfo_mgr_sheet_'+(mn||'draft');}
+function saveMgrSheetForPeriod(mn){
+  if(!mn)return;
+  localStorage.setItem(getMgrSheetKey(mn),JSON.stringify(mgrSheetData));
+}
+function loadMgrSheetForPeriod(mn){
+  if(!mn)return;
+  try{
+    const saved=JSON.parse(localStorage.getItem(getMgrSheetKey(mn))||'null');
+    if(saved)mgrSheetData=saved;
+    else mgrSheetData={};
+  }catch{mgrSheetData={};}
+}
+
 function setCoachSheet(coach,field,val){
   if(!_pinUnlocked){tst2('Enter PIN in Admin Center to edit.','wn');return;}
   if(wkLocked){tst2('Period is locked.','wn');return;}
   if(!coachSheetData[coach])coachSheetData[coach]={};
   coachSheetData[coach][field]=val;
   clearTimeout(window._coachSheetTimer);
-  window._coachSheetTimer=setTimeout(()=>renCoachSheet(),200);
+  window._coachSheetTimer=setTimeout(()=>{
+    renCoachSheet();
+    const mn=document.getElementById('coachSheetMonth')?.value;
+    if(mn)saveCoachSheetForPeriod(mn);
+  },500);
 }
 function saveCoachSheet(){
   const mn=document.getElementById('coachSheetMonth')?.value;
@@ -6220,7 +6314,7 @@ function renCoachSheet(){
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
                 <input type="number" value="${sd.actPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.actPct>=100?'#F0FBF4':+sd.actPct>0?'#FFF5F5':'#fff'}" onchange="setCoachSheet('${store.s}','actPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
                 ${sd.actActual||sd.actTarget?`<div style="font-size:8px;color:var(--mu);margin-top:1px">${sd.actActual||0}/${sd.actTarget||0} Metro</div>`:''}
-                ${elbLoaded&&!sd.actPct?`<div style="font-size:8px;color:var(--da);font-weight:700">⚠ No ELB match</div>`:''}
+                ${elbLoaded&&!sd.actPct?`<div style="font-size:8px;color:var(--da);font-weight:700" title="Re-upload ELB to refresh">⚠ No ELB match</div>`:''}
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
                 <input type="number" value="${sd.accTotal||''}" placeholder="Acc $ Total" min="0" step="0.01" style="${inpStyle};background:${sd.accTotal?'#F0FBF4':'#fff'}" onchange="setCoachSheet('${store.s}','accTotal',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
