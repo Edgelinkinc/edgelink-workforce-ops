@@ -935,6 +935,10 @@ body.page-pg-assign .week-bar{display:none!important;}
           <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
             ⚡ Enter actuals for all stores. Targets pull from Backsheet Setup. Bonus calculates automatically per store tier and monthly rules.
           </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:#F3E8FF;border:1px solid var(--se);border-radius:8px;font-size:12px;">
+                <span>📊</span>
+                <div id="mgrELBBannerText" style="color:var(--mu)">No ELB data — upload in Admin → Data Management to auto-fill actuals</div>
+              </div>
         </div>
         <!-- SUMMARY STRIP -->
         <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:14px">
@@ -1560,7 +1564,69 @@ body.page-pg-assign .week-bar{display:none!important;}
 
       <!-- BACKSHEET -->
       <div class="sub-pane" id="admin-backsheet">
-        <div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">📋 Backsheet Setup — Monthly Manager Rules</div></div>
+                <!-- ELB METRIC MAPPING -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hdr" style="background:var(--pr)">
+            <div class="card-title">📊 ELB Report Metric Mapping</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.7)">Configure which R column maps to each bonus field</div>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px">
+              <div class="fi">
+                <label>Coach: Activation R Column</label>
+                <select id="elbCoachActR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="1">R1 — New Voice Activations</option>
+                  <option value="2">R2 — BTS</option><option value="3">R3 — HSI</option>
+                  <option value="4">R4</option><option value="5">R5</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: Acts Actual R Column</label>
+                <select id="elbMgrActR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="1">R1 — New Voice Activations</option>
+                  <option value="2">R2</option><option value="3">R3</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: BTS Actual R Column</label>
+                <select id="elbMgrBtsR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="2">R2 — BTS (-HSI)</option>
+                  <option value="1">R1</option><option value="3">R3</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: HSI Actual R Column</label>
+                <select id="elbMgrHsiR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="3">R3 — HSI</option>
+                  <option value="1">R1</option><option value="2">R2</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Manager: Protection Attach R Column</label>
+                <select id="elbMgrProtR" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="5">R5 — Total Voice Protection</option>
+                  <option value="6">R6 — 95-Day Act Protection</option>
+                  <option value="7">R7 — 95-Day Feature Retention</option>
+                  <option value="4">R4</option><option value="8">R8</option>
+                  <option value="9">R9</option><option value="10">R10</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Activation % Source</label>
+                <select id="elbUseResult" style="padding:7px 10px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none">
+                  <option value="1">Use Result % column (Metro calculated)</option>
+                  <option value="0">Calculate Actual ÷ Target ourselves</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="btn bp sm" onclick="saveELBMapFromUI()">💾 Save Mapping</button>
+              <button class="btn bo sm" onclick="resetELBMap()">↺ Reset to Defaults</button>
+              <div id="elbMapStatus" style="font-size:12px;color:var(--mu)"></div>
+            </div>
+          </div>
+        </div>
+<div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">📋 Backsheet Setup — Monthly Manager Rules</div></div>
         <div class="card-body">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
             <div class="fi" style="min-width:180px"><label>Backsheet Month</label><input type="month" id="aBsMonth" onchange="loadAdminBsMonth()"/></div>
@@ -2102,6 +2168,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   try{initHomePage();}catch(e){console.error('Home init error:',e);}
   // Apply ELB data if previously loaded
   applyELBToCoachSheet();
+  applyELBToMgrSheet();
   updELBStatus();
   // Load current week data from storage
   if(wk) loadWeek(wk);
@@ -2516,100 +2583,189 @@ function pELB(file){
 
 function parseELBCSV(txt, fname){
   const lines=txt.trim().split('\n');
-  if(lines.length<2){tst2('ELB file appears empty','er');return;}
+  if(lines.length<3){tst2('ELB file empty or missing rows','er');return;}
 
-  // Parse header - find column indices
+  // Metro ELB has TWO header rows:
+  // Row 0: *, National Rank, HierarchyValue4PBI, R1, Actual, MTD Target, Result, R2, ...
+  // Row 1: sub-labels (New Voice activation data, BTS, HSI, ...)
+  // Row 2+: data rows
   const isTab=lines[0].split('\t').length>lines[0].split(',').length;
   const sep=isTab?'\t':',';
-  const hdr=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const hdr0=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const hdr1=lines[1].split(sep).map(c=>c.replace(/"/g,'').trim());
 
-  // Find key columns
-  const fc=(...names)=>{for(const n of names){const i=hdr.findIndex(c=>c.toLowerCase()===n.toLowerCase());if(i>=0)return i;}return -1;};
-  const rankI=fc('National Rank','nationalrank','national_rank');
-  const storeI=fc('HierarchyValue4PBI','hierarchyvalue4pbi','store id','storeid');
-
-  // R1 columns: Actual, MTD Target, Result — they appear AFTER R1 label
-  // Header row: ... R1, Actual, MTD Target, Result, R2, Actual ...
-  // Find the first "Actual" after "R1"
-  const r1I=hdr.findIndex(c=>c==='R1');
-  let r1ActI=-1,r1TgtI=-1,r1ResI=-1;
-  if(r1I>=0){
-    // Next three should be Actual, MTD Target, Result
-    for(let i=r1I+1;i<Math.min(r1I+5,hdr.length);i++){
-      const col=hdr[i].toLowerCase().replace(/\s+/g,'');
-      if(col==='actual'||col.includes('actual'))if(r1ActI<0)r1ActI=i;
-      if(col==='mtdtarget'||col.includes('target'))if(r1TgtI<0)r1TgtI=i;
-      if(col==='result'||col.includes('result'))if(r1ResI<0)r1ResI=i;
-    }
-  }
-
-  console.log('ELB columns: rank='+rankI+' store='+storeI+' r1Act='+r1ActI+' r1Tgt='+r1TgtI+' r1Res='+r1ResI);
-
+  // Find fixed columns
+  const rankI=hdr0.findIndex(c=>/national.?rank/i.test(c));
+  const storeI=hdr0.findIndex(c=>/hierarchyvalue4pbi/i.test(c));
   if(rankI<0||storeI<0){
     tst2('Cannot find National Rank or HierarchyValue4PBI columns','er');
+    console.log('Row 0:',hdr0.slice(0,12),'Row 1:',hdr1.slice(0,12));
     return;
   }
 
-  // Build store ID → store name map from SR
-  const storeIdMap={};
-  SR.forEach(s=>{ storeIdMap[s.id]=s.s; storeIdMap[String(+s.id)]=s.s; });
+  // Map all R blocks: R1-R10 each followed by Actual, MTD Target, Result
+  const rBlocks={};
+  for(let i=0;i<hdr0.length;i++){
+    const m=hdr0[i].match(/^R(\d+)$/);
+    if(!m)continue;
+    const rn=+m[1];
+    let actI=-1,tgtI=-1,resI=-1;
+    for(let j=i+1;j<Math.min(i+6,hdr0.length);j++){
+      const v0=hdr0[j].toLowerCase().replace(/\s/g,'');
+      if(v0==='actual'&&actI<0){actI=j;continue;}
+      if((v0.includes('target')||v0.includes('mtd'))&&tgtI<0){tgtI=j;continue;}
+      if(v0==='result'&&resI<0){resI=j;continue;}
+    }
+    // Category name from sub-header
+    const catName=(hdr1[i]||hdr1[i+1]||'R'+rn).trim();
+    rBlocks[rn]={actI,tgtI,resI,catName};
+  }
+  console.log('ELB: rank='+rankI+' store='+storeI+' rBlocks=',rBlocks);
+
+  // Get metric mapping from Admin settings (or use defaults)
+  const map=getELBMetricMap();
+
+  // Store ID → store name lookup
+  const idMap={};
+  SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
 
   const elbData={};
-  let matched=0,unmatched=0;
+  let matched=0;
+  const unmatched=[];
 
-  for(let i=1;i<lines.length;i++){
+  const parseVal=(cols,b,useResult)=>{
+    const actual=b.actI>=0?+(cols[b.actI]||'').replace(/[",]/g,'')||0:0;
+    const target=b.tgtI>=0?+(cols[b.tgtI]||'').replace(/[",]/g,'')||0:0;
+    let pct=0;
+    if(useResult&&b.resI>=0){
+      pct=parseFloat((cols[b.resI]||'').replace(/[",]/g,''))||0;
+      if(pct>0&&pct<2)pct=Math.round(pct*1000)/10; // 1.085 → 108.5
+    } else if(actual>0&&target>0){
+      pct=Math.round((actual/target)*1000)/10;
+    }
+    return{actual,target,pct};
+  };
+
+  for(let i=2;i<lines.length;i++){
     const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
-    if(!cols||cols.length<3)continue;
-
+    if(!cols||cols.length<4)continue;
     const rawId=(cols[storeI]||'').replace(/"/g,'').trim();
-    const rank=parseInt((cols[rankI]||'').replace(/"/g,'').trim())||0;
+    if(!rawId)continue;
+    const rank=parseInt((cols[rankI]||'').replace(/[",]/g,''))||0;
+    const storeName=idMap[rawId]||idMap[String(+rawId)]||null;
+    if(!storeName){if(rawId)unmatched.push(rawId);continue;}
 
-    // Look up store name
-    const storeName=storeIdMap[rawId]||storeIdMap[String(+rawId)]||null;
-    if(!storeName){unmatched++;continue;}
-
-    // Parse R1 values
-    const actActual=r1ActI>=0?+(cols[r1ActI]||'').replace(/[",]/g,'').trim()||0:0;
-    const actTarget=r1TgtI>=0?+(cols[r1TgtI]||'').replace(/[",]/g,'').trim()||0:0;
-
-    // Result % — could be "108.5%" or "108.5" or "1.085"
-    let actPct=0;
-    if(r1ResI>=0){
-      const raw=(cols[r1ResI]||'').replace(/[",]/g,'').trim();
-      actPct=parseFloat(raw)||0;
-      // If it looks like a decimal (0.x or 1.x for ~100%), convert
-      if(actPct>0&&actPct<=10) actPct=Math.round(actPct*100);
-      else if(actPct>0&&actPct<2&&raw.indexOf('.')==1) actPct=Math.round(actPct*100);
-    } else if(actActual>0&&actTarget>0){
-      actPct=Math.round((actActual/actTarget)*1000)/10;
+    // Parse all R blocks for this store
+    const rData={};
+    for(let rn=1;rn<=10;rn++){
+      if(!rBlocks[rn])continue;
+      rData[rn]=parseVal(cols,rBlocks[rn],map.useResult);
     }
 
-    elbData[storeName]={elbRank:rank,actActual,actTarget,actPct,storeId:rawId};
+    elbData[storeName]={
+      elbRank    : rank,
+      storeId    : rawId,
+      // COACH fields (uses configurable mapping)
+      actPct     : rData[map.coachActR]?.pct    || 0,
+      actActual  : rData[map.coachActR]?.actual  || 0,
+      actTarget  : rData[map.coachActR]?.target  || 0,
+      // MANAGER fields (uses configurable mapping)
+      mgrActActual   : rData[map.mgrActR]?.actual   || 0,
+      mgrActTarget   : rData[map.mgrActR]?.target   || 0,
+      mgrBtsActual   : rData[map.mgrBtsR]?.actual   || 0,
+      mgrBtsTarget   : rData[map.mgrBtsR]?.target   || 0,
+      mgrHsiActual   : rData[map.mgrHsiR]?.actual   || 0,
+      mgrHsiTarget   : rData[map.mgrHsiR]?.target   || 0,
+      mgrProtPct     : rData[map.mgrProtR]?.pct     || 0,  // protection attach %
+      mgrProtActual  : rData[map.mgrProtR]?.actual  || 0,
+      mgrProtTarget  : rData[map.mgrProtR]?.target  || 0,
+      r              : rData  // all raw R data preserved
+    };
     matched++;
   }
 
   // Save to localStorage
+  const catNames={};
+  Object.entries(rBlocks).forEach(([rn,b])=>{catNames[rn]=b.catName;});
   localStorage.setItem('wfo_elb_data',JSON.stringify({
-    data:elbData,
-    loadedAt:new Date().toLocaleString(),
-    fname,
-    matched,
-    unmatched
+    data:elbData, loadedAt:new Date().toLocaleString(),
+    fname, matched, unmatched:unmatched.slice(0,20), catNames, map
   }));
 
-  // Apply to coachSheetData immediately
+  // Auto-apply to both sheets
   applyELBToCoachSheet();
+  applyELBToMgrSheet();
 
-  // Update UI
   const fnEl=document.getElementById('fnELB');
-  if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores matched'+(unmatched?' ('+unmatched+' unmatched)':'');
+  if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores matched'+(unmatched.length?' ('+unmatched.length+' unmatched IDs)':'');
   updELBStatus();
-  tst2('ELB data loaded — '+matched+' stores auto-populated','ok');
 
-  // Re-render coach sheet if visible
+  if(unmatched.length)console.warn('Unmatched store IDs:',unmatched);
+  tst2('ELB loaded — '+matched+' stores → Coach + Manager auto-populated','ok');
+
+  // Re-render sheets if visible
   const cs=document.getElementById('coachSheetSections');
   if(cs&&cs.innerHTML.trim())renCoachSheet();
+  if(document.getElementById('mgrSheetBody'))renMgrSheet();
 }
+
+// ── ELB METRIC MAP ──
+// Configurable mapping: which R column feeds which bonus field
+// Saved in localStorage so Admin can adjust without code changes
+function getELBMetricMap(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('wfo_elb_map')||'null');
+    if(saved)return saved;
+  }catch{}
+  // Defaults based on Metro ELB report structure
+  return{
+    coachActR  : 1,  // R1 = New Voice Activations (coach act% to goal)
+    mgrActR    : 1,  // R1 = New Voice Activations (manager acts actual)
+    mgrBtsR    : 2,  // R2 = BTS activations (manager BTS actual)
+    mgrHsiR    : 3,  // R3 = HSI activations (manager HSI actual)
+    mgrProtR   : 5,  // R5 = Total Voice Protection (manager attach decelerator)
+    useResult  : true // true=use Result% column, false=calculate Actual÷Target
+  };
+}
+function saveELBMapFromUI(){
+  const map={
+    coachActR : +document.getElementById('elbCoachActR')?.value||1,
+    mgrActR   : +document.getElementById('elbMgrActR')?.value||1,
+    mgrBtsR   : +document.getElementById('elbMgrBtsR')?.value||2,
+    mgrHsiR   : +document.getElementById('elbMgrHsiR')?.value||3,
+    mgrProtR  : +document.getElementById('elbMgrProtR')?.value||5,
+    useResult : document.getElementById('elbUseResult')?.value!=='0'
+  };
+  saveELBMetricMap(map);
+  const st=document.getElementById('elbMapStatus');
+  if(st){st.textContent='✅ Saved — '+new Date().toLocaleTimeString();st.style.color='var(--ok)';}
+  // Re-parse if ELB data already loaded
+  const elb=getELBData();
+  if(elb){tst2('Mapping saved — re-upload ELB CSV to apply new mapping','wn');}
+}
+function resetELBMap(){
+  localStorage.removeItem('wfo_elb_map');
+  // Reset selects to defaults
+  const defaults={elbCoachActR:1,elbMgrActR:1,elbMgrBtsR:2,elbMgrHsiR:3,elbMgrProtR:5,elbUseResult:1};
+  Object.entries(defaults).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
+  tst2('ELB mapping reset to defaults','ok');
+}
+function loadELBMapToUI(){
+  const map=getELBMetricMap();
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  set('elbCoachActR',map.coachActR);
+  set('elbMgrActR',map.mgrActR);
+  set('elbMgrBtsR',map.mgrBtsR);
+  set('elbMgrHsiR',map.mgrHsiR);
+  set('elbMgrProtR',map.mgrProtR);
+  set('elbUseResult',map.useResult?'1':'0');
+}
+
+function saveELBMetricMap(map){
+  localStorage.setItem('wfo_elb_map',JSON.stringify(map));
+  tst2('ELB metric mapping saved','ok');
+}
+
 
 function getELBData(){
   try{const d=JSON.parse(localStorage.getItem('wfo_elb_data')||'null');return d||null;}catch{return null;}
@@ -2620,11 +2776,33 @@ function applyELBToCoachSheet(){
   if(!elb||!elb.data)return;
   Object.entries(elb.data).forEach(([storeName,d])=>{
     if(!coachSheetData[storeName])coachSheetData[storeName]={};
-    // Only auto-fill if not manually overridden (or always overwrite — using ELB as source of truth)
-    coachSheetData[storeName].elbRank=d.elbRank||coachSheetData[storeName].elbRank||0;
-    coachSheetData[storeName].actPct=d.actPct||coachSheetData[storeName].actPct||0;
-    coachSheetData[storeName].actActual=d.actActual||0;
-    coachSheetData[storeName].actTarget=d.actTarget||0;
+    const sd=coachSheetData[storeName];
+    if(d.elbRank)sd.elbRank=d.elbRank;
+    if(d.actPct)sd.actPct=d.actPct;
+    if(d.actActual)sd.actActual=d.actActual;
+    if(d.actTarget)sd.actTarget=d.actTarget;
+  });
+}
+
+function applyELBToMgrSheet(){
+  const elb=getELBData();
+  if(!elb||!elb.data)return;
+  // Populate mgrSheetData with actuals from ELB
+  // Targets come from backsheet — we only fill ACTUALS
+  // Also fills ELB rank and protection attach %
+  Object.entries(elb.data).forEach(([storeName,d])=>{
+    if(!mgrSheetData[storeName])mgrSheetData[storeName]={};
+    const sd=mgrSheetData[storeName];
+    // Acts actual (R1)
+    if(d.mgrActActual)sd['acts']=d.mgrActActual;
+    // BTS actual (R2)
+    if(d.mgrBtsActual)sd['bts']=d.mgrBtsActual;
+    // HSI actual (R3)
+    if(d.mgrHsiActual)sd['hsi']=d.mgrHsiActual;
+    // Protection attach % (R5 Result) → attach field for decelerator
+    if(d.mgrProtPct)sd['attach']=d.mgrProtPct;
+    // ELB rank
+    if(d.elbRank)sd['elb']=d.elbRank;
   });
 }
 
@@ -3610,6 +3788,16 @@ function onMgrSheetMonth(){
   renMgrSheet();
 }
 function renMgrSheet(){
+  // Apply ELB data before rendering
+  applyELBToMgrSheet();
+  const elbLoaded=!!getELBData();
+  const elbObj=getELBData();
+  // Update ELB banner if present
+  const mgrElbBanner=document.getElementById('mgrELBBannerText');
+  if(mgrElbBanner){
+    if(elbLoaded){mgrElbBanner.textContent='✅ ELB loaded — '+elbObj.matched+' stores auto-filled (Acts, BTS, HSI, Protection, ELB Rank) — '+elbObj.loadedAt;mgrElbBanner.style.color='var(--ok)';}
+    else{mgrElbBanner.textContent='No ELB data — upload in Admin → Data Management to auto-fill actuals';mgrElbBanner.style.color='var(--mu)';}
+  }
   const mn=document.getElementById('mgrSheetMonthIn')?.value;
   const hdrEl=document.getElementById('mgrSheetHdr'),bodyEl=document.getElementById('mgrSheetBody');
   if(!hdrEl||!bodyEl)return;
@@ -4164,7 +4352,7 @@ function swAdmin(tab,btn){
   if(tab==='data')renAdminSysInfo();
   if(tab==='datastatus'){refreshDataStatus();initDataStatus();}
   if(tab==='history'){renWkHist();}
-  if(tab==='backsheet'){const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
+  if(tab==='backsheet'){loadELBMapToUI();const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
 }
 
 function initAdminCenter(){
