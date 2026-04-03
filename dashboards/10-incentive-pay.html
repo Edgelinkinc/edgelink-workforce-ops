@@ -479,18 +479,7 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="si si-solo active" data-page="pg-home" onclick="goPage('pg-home',this)"><span class="ic">🏠</span><span class="si-label">Home</span></div>
   </div>
 
-  <!-- BONUSES GROUP -->
-  <div class="sg-wrap">
-    <div class="sg-hdr" onclick="toggleSG('sg-bonuses')">
-      <span class="sg-label">Bonuses</span>
-      <span class="sg-arrow" id="sg-bonuses-arrow">▾</span>
-    </div>
-    <div class="sg-items" id="sg-bonuses">
-      <div class="si" data-page="pg-reps" onclick="goPage('pg-reps',this)"><span class="ic">👤</span><span class="si-label">Reps</span></div>
-      <div class="si" data-page="pg-managers" onclick="goPage('pg-managers',this)"><span class="ic">🏢</span><span class="si-label">Managers</span></div>
-      <div class="si" data-page="pg-coaches" onclick="goPage('pg-coaches',this)"><span class="ic">🎯</span><span class="si-label">Coaches</span></div>
-    </div>
-  </div>
+  
 
   <!-- ANALYTICS GROUP -->
   <div class="sg-wrap">
@@ -1529,6 +1518,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
       <!-- ADMIN NAV TABS -->
       <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch">
+        <button class="sub-tab" onclick="swAdmin('bonuses',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:6px 12px;background:var(--pr);color:#fff;border-color:var(--pr)">💼 Bonuses</button>
         <button class="sub-tab active" onclick="swAdmin('lock',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:6px 12px">🔒 Lock Controls</button>
         <button class="sub-tab" onclick="swAdmin('stores',this)">🏪 Store Roster</button>
         <button class="sub-tab" onclick="swAdmin('roster',this)">👥 Rep Roster</button>
@@ -1542,7 +1532,66 @@ body.page-pg-assign .week-bar{display:none!important;}
       </div>
 
       <!-- LOCK CONTROLS -->
-      <div class="sub-pane active" id="admin-lock">
+      <div class="sub-pane active" <div class="sub-pane active" id="admin-bonuses">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px">
+
+          <!-- REPS -->
+          <div style="background:#fff;border-radius:12px;border:1px solid var(--bo);overflow:hidden;box-shadow:var(--sh)">
+            <div style="background:var(--dk);padding:14px 18px;display:flex;align-items:center;gap:10px">
+              <span style="font-size:24px">👤</span>
+              <div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:#fff">Reps</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.65)">Weekly bonus calculator</div>
+              </div>
+            </div>
+            <div style="padding:14px 18px">
+              <p style="font-size:12px;color:var(--mu);margin-bottom:12px">Box Level Ups · Accessories · Power Ups · MIM Payouts</p>
+              <button class="btn bp" style="width:100%;justify-content:center" onclick="goPage('pg-reps',null)">Open Reps →</button>
+            </div>
+          </div>
+
+          <!-- MANAGERS -->
+          <div style="background:#fff;border-radius:12px;border:1px solid var(--bo);overflow:hidden;box-shadow:var(--sh)">
+            <div style="background:var(--se);padding:14px 18px;display:flex;align-items:center;gap:10px">
+              <span style="font-size:24px">🏢</span>
+              <div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:#fff">Managers</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.65)">Monthly bonus calculator</div>
+              </div>
+            </div>
+            <div style="padding:14px 18px">
+              <p style="font-size:12px;color:var(--mu);margin-bottom:12px">Acts · BTS · HSI · Accessories · ELB · Protection</p>
+              <button class="btn bs" style="width:100%;justify-content:center" onclick="goPage('pg-managers',null)">Open Managers →</button>
+            </div>
+          </div>
+
+          <!-- COACHES -->
+          <div style="background:#fff;border-radius:12px;border:1px solid var(--bo);overflow:hidden;box-shadow:var(--sh)">
+            <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:14px 18px;display:flex;align-items:center;gap:10px">
+              <span style="font-size:24px">🎯</span>
+              <div>
+                <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:#fff">Coaches</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.65)">Monthly bonus + MIM spiff</div>
+              </div>
+            </div>
+            <div style="padding:14px 18px">
+              <p style="font-size:12px;color:var(--mu);margin-bottom:12px">Act Bonus · Acc Bonus · MIM Spiff · Kicker · Pay Slips</p>
+              <button class="btn bp" style="width:100%;justify-content:center" onclick="goPage('pg-coaches',null)">Open Coaches →</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- QUICK LINKS -->
+        <div style="background:#F3E8FF;border-radius:10px;padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:12px;font-weight:700;color:var(--se)">Quick:</span>
+          <button class="btn bp sm" onclick="goPage('pg-coach-payout',null)">🎯 Coach Payout Slip</button>
+          <button class="btn bp sm" onclick="goPage('pg-reps',null);setTimeout(()=>swSub('reps','overview',document.querySelector('[onclick*=reps][onclick*=overview]')),200)">📊 Rep Overview</button>
+          <button class="btn bs sm" onclick="goPage('pg-managers',null)">🏢 Manager Sheet</button>
+        </div>
+      </div><!-- /admin-bonuses -->
+
+      <div class="sub-pane" id="admin-lock">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
           <!-- REP WEEK LOCK -->
           <div class="card">
@@ -2506,13 +2555,6 @@ function updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+
 
 // ── PAGE NAV ──
 function goPage(id,el){
-  // Admin-only pages require PIN
-  const adminOnlyPages=['pg-reps','pg-managers','pg-coaches'];
-  if(adminOnlyPages.includes(id)&&!_pinUnlocked){
-    // Show PIN overlay, navigate after unlock
-    requirePin(()=>goPage(id,el));
-    return;
-  }
   // Disable browser scroll restoration and reset immediately
   if(history.scrollRestoration)history.scrollRestoration='manual';
   const _cont=document.querySelector('.content');
