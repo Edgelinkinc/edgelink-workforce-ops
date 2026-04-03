@@ -1786,6 +1786,26 @@ body.page-pg-assign .week-bar{display:none!important;}
                 <div id="fnELB" style="font-size:11px;color:var(--ok)"></div>
                 <div id="elbStatusBadge" style="font-size:11px;margin-top:4px"></div>
               </div>
+              <!-- RTBDI STORE REPORT -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo);border-left:3px solid var(--se)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">📈 RTBDI Store Report <span style="font-size:10px;font-weight:400;color:var(--mu)">→ Coach Acc $ + Boxes</span></div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Metro KPI By Market HTML export · Acc $ and Boxes per store</div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".xls,.html,.htm" style="display:none" onchange="requirePin(()=>pRTBDI_Store(this.files[0]))"/>
+                  <div class="btn bs sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload RTBDI Store Report</div>
+                </label>
+                <div id="fnRTBDIStore" style="font-size:11px;color:var(--ok)"></div>
+              </div>
+              <!-- MIM REPORT -->
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo);border-left:3px solid var(--ok)">
+                <div style="font-weight:700;font-size:13px;color:var(--ok);margin-bottom:4px">📱 MIM Report <span style="font-size:10px;font-weight:400;color:var(--mu)">→ Rep BANs + Coach MIM Spiff</span></div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Metro MIM CSV · Orders = MM BANs per rep and per store</div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".csv,.txt,.xlsx" style="display:none" onchange="requirePin(()=>pMIM(this.files[0]))"/>
+                  <div class="btn bok sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload MIM Report</div>
+                </label>
+                <div id="fnMIM" style="font-size:11px;color:var(--ok)"></div>
+              </div>
               <!-- METRO MANAGER -->
               <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
                 <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">🏢 Metro CSV — Managers</div>
@@ -1819,6 +1839,8 @@ body.page-pg-assign .week-bar{display:none!important;}
             <button class="btn bd" onclick="if(confirm('Clear chargebacks?')){CBs=[];saveSession();renCBL();tst2('Cleared.','ok')}">🗑 Clear Chargebacks</button>
             <button class="btn bd" onclick="if(confirm('Clear store assignments?')){clrAssign()}">🗑 Clear Store Assignments</button>
             <button class="btn bd" onclick="if(confirm('Clear manager records?')){localStorage.removeItem('wfo_mgr_recs');renMgrHist();renMgrOverview();tst2('Cleared.','ok')}">🗑 Clear Manager Records</button>
+            <button class="btn bd" onclick="if(confirm('Clear RTBDI store data?')){localStorage.removeItem('wfo_rtbdi_store');document.getElementById('fnRTBDIStore').textContent='';tst2('Cleared.','ok')}">🗑 Clear RTBDI Store Data</button>
+            <button class="btn bd" onclick="if(confirm('Clear MIM data?')){localStorage.removeItem('wfo_mim_data');document.getElementById('fnMIM').textContent='';tst2('Cleared.','ok')}">🗑 Clear MIM Data</button>
             <button class="btn bd" onclick="if(confirm('Clear coach records?')){localStorage.removeItem('wfo_coach_recs');renCoachOv();tst2('Cleared.','ok')}">🗑 Clear Coach Records</button>
             <div style="border-top:1px solid var(--bo);padding-top:10px;margin-top:2px"><button class="btn bd" style="background:#7B0000;width:100%" onclick="clearAllData()">⚠️ Clear ALL Data</button></div>
             <button class="btn bo sm" onclick="rstT()">↺ Reset Tiers</button>
@@ -2169,6 +2191,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   // Apply ELB data if previously loaded
   applyELBToCoachSheet();
   applyELBToMgrSheet();
+  applyRTBDIToCoachSheet();
+  applyMIMToReps();
+  applyMIMToCoachSheet();
   updELBStatus();
   // Load current week data from storage
   if(wk) loadWeek(wk);
@@ -2825,6 +2850,283 @@ function clearELBData(){
   const fnEl=document.getElementById('fnELB');
   if(fnEl)fnEl.textContent='';
   tst2('ELB data cleared','ok');
+}
+
+
+// ══════════════════════════════════════════════════════
+// RTBDI STORE REPORT PARSER
+// HTML export from Metro KPI By Market report
+// Extracts: Acc $ and Boxes per store → feeds coach acc/box calculation
+// Store ID format: "MARKET ELxxxxxxx-STATE-STORENAME"
+// ══════════════════════════════════════════════════════
+
+function pRTBDI_Store(file){
+  const fnEl=document.getElementById('fnRTBDIStore');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseRTBDIStore(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read RTBDI store file','er');
+  rd.readAsText(file);
+}
+
+function extractRTBDIStoreName(raw){
+  // "BOSTON EL70857045-RI-BROADWAY" → "RI-BROADWAY"
+  if(!raw)return null;
+  const m=raw.match(/EL\d+[-\s]+(.+)/i);
+  if(!m)return null;
+  return m[1].trim().toUpperCase();
+}
+
+function matchRTBDIStore(extracted){
+  if(!extracted)return null;
+  const norm=s=>s.replace(/[\s-]/g,'').toUpperCase();
+  const en=norm(extracted);
+  // Exact match first
+  let found=SR.find(s=>norm(s.s)===en);
+  if(found)return found.s;
+  // Partial match
+  found=SR.find(s=>en.includes(norm(s.s))||norm(s.s).includes(en));
+  if(found)return found.s;
+  // Also try without state prefix
+  const noState=extracted.replace(/^[A-Z]{2}-/,'');
+  found=SR.find(s=>norm(s.s).includes(norm(noState))||norm(noState).includes(norm(s.s.replace(/^[A-Z]{2}-/,''))));
+  return found?found.s:null;
+}
+
+function parseRTBDIStore(html, fname){
+  // Parse HTML table
+  const div=document.createElement('div');
+  div.innerHTML=html;
+  const cells=[];
+  div.querySelectorAll('tr').forEach(tr=>{
+    const row=[];
+    tr.querySelectorAll('td,th').forEach(td=>row.push(td.textContent.trim()));
+    if(row.some(c=>c))cells.push(row);
+  });
+
+  // Find header row - look for "Store ID" and "Acc $"
+  let hdrRow=-1,storeCol=-1,accCol=-1,boxCol=-1,ppdCol=-1,btsCol=-1,hintCol=-1;
+  for(let i=0;i<cells.length;i++){
+    const r=cells[i];
+    const si=r.findIndex(c=>/store.?id/i.test(c));
+    const ai=r.findIndex(c=>/acc\s*\$/i.test(c));
+    if(si>=0&&ai>=0){
+      hdrRow=i;
+      storeCol=si;
+      accCol=ai;
+      boxCol=r.findIndex(c=>/^boxes$/i.test(c));
+      ppdCol=r.findIndex(c=>/^ppd$/i.test(c));
+      btsCol=r.findIndex(c=>/^bts$/i.test(c));
+      hintCol=r.findIndex(c=>/^hint$/i.test(c));
+      break;
+    }
+  }
+
+  if(hdrRow<0){tst2('Cannot find Store ID or Acc $ columns in RTBDI report','er');return;}
+  console.log('RTBDI cols: store='+storeCol+' acc='+accCol+' box='+boxCol+' ppd='+ppdCol);
+
+  const rtbdiData={};
+  let matched=0;const unmatched=[];
+
+  for(let i=hdrRow+1;i<cells.length;i++){
+    const row=cells[i];
+    const rawStore=row[storeCol]||'';
+    if(!rawStore.match(/EL\d+/i))continue; // skip non-store rows
+
+    const extracted=extractRTBDIStoreName(rawStore);
+    const storeName=matchRTBDIStore(extracted);
+    if(!storeName){if(extracted)unmatched.push(extracted);continue;}
+
+    const parseNum=v=>{
+      if(!v)return 0;
+      return +(v.replace(/[$,\s]/g,'').trim())||0;
+    };
+
+    rtbdiData[storeName]={
+      accTotal : accCol>=0?parseNum(row[accCol]):0,
+      boxes    : boxCol>=0?parseNum(row[boxCol]):0,
+      ppd      : ppdCol>=0?parseNum(row[ppdCol]):0,
+      bts      : btsCol>=0?parseNum(row[btsCol]):0,
+      hint     : hintCol>=0?parseNum(row[hintCol]):0,
+    };
+    matched++;
+  }
+
+  localStorage.setItem('wfo_rtbdi_store',JSON.stringify({
+    data:rtbdiData,loadedAt:new Date().toLocaleString(),fname,matched,unmatched:unmatched.slice(0,20)
+  }));
+
+  applyRTBDIToCoachSheet();
+
+  const fnEl=document.getElementById('fnRTBDIStore');
+  if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores matched'+(unmatched.length?' ('+unmatched.length+' unmatched)':'');
+  if(unmatched.length)console.warn('RTBDI unmatched stores:',unmatched);
+  tst2('RTBDI store report loaded — '+matched+' stores → Acc $ + Boxes auto-filled','ok');
+  const cs=document.getElementById('coachSheetSections');
+  if(cs&&cs.innerHTML.trim())renCoachSheet();
+}
+
+function getRTBDIStoreData(){
+  try{return JSON.parse(localStorage.getItem('wfo_rtbdi_store')||'null');}catch{return null;}
+}
+
+function applyRTBDIToCoachSheet(){
+  const d=getRTBDIStoreData();
+  if(!d||!d.data)return;
+  Object.entries(d.data).forEach(([storeName,v])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    const sd=coachSheetData[storeName];
+    if(v.accTotal)sd.accTotal=v.accTotal;
+    if(v.boxes)sd.totalBoxes=v.boxes;
+    // acc/box is calculated in renCoachSheet from accTotal ÷ totalBoxes
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// MIM REPORT PARSER
+// Metro MIM CSV/Excel export
+// Store rows: Store Name has value, Employee Name is blank
+// Rep rows: both Store Name and Employee Name have values
+// Store Name format: "10198293 : 190 Newport Ave" → extract store ID
+// Orders column = MM BANs count
+// ══════════════════════════════════════════════════════
+
+function pMIM(file){
+  const fnEl=document.getElementById('fnMIM');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseMIM(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read MIM file','er');
+  rd.readAsText(file);
+}
+
+function extractMIMStoreId(raw){
+  // "10198293 : 190 Newport Ave" → "10198293"
+  if(!raw)return null;
+  const m=raw.match(/^(\d{8})/);
+  return m?m[1]:null;
+}
+
+function parseMIM(txt, fname){
+  const lines=txt.trim().split('\n');
+  if(lines.length<2){tst2('MIM file appears empty','er');return;}
+
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+
+  // Find columns
+  const fc=(...names)=>hdr.findIndex(c=>names.some(n=>c.toLowerCase().replace(/\s/g,'').includes(n.toLowerCase().replace(/\s/g,''))));
+  const storeNameI  = fc('Store Name','storename');
+  const empNameI    = fc('Employee Name','employeename');
+  const ordersI     = fc('Orders');
+  const eligBansI   = fc('Eligible BANs','eligiblebans');
+  const migrI       = fc('Migrations');
+  const migrTgtI    = fc('Migration Target');
+  const migrPctI    = fc('Migrations % to Tgt','migrationspct');
+
+  if(storeNameI<0||ordersI<0){
+    tst2('Cannot find Store Name or Orders columns in MIM report','er');
+    console.log('MIM headers:',hdr);
+    return;
+  }
+
+  // Build store ID → store name map from SR
+  const idMap={};
+  SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+
+  const mimStoreData={};
+  const mimRepData={};  // keyed by NTID (lowercase)
+  let storeMatched=0,repRows=0;
+  const unmatched=[];
+
+  const pn=v=>+(v||'').replace(/[",\s%]/g,'')||0;
+
+  for(let i=1;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<2)continue;
+
+    const rawStore=(cols[storeNameI]||'').replace(/"/g,'').trim();
+    const rawEmp=empNameI>=0?(cols[empNameI]||'').replace(/"/g,'').trim():'';
+
+    if(!rawStore)continue;
+
+    // Extract store ID from "10198293 : 190 Newport Ave"
+    const storeIdM=rawStore.match(/^(\d{7,8})/);
+    if(!storeIdM)continue;
+    const storeId=storeIdM[1];
+    const storeName=idMap[storeId]||idMap[String(+storeId)]||null;
+
+    const orders   = pn(cols[ordersI]);
+    const eligBans = eligBansI>=0?pn(cols[eligBansI]):0;
+    const migr     = migrI>=0?pn(cols[migrI]):0;
+    const migrTgt  = migrTgtI>=0?pn(cols[migrTgtI]):0;
+    const migrPct  = migrPctI>=0?parseFloat((cols[migrPctI]||'').replace(/[",]/g,''))||0:0;
+
+    if(rawEmp==='Total'){
+      // STORE-LEVEL ROW
+      if(!storeName){unmatched.push(storeId);continue;}
+      mimStoreData[storeName]={orders,eligBans,migrations:migr,migrationTarget:migrTgt,migrationPct:migrPct};
+      storeMatched++;
+
+    } else if(rawEmp&&!rawEmp.startsWith('~')){
+      // REP-LEVEL ROW — extract NTID from "Last, First : (ntid)"
+      const ntidM=rawEmp.match(/\(([^)]+)\)\s*$/);
+      const ntid=ntidM?ntidM[1].toLowerCase().trim():null;
+      if(ntid&&ntid!=='~'){
+        mimRepData[ntid]={storeName,orders,eligBans,migrations:migr};
+        repRows++;
+      }
+    }
+    // Skip "~, ~ : (~)" rows silently
+  }
+
+  localStorage.setItem('wfo_mim_data',JSON.stringify({
+    storeData:mimStoreData, repData:mimRepData,
+    loadedAt:new Date().toLocaleString(), fname,
+    storeMatched, repRows, unmatched:unmatched.slice(0,20)
+  }));
+
+  applyMIMToReps();
+  applyMIMToCoachSheet();
+
+  const fnEl=document.getElementById('fnMIM');
+  if(fnEl)fnEl.textContent='✅ '+fname+' — '+storeMatched+' stores + '+repRows+' reps matched';
+  if(unmatched.length)console.warn('MIM unmatched store IDs:',unmatched);
+  tst2('MIM loaded — '+storeMatched+' stores + '+repRows+' reps auto-filled','ok');
+  renR();
+  const cs=document.getElementById('coachSheetSections');
+  if(cs&&cs.innerHTML.trim())renCoachSheet();
+}
+
+
+function getMIMData(){
+  try{return JSON.parse(localStorage.getItem('wfo_mim_data')||'null');}catch{return null;}
+}
+
+function applyMIMToReps(){
+  const mim=getMIMData();
+  if(!mim||!mim.repData)return;
+  // Match by NTID (most reliable) — NTID stored lowercase in mimRepData
+  reps.forEach(r=>{
+    const ntid=(r.ri||'').toLowerCase().trim();
+    const repRow=ntid?mim.repData[ntid]:null;
+    if(repRow){
+      r.mb=repRow.orders||0;  // Orders = MM BANs count
+    }
+  });
+  saveSession();
+}
+
+function applyMIMToCoachSheet(){
+  const mim=getMIMData();
+  if(!mim||!mim.storeData)return;
+  // Store-level Orders = coach MIM spiff basis
+  Object.entries(mim.storeData).forEach(([storeName,d])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    coachSheetData[storeName].mimOrders=d.orders||0;
+    coachSheetData[storeName].eligBans=d.eligBans||0;
+  });
 }
 
 // ── CSV UPLOAD ──
@@ -3956,6 +4258,8 @@ let coachSheetData={}; // {coachName: {actPct, accPerBox, shrinkPct, elbPctile, 
 function renCoachSheet(){
   // Apply ELB data before rendering
   applyELBToCoachSheet();
+  applyRTBDIToCoachSheet();
+  applyMIMToCoachSheet();
   const elbLoaded=!!getELBData();
   const elbObj=getELBData();
   const elbBanner=document.getElementById('coachELBBannerText');
@@ -3968,7 +4272,13 @@ function renCoachSheet(){
   el.innerHTML=COACHES.map(coach=>{
     const sd=coachSheetData[coach]||{};
     const stores=SR.filter(s=>s.c===coach);
-    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    // MIM BANs: sum from MIM store report (store-level Orders) for this coach's stores
+    // Falls back to rep-level mb if MIM report not loaded
+    const mimFromReport=stores.reduce((sum,store)=>{
+      return sum+(coachSheetData[store.s]?.mimOrders||0);
+    },0);
+    const mimFromReps=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    const mimBans=mimFromReport||mimFromReps;
     const mimSpiff=mimBans*ct.mimRate;
     // Calculate bonus
     const doors=+sd.doors||stores.length;
@@ -4976,7 +5286,8 @@ function renCoachSheet(){
                 ${elbLoaded&&!sd.actPct?`<div style="font-size:8px;color:var(--da);font-weight:700">⚠ No ELB match</div>`:''}
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                <input type="number"  value="${sd.accTotal||''}" placeholder="Acc $ Total" min="0" step="0.01" style="${inpStyle}" onchange="setCoachSheet('${store.s}','accTotal',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                <input type="number" value="${sd.accTotal||''}" placeholder="Acc $ Total" min="0" step="0.01" style="${inpStyle};background:${sd.accTotal?'#F0FBF4':'#fff'}" onchange="setCoachSheet('${store.s}','accTotal',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                ${sd.accTotal&&getRTBDIStoreData()?`<div style="font-size:8px;color:var(--ok);font-weight:700">✓ RTBDI</div>`:''}
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
                 <input type="number"  value="${sd.shrinkPct||''}" placeholder="%" min="0" step="0.1" style="${inpStyle};background:${+sd.shrinkPct>5?'#FFEBEE':+sd.shrinkPct>2?'#FFF8E1':'#fff'}" onchange="setCoachSheet('${store.s}','shrinkPct',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
@@ -4986,7 +5297,8 @@ function renCoachSheet(){
                 ${elbLoaded&&sd.elbRank?`<div style="font-size:8px;color:${+sd.elbRank>=3368?'var(--da)':'var(--ok)'};font-weight:700">${+sd.elbRank>=3368?'🚫 DQ':'✓ Metro'}</div>`:''}
               </td>
               <td style="padding:4px 6px;text-align:center;background:#FFFDF0">
-                <input type="number"  value="${sd.totalBoxes||''}" placeholder="0" min="0" style="${inpStyle}" onchange="setCoachSheet('${store.s}','totalBoxes',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                <input type="number" value="${sd.totalBoxes||''}" placeholder="0" min="0" style="${inpStyle};background:${sd.totalBoxes?'#F0FBF4':'#fff'}" onchange="setCoachSheet('${store.s}','totalBoxes',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
+                ${sd.totalBoxes&&getRTBDIStoreData()?`<div style="font-size:8px;color:var(--ok);font-weight:700">✓ RTBDI</div>`:''}
               </td>
               <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--ok)">$${res.actBonus.toFixed(2)}</strong>${res.actPct>0&&res.actPct<100?`<div style="font-size:8px;color:var(--da)">Under 100%</div>`:''}</td>
               <td style="padding:5px 10px;text-align:center;background:#F0FBF4"><strong style="color:var(--se)">$${res.accBonus.toFixed(2)}</strong><div style="font-size:8px;color:var(--mu)">${res.accPerBox>0?'$'+res.accPerBox.toFixed(2)+'/box':''}</div></td>
