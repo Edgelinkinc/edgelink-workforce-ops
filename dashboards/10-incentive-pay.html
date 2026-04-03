@@ -511,6 +511,10 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="si si-solo" data-page="pg-employee" onclick="goPage('pg-employee',this)"><span class="ic">💵</span><span class="si-label">My Bonus</span></div>
   </div>
 
+  <div class="sg-wrap">
+    <div class="si si-solo" data-page="pg-coach-payout" onclick="goPage('pg-coach-payout',this)"><span class="ic">🎯</span><span class="si-label">Coach Payout</span></div>
+  </div>
+
   <!-- ADMIN — standalone -->
   <div class="sg-wrap">
     <div class="si si-solo" data-page="pg-admin" onclick="goPage('pg-admin',this)"><span class="ic">🔐</span><span class="si-label">Admin Center</span></div>
@@ -1025,7 +1029,9 @@ body.page-pg-assign .week-bar{display:none!important;}
       </div>
       <div id="mgrFlyerInline"></div>
     </div>
-      <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
+  </div><!-- /pg-managers -->
+
+  <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
   <div class="page" id="pg-coaches">
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
@@ -1362,6 +1368,124 @@ body.page-pg-assign .week-bar{display:none!important;}
     </div></div>
   </div>
 
+
+
+  <!-- ════════════════════ COACH BONUS PAYOUT ════════════════════ -->
+  <div class="page" id="pg-coach-payout">
+    <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:12px;padding:18px 22px;margin-bottom:20px;color:#fff">
+      <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px">🎯 Coach Bonus Payout</div>
+      <div style="font-size:12px;opacity:.75;margin-top:4px">Per-store breakdown + MIM spiff by coach and period</div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px">
+      <div class="fi" style="min-width:180px">
+        <label>Coach</label>
+        <select id="cpCoachSel" onchange="renCoachPayout()" style="padding:9px 12px;border:2px solid var(--bo);border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;width:100%">
+          <option value="">— Select Coach —</option>
+        </select>
+      </div>
+      <div class="fi" style="min-width:160px">
+        <label>Store Bonus Month</label>
+        <input type="month" id="cpBonusMonth" onchange="renCoachPayout()" style="padding:9px 12px;border:2px solid var(--bo);border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;width:100%"/>
+      </div>
+      <div class="fi" style="min-width:160px">
+        <label>MIM Spiff Month</label>
+        <input type="month" id="cpMimMonth" onchange="renCoachPayout()" style="padding:9px 12px;border:2px solid var(--bo);border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;width:100%"/>
+      </div>
+      <button class="btn bp sm" onclick="generateCoachPayoutSlip()" style="margin-bottom:2px">🖨 Print Slip</button>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="cpEmpty" style="text-align:center;padding:60px 20px;color:var(--mu)">
+      <div style="font-size:48px;margin-bottom:12px">🎯</div>
+      <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:var(--se);margin-bottom:8px">Select a coach and months above</div>
+      <div style="font-size:13px">Upload ELB + RTBDI data in Admin → Data Management first</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="cpContent" style="display:none">
+
+      <!-- SECTION 1: STORE BONUS -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hdr" style="background:var(--se)">
+          <div class="card-title">🏪 Store Bonus Breakdown</div>
+          <div id="cpBonusPeriodLabel" style="font-size:12px;color:rgba(255,255,255,.7)"></div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="tw">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="background:var(--thb)">
+                  <th style="padding:8px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--se)">Store</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--se)">Tier</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--se)">Act %</th>
+                  <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--mu);text-transform:uppercase;border-bottom:2px solid var(--se)">Acc $</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--mu);text-transform:uppercase;border-bottom:2px solid var(--se)">PPD</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--mu);text-transform:uppercase;border-bottom:2px solid var(--se)">Acc/Box</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--mu);text-transform:uppercase;border-bottom:2px solid var(--se)">Shrink</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--mu);text-transform:uppercase;border-bottom:2px solid var(--se)">ELB</th>
+                  <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--se)">Act Bonus</th>
+                  <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--se);text-transform:uppercase;border-bottom:2px solid var(--se)">Acc Bonus</th>
+                  <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--se)">Store Total</th>
+                </tr>
+              </thead>
+              <tbody id="cpStoreRows"></tbody>
+              <tfoot id="cpStoreFoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: MIM SPIFF -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hdr" style="background:var(--ok)">
+          <div class="card-title">📱 MIM Spiff</div>
+          <div id="cpMimPeriodLabel" style="font-size:12px;color:rgba(255,255,255,.7)"></div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="tw">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead>
+                <tr style="background:var(--thb)">
+                  <th style="padding:8px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--ok)">Store</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--ok)">Manager</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--ok)">BANs</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--ok)">Rate</th>
+                  <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--ok)">MIM Payout</th>
+                </tr>
+              </thead>
+              <tbody id="cpMimRows"></tbody>
+              <tfoot id="cpMimFoot"></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: GRAND TOTAL -->
+      <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:12px;padding:20px 24px;display:flex;flex-wrap:wrap;gap:20px;align-items:center">
+        <div style="flex:1;min-width:180px">
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:#fff" id="cpCoachNameTotal">Coach</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px" id="cpPeriodSummary"></div>
+        </div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-size:9px;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:700">Store Bonus</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:20px;color:#fff" id="cpTotalBonus">$0.00</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:9px;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:700">MIM Spiff</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:20px;color:#fff" id="cpTotalMim">$0.00</div>
+          </div>
+          <div style="text-align:center;border-left:1px solid rgba(255,255,255,.3);padding-left:24px">
+            <div style="font-size:9px;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:700">Total Payout</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:28px;color:#E20074" id="cpGrandTotal">$0.00</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /cpContent -->
+  </div><!-- /pg-coach-payout -->
 
   <div class="page" id="pg-admin">
     <!-- PIN GATE -->
@@ -2333,6 +2457,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(mgrLbl)mgrLbl.textContent=formatPeriod(_mn);
 
   const cmp=document.getElementById('coachMimPayMonth');if(cmp&&!cmp.value)cmp.value=_mn;
+  // Init coach payout defaults (done on navigate)
+
   const msm=document.getElementById('mgrSheetMonthIn');if(msm&&!msm.value)msm.value=_mn;
   // Also set admin lock month pickers
   const aml=document.getElementById('adminMgrLockMonth');if(aml&&!aml.value)aml.value=_mn;
@@ -2340,7 +2466,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const abm=document.getElementById('aBsMonth');if(abm&&!abm.value)abm.value=_mn;
   // Always start on home page if no session or if session is pg-admin/pg-history
   const _stored=sessionStorage.getItem("wfo_page");
-  const _skipPages=['pg-admin','pg-history','pg-roster','pg-assign'];
+  const _skipPages=['pg-admin','pg-history','pg-roster','pg-assign','pg-reps','pg-managers','pg-coaches'];
   const last=(!_stored||_skipPages.includes(_stored))?'pg-home':_stored;
   // Set initial body page class
   document.body.classList.add('page-'+last);
@@ -2371,7 +2497,7 @@ document.addEventListener('keydown', function(e){
 });
 
 function pinSubmit(){
-  if(_pinEntry===PIN){_pinUnlocked=true;document.getElementById("pinOv").classList.remove("open");_pinEntry="";updPinDots();const _ps=document.getElementById("pinStatus");if(_ps){_ps.textContent="✅ Admin Mode — Editing ON";_ps.style.background="var(--ok)";_ps.style.color="#fff";}if(_pinCb){const cb=_pinCb;_pinCb=null;cb();}clearTimeout(_renTimer);_renTimer=setTimeout(()=>{renR();if(typeof updSheetStatus==="function")updSheetStatus();},80);}
+  if(_pinEntry===PIN){_pinUnlocked=true;document.body.classList.add("admin-unlocked");document.getElementById("pinOv").classList.remove("open");_pinEntry="";updPinDots();const _ps=document.getElementById("pinStatus");if(_ps){_ps.textContent="✅ Admin Mode — Editing ON";_ps.style.background="var(--ok)";_ps.style.color="#fff";}if(_pinCb){const cb=_pinCb;_pinCb=null;cb();}clearTimeout(_renTimer);_renTimer=setTimeout(()=>{renR();if(typeof updSheetStatus==="function")updSheetStatus();},80);}
   else{document.getElementById("pinErr").textContent="Incorrect PIN. Try again.";document.getElementById("pinBox").classList.add("shake");setTimeout(()=>document.getElementById("pinBox").classList.remove("shake"),350);_pinEntry="";updPinDots();}
 }
 function pinClear(){_pinEntry="";updPinDots();document.getElementById("pinErr").textContent="";}
@@ -2380,6 +2506,13 @@ function updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+
 
 // ── PAGE NAV ──
 function goPage(id,el){
+  // Admin-only pages require PIN
+  const adminOnlyPages=['pg-reps','pg-managers','pg-coaches'];
+  if(adminOnlyPages.includes(id)&&!_pinUnlocked){
+    // Show PIN overlay, navigate after unlock
+    requirePin(()=>goPage(id,el));
+    return;
+  }
   // Disable browser scroll restoration and reset immediately
   if(history.scrollRestoration)history.scrollRestoration='manual';
   const _cont=document.querySelector('.content');
@@ -2398,6 +2531,7 @@ function goPage(id,el){
   if(id==="pg-leaderboard")renLB();
   if(id==="pg-summary")renSum();
   if(id==="pg-managers"){const _cm=document.querySelector('.content');if(_cm)_cm.scrollTop=0;renMgrOverview();requestAnimationFrame(()=>{if(_cm)_cm.scrollTop=0;});}
+  if(id==="pg-coach-payout"){initCoachPayoutPage();renCoachPayout();}
   if(id==="pg-coaches"){
     renCoachOv();
     renCoachMim();
@@ -3498,6 +3632,214 @@ function adA(i){
   cont.appendChild(row);
 }
 let coachMimPayLocked=false;
+
+
+// ══════════════════════════════════════════════════════
+// COACH BONUS PAYOUT PAGE
+// Shows per-store store bonus + MIM spiff for a selected coach
+// Two separate month pickers — store bonus month and MIM month
+// ══════════════════════════════════════════════════════
+
+function initCoachPayoutPage(){
+  // Populate coach dropdown
+  const sel=document.getElementById('cpCoachSel');
+  if(!sel)return;
+  // Keep default empty option
+  while(sel.options.length>1)sel.remove(1);
+  COACHES.forEach(c=>{
+    const opt=document.createElement('option');
+    opt.value=c;opt.textContent=c;
+    sel.appendChild(opt);
+  });
+  // Set default months
+  const mn=defaultMonth();
+  const bm=document.getElementById('cpBonusMonth');
+  const mm=document.getElementById('cpMimMonth');
+  if(bm&&!bm.value)bm.value=mn;
+  if(mm&&!mm.value)mm.value=mn;
+}
+
+function renCoachPayout(){
+  const coach=document.getElementById('cpCoachSel')?.value;
+  const bonusMn=document.getElementById('cpBonusMonth')?.value;
+  const mimMn=document.getElementById('cpMimMonth')?.value;
+  const empty=document.getElementById('cpEmpty');
+  const content=document.getElementById('cpContent');
+  if(!coach||!bonusMn){
+    if(empty)empty.style.display='block';
+    if(content)content.style.display='none';
+    return;
+  }
+  if(empty)empty.style.display='none';
+  if(content)content.style.display='block';
+
+  const srBs=getSR_BS();
+  const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+  const ct=T.coach||DT.coach;
+
+  // ── Load coach sheet data for bonus month ──
+  let bsd={};
+  try{bsd=JSON.parse(localStorage.getItem('wfo_coach_sheet_'+bonusMn)||'{}');}catch{}
+  // Apply uploads if matching period
+  const elbPeriod=getELBData()?.period;
+  const rtbdiPeriod=getRTBDIStoreData()?.period;
+  if(elbPeriod===bonusMn)applyELBToCoachSheet();
+  if(rtbdiPeriod===bonusMn)applyRTBDIToCoachSheet();
+  // Merge: uploaded data takes priority for matching period
+  stores.forEach(s=>{
+    if(!bsd[s.s])bsd[s.s]={};
+    const live=coachSheetData[s.s]||{};
+    if(elbPeriod===bonusMn)Object.assign(bsd[s.s],live);
+  });
+
+  // ── STORE BONUS TABLE ──
+  const bonusLabel=document.getElementById('cpBonusPeriodLabel');
+  if(bonusLabel)bonusLabel.textContent=formatPeriod(bonusMn);
+
+  let totalAct=0,totalAcc=0,totalKick=0;
+  const storeRows=stores.map((store,si)=>{
+    const sd=bsd[store.s]||{};
+    const res=calcStoreCoachBonus(store.s,sd);
+    totalAct+=res.actBonus;totalAcc+=res.accBonus;totalKick+=res.kicker||0;
+    const accPerBox=+sd.totalBoxes>0?(+sd.accTotal/+sd.totalBoxes):0;
+    const elbOk=+sd.elbRank>0&&+sd.elbRank<(T.elbDQ||DT.elbDQ||3368);
+    return`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 12px;font-weight:700;color:var(--se);white-space:nowrap">${X(store.s)}</td>
+      <td style="padding:7px 8px;text-align:center"><span class="bdg ${store.tier===1?'bok2':'bno'}" style="font-size:9px">${store.me}</span></td>
+      <td style="padding:7px 8px;text-align:center;font-weight:700;color:${+sd.actPct>=100?'var(--ok)':'var(--da)'}">${sd.actPct?sd.actPct.toFixed(1)+'%':'—'}</td>
+      <td style="padding:7px 8px;text-align:right">${sd.accTotal?'$'+(+sd.accTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
+      <td style="padding:7px 8px;text-align:center">${sd.totalBoxes||'—'}</td>
+      <td style="padding:7px 8px;text-align:center">${accPerBox>0?'$'+accPerBox.toFixed(2):'—'}</td>
+      <td style="padding:7px 8px;text-align:center">${sd.shrinkPct?sd.shrinkPct+'%':'—'}</td>
+      <td style="padding:7px 8px;text-align:center;color:${elbOk?'var(--ok)':'var(--da)'};font-size:11px">${sd.elbRank||'—'}</td>
+      <td style="padding:7px 8px;text-align:right;font-weight:700;color:var(--pr)">$${res.actBonus.toFixed(2)}</td>
+      <td style="padding:7px 8px;text-align:right;font-weight:700;color:var(--se)">$${res.accBonus.toFixed(2)}</td>
+      <td style="padding:7px 8px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;color:${res.total>0?'var(--ok)':'var(--mu)'}">$${res.total.toFixed(2)}</td>
+    </tr>${res.guardrails.length?`<tr><td colspan="11" style="padding:3px 12px;font-size:9px;color:var(--da)">⚠ ${res.guardrails.join(' · ')}</td></tr>`:''}`;
+  }).join('');
+
+  const storeFoot=`<tr style="background:var(--se)">
+    <td colspan="8" style="padding:9px 12px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#fff">Store Bonus Total</td>
+    <td style="padding:9px 8px;text-align:right;font-weight:700;color:#fff">$${totalAct.toFixed(2)}</td>
+    <td style="padding:9px 8px;text-align:right;font-weight:700;color:#fff">$${totalAcc.toFixed(2)}</td>
+    <td style="padding:9px 8px;text-align:right;font-family:'Poppins',sans-serif;font-weight:900;font-size:15px;color:#E20074">$${(totalAct+totalAcc+totalKick).toFixed(2)}</td>
+  </tr>`;
+
+  const sr=document.getElementById('cpStoreRows');if(sr)sr.innerHTML=storeRows;
+  const sf=document.getElementById('cpStoreFoot');if(sf)sf.innerHTML=storeFoot;
+
+  // ── MIM SPIFF TABLE ──
+  const mimLabel=document.getElementById('cpMimPeriodLabel');
+  if(mimLabel)mimLabel.textContent=formatPeriod(mimMn||bonusMn);
+
+  const mimData=getCoachMimPayData(mimMn||bonusMn);
+  const mimRate=+document.getElementById('coachMimPayRate')?.value||ct.mimRate||10;
+  let totalMim=0;
+
+  const mimRows=stores.map((store,si)=>{
+    const storeData=mimData?.stores?.[store.s];
+    const bans=storeData?(storeData.overrideOrders??storeData.orders??0):0;
+    const payout=bans*mimRate;
+    totalMim+=payout;
+    const mgr=srBs[store.s]?.mgr||store.mgr||'—';
+    return`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:7px 12px;font-weight:700;color:var(--se)">${X(store.s)}</td>
+      <td style="padding:7px 10px;font-size:11px;color:var(--mu)">${X(mgr)}</td>
+      <td style="padding:7px 10px;text-align:center;font-weight:700;font-size:15px">${bans||'—'}</td>
+      <td style="padding:7px 10px;text-align:center;color:var(--mu)">$${mimRate}/BAN</td>
+      <td style="padding:7px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;color:${payout>0?'var(--ok)':'var(--mu)'}">$${payout.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  const mimFoot=`<tr style="background:var(--ok)">
+    <td colspan="4" style="padding:9px 12px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#fff">MIM Spiff Total</td>
+    <td style="padding:9px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:900;font-size:15px;color:#fff">$${totalMim.toFixed(2)}</td>
+  </tr>`;
+
+  const mr=document.getElementById('cpMimRows');if(mr)mr.innerHTML=mimRows;
+  const mf=document.getElementById('cpMimFoot');if(mf)mf.innerHTML=mimFoot;
+
+  // ── GRAND TOTAL ──
+  const storeBonus=totalAct+totalAcc+totalKick;
+  const grand=storeBonus+totalMim;
+  const u=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  u('cpCoachNameTotal',coach);
+  u('cpPeriodSummary','Store: '+formatPeriod(bonusMn)+(mimMn&&mimMn!==bonusMn?' · MIM: '+formatPeriod(mimMn):''));
+  u('cpTotalBonus','$'+storeBonus.toFixed(2));
+  u('cpTotalMim','$'+totalMim.toFixed(2));
+  u('cpGrandTotal','$'+grand.toFixed(2));
+}
+
+function generateCoachPayoutSlip(){
+  const coach=document.getElementById('cpCoachSel')?.value;
+  const bonusMn=document.getElementById('cpBonusMonth')?.value;
+  const mimMn=document.getElementById('cpMimMonth')?.value||bonusMn;
+  if(!coach||!bonusMn){tst2('Select a coach and month first','er');return;}
+
+  // Collect current rendered data
+  const storeTable=document.getElementById('cpStoreRows')?.innerHTML||'';
+  const storeFoot=document.getElementById('cpStoreFoot')?.innerHTML||'';
+  const mimTable=document.getElementById('cpMimRows')?.innerHTML||'';
+  const mimFoot=document.getElementById('cpMimFoot')?.innerHTML||'';
+  const grand=document.getElementById('cpGrandTotal')?.textContent||'$0.00';
+  const storeTotal=document.getElementById('cpTotalBonus')?.textContent||'$0.00';
+  const mimTotal=document.getElementById('cpTotalMim')?.textContent||'$0.00';
+
+  const html=`<!DOCTYPE html><html><head><title>Coach Payout — ${coach}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#1A1A1A;padding:20px;}
+    .header{background:#4A1A6B;color:#fff;padding:16px 22px;border-radius:8px 8px 0 0;}
+    .header h1{font-size:18px;font-weight:800;}
+    .header h2{font-size:13px;font-weight:400;opacity:.8;margin-top:3px;}
+    .meta{background:#F3E8FF;padding:10px 20px;display:flex;gap:24px;flex-wrap:wrap;border-bottom:2px solid #6E2B8B;margin-bottom:16px;}
+    .meta div label{font-size:9px;font-weight:700;text-transform:uppercase;color:#6E2B8B;display:block;}
+    .meta div span{font-size:13px;font-weight:700;}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px;}
+    th{background:#F3E8FF;color:#6E2B8B;font-weight:700;font-size:9px;text-transform:uppercase;padding:6px 8px;border-bottom:2px solid #6E2B8B;text-align:left;}
+    td{padding:6px 8px;border-bottom:1px solid #E8E8E8;}
+    tr:nth-child(even) td{background:#FAFAFA;}
+    .section-hdr{font-family:'Segoe UI',sans-serif;font-weight:800;font-size:13px;color:#6E2B8B;margin:16px 0 8px;}
+    .grand{background:#4A1A6B;color:#fff;padding:16px 22px;border-radius:8px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;}
+    .grand .item label{font-size:9px;opacity:.7;font-weight:700;text-transform:uppercase;display:block;}
+    .grand .item span{font-size:18px;font-weight:800;}
+    .grand .total span{font-size:26px;font-weight:900;color:#E20074;}
+    .footer{margin-top:14px;font-size:9px;color:#666;text-align:center;border-top:1px solid #E8E8E8;padding-top:8px;}
+    @media print{.no-print{display:none;}}
+  </style></head><body>
+  <div class="no-print" style="margin-bottom:12px">
+    <button onclick="window.print()" style="background:#E20074;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer">🖨 Print / Save PDF</button>
+    <button onclick="window.close()" style="background:#666;color:#fff;border:none;padding:8px 14px;border-radius:6px;margin-left:8px;cursor:pointer">✕ Close</button>
+  </div>
+  <div class="header">
+    <h1>EDGELINK INC — WORK FORCE OPS</h1>
+    <h2>Coach Bonus Payout · ${coach}</h2>
+  </div>
+  <div class="meta">
+    <div><label>Coach</label><span>${coach}</span></div>
+    <div><label>Store Bonus Period</label><span>${formatPeriod(bonusMn)}</span></div>
+    <div><label>MIM Spiff Period</label><span>${formatPeriod(mimMn)}</span></div>
+    <div><label>Generated</label><span>${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></div>
+  </div>
+  <div class="section-hdr">🏪 Store Bonus Breakdown</div>
+  <table><thead><tr>
+    <th>Store</th><th>Tier</th><th>Act %</th><th>Acc $</th><th>PPD</th><th>Acc/Box</th><th>Shrink</th><th>ELB</th><th>Act Bonus</th><th>Acc Bonus</th><th>Total</th>
+  </tr></thead><tbody>${storeTable}</tbody><tfoot>${storeFoot}</tfoot></table>
+  <div class="section-hdr">📱 MIM Spiff</div>
+  <table><thead><tr>
+    <th>Store</th><th>Manager</th><th>BANs</th><th>Rate</th><th>MIM Payout</th>
+  </tr></thead><tbody>${mimTable}</tbody><tfoot>${mimFoot}</tfoot></table>
+  <div class="grand">
+    <div class="item"><label>Store Bonus</label><span>${storeTotal}</span></div>
+    <div class="item"><label>MIM Spiff</label><span>${mimTotal}</span></div>
+    <div class="item total" style="margin-left:auto;border-left:1px solid rgba(255,255,255,.3);padding-left:24px"><label>Total Payout</label><span>${grand}</span></div>
+  </div>
+  <div class="footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${formatPeriod(bonusMn)}</div>
+  </body></html>`;
+
+  const w=window.open('','_blank','width=1000,height=750');
+  w.document.write(html);w.document.close();
+}
 
 // ── CSV UPLOAD ──
 function handleAdminDrop(e,src,dzId){
@@ -5118,6 +5460,7 @@ function adminPinClear(){_adminPinEntry='';updAdminPinDots();document.getElement
 function adminPinSubmit(){
   if(_adminPinEntry===PIN){
     _pinUnlocked=true;
+    document.body.classList.add('admin-unlocked');
     document.getElementById('adminGate').style.display='none';
     document.getElementById('adminContent').style.display='block';
     _adminPinEntry='';updAdminPinDots();
@@ -5146,6 +5489,7 @@ function toggleMobileMenu(){
 
 function adminLockOut(){
   _pinUnlocked=false;
+  document.body.classList.remove('admin-unlocked');
   document.getElementById('adminGate').style.display='flex';
   document.getElementById('adminContent').style.display='none';
   _adminPinEntry='';updAdminPinDots();
@@ -7604,6 +7948,7 @@ function getStoreMgrGuaranteePayout(storeName){
     <button class="bn" onclick="goPage('pg-managers',this)" data-page="pg-managers"><span class="bn-ic">🏢</span><span class="bn-lbl">Mgrs</span></button>
     <button class="bn" onclick="goPage('pg-coaches',this)" data-page="pg-coaches"><span class="bn-ic">🎯</span><span class="bn-lbl">Coaches</span></button>
     <button class="bn" onclick="goPage('pg-employee',this)" data-page="pg-employee"><span class="bn-ic">💵</span><span class="bn-lbl">My Bonus</span></button>
+class="bn" onclick="goPage('pg-coach-payout',this)" data-page="pg-coach-payout"><span class="bn-ic">💵</span><span class="bn-lbl">Coach Payout</span></button>
     <button class="bn" onclick="toggleMobileMenu()" id="moreBtn"><span class="bn-ic">☰</span><span class="bn-lbl">More</span></button>
   </nav>
   <!-- MOBILE MORE MENU -->
