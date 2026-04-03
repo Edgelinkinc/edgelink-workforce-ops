@@ -1052,32 +1052,52 @@ body.page-pg-assign .week-bar{display:none!important;}
 
     <!-- OVERVIEW -->
     <div class="sub-pane active" id="coach-overview">
-      <div class="card"><div class="card-hdr"><div class="card-title">🎯 Coach Bonus Overview</div></div>
-        <div class="card-body" style="min-height:200px">
-          <div id="coachOvDataBanner" style="display:none;background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#8a6000">
-            ⚡ Upload ELB + RTBDI reports in Admin → Data Management to populate bonus data. Select a month in Breakdown &amp; Payouts first.
-          </div>
-          <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:16px">
-            <div class="kc kcg"><div class="kl">Total Coach Gross</div><div class="kv" id="ck-gross">$—</div><div class="ks">all coaches</div></div>
-            <div class="kc kct"><div class="kl">MIM Spiff Total</div><div class="kv" id="ck-mim">$—</div><div class="ks">$10/BAN</div></div>
-            <div class="kc kcp"><div class="kl">Kicker Earned</div><div class="kv" id="ck-kick">$—</div><div class="ks">company-wide</div></div>
-            <div class="kc kcw"><div class="kl">Guardrails Hit</div><div class="kv" id="ck-guard">—</div><div class="ks">this period</div></div>
-          </div>
-          <div class="tw"><table style="width:100%;border-collapse:collapse;font-size:12px">
-            <thead><tr style="background:var(--thb)">
-              <th style="padding:7px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Coach</th>
-              <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Stores</th>
-              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr)">Act Bonus</th>
-              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--se);text-transform:uppercase;border-bottom:2px solid var(--pr)">Acc Bonus</th>
-              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr)">MIM Spiff</th>
-              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Kicker</th>
-              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr)">Total</th>
-              <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Status</th>
-            </tr></thead>
-            <tbody id="coach-ov-body"></tbody>
-          </table></div>
-        </div>
+      <div class="card"><div class="card-hdr" style="background:var(--se)">
+        <div class="card-title">🎯 Coach Bonus Overview</div>
       </div>
+      <div class="card-body">
+
+        <!-- MONTH PICKERS -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;padding:14px 16px;background:#F8F8F8;border-radius:10px;border:1px solid var(--bo)">
+          <div class="fi" style="min-width:160px;margin-bottom:0">
+            <label style="font-size:11px;font-weight:700;color:var(--se)">Bonus Month</label>
+            <input type="month" id="coachOvBonusMonth" onchange="renCoachOv()"
+              style="padding:8px 12px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;width:100%"/>
+          </div>
+          <div class="fi" style="min-width:160px;margin-bottom:0">
+            <label style="font-size:11px;font-weight:700;color:var(--ok)">MIM Spiff Month</label>
+            <input type="month" id="coachOvMimMonth" onchange="renCoachOv()"
+              style="padding:8px 12px;border:2px solid var(--bo);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;width:100%"/>
+          </div>
+          <div id="coachOvDataBanner" style="display:none;background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+            ⚡ Upload ELB + RTBDI in Admin → Data Management first
+          </div>
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:16px">
+          <div class="kc kcg"><div class="kl">Total Coach Gross</div><div class="kv" id="ck-gross">$—</div><div class="ks">all coaches</div></div>
+          <div class="kc kct"><div class="kl">MIM Spiff Total</div><div class="kv" id="ck-mim">$—</div><div class="ks" id="ck-mim-sub">$10/BAN</div></div>
+          <div class="kc kcp"><div class="kl">Kicker Earned</div><div class="kv" id="ck-kick">$—</div><div class="ks">company-wide</div></div>
+          <div class="kc kcw"><div class="kl">Guardrails Hit</div><div class="kv" id="ck-guard">—</div><div class="ks">this period</div></div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="tw"><table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--thb)">
+            <th style="padding:8px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);min-width:140px">Coach</th>
+            <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);width:70px">Stores</th>
+            <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr);width:100px">Act Bonus</th>
+            <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--se);text-transform:uppercase;border-bottom:2px solid var(--pr);width:100px">Acc Bonus</th>
+            <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr);width:100px">MIM Spiff</th>
+            <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--mu);text-transform:uppercase;border-bottom:2px solid var(--pr);width:100px">Kicker</th>
+            <th style="padding:8px 10px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr);width:110px">Total</th>
+            <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);width:90px">Status</th>
+          </tr></thead>
+          <tbody id="coach-ov-body"></tbody>
+        </table></div>
+
+      </div></div>
     </div>
 
     <!-- BREAKDOWN & PAYOUTS -->
@@ -2946,7 +2966,7 @@ function renCoachOv(){
   if(_ovMn&&_spRp===_ovMn)applyRTBDIToCoachSheet();
   if(_ovMn&&_spMp&&_spMp===_ovMn)applyMIMToCoachSheet();
   let tGross=0,tMim=0,tKick=0,tGuard=0;
-  body.innerHTML=COACHES.map(coach=>{
+  body.innerHTML=COACHES.map((coach,ci)=>{
     const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
     let actBonus=0,accBonus=0,kicker=0,guardrails=[];let hasData=false;
     stores.forEach(store=>{
@@ -2965,15 +2985,15 @@ function renCoachOv(){
     const hasGuard=guardrails.length>0;
     tGross+=gross;tMim+=mimSpiff;tKick+=kicker;if(hasGuard)tGuard++;
     const status=!hasData?'<span class="bdg bno">No Data</span>':hasGuard?'<span class="bdg bfl">Guardrail</span>':'<span class="bdg bok2">Clean</span>';
-    return`<tr>
-      <td style="font-weight:700;color:var(--se)">${coach}</td>
-      <td style="text-align:center">${stores.length}</td>
-      <td style="font-weight:700;color:var(--pr)">${hasData?'$'+actBonus.toFixed(2):'—'}</td>
-      <td style="font-weight:700;color:var(--se)">${hasData?'$'+accBonus.toFixed(2):'—'}</td>
-      <td style="font-weight:700;color:var(--ok)">$${mimSpiff.toFixed(2)}</td>
-      <td>${kicker>0?'$'+kicker.toFixed(2):'$0.00'}</td>
-      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${total.toFixed(2)}</td>
-      <td>${status}</td>
+    return`<tr style="border-bottom:1px solid var(--bo);background:${ci%2===0?'#fff':'#FAFAFA'}">
+      <td style="padding:8px 12px;font-weight:700;color:var(--se)">${coach}</td>
+      <td style="padding:8px 10px;text-align:center">${stores.length}</td>
+      <td style="padding:8px 10px;text-align:right;font-weight:700;color:${hasData?'var(--pr)':'var(--mu)'}">${hasData?'$'+actBonus.toFixed(2):'—'}</td>
+      <td style="padding:8px 10px;text-align:right;font-weight:700;color:${hasData?'var(--se)':'var(--mu)'}">${hasData?'$'+accBonus.toFixed(2):'—'}</td>
+      <td style="padding:8px 10px;text-align:right;font-weight:700;color:${mimSpiff>0?'var(--ok)':'var(--mu)'}">$${mimSpiff.toFixed(2)}</td>
+      <td style="padding:8px 10px;text-align:right;color:${kicker>0?'#00897B':'var(--mu)'}">${kicker>0?'$'+kicker.toFixed(2):'$0.00'}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${total.toFixed(2)}</td>
+      <td style="padding:8px 10px;text-align:center">${status}</td>
     </tr>`;
   }).join('');
   const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
