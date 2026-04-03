@@ -2266,6 +2266,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   window._mgrSheetCurrentMonth=_mn;
   loadMgrSheetForPeriod(_mn);
   applyELBToMgrSheet();
+  applyRTBDIToMgrSheet();
   const mgrLbl=document.getElementById('mgrSheetMonth');
   if(mgrLbl)mgrLbl.textContent=formatPeriod(_mn);
 
@@ -3189,6 +3190,7 @@ function parseRTBDIStore(content, fname){
     existing.period=period;
     localStorage.setItem('wfo_rtbdi_store',JSON.stringify(existing));
     applyRTBDIToCoachSheet();
+    applyRTBDIToMgrSheet();
     const fnEl=document.getElementById('fnRTBDIStore');
     if(matched>0){
       if(fnEl)fnEl.innerHTML='<span style="color:var(--ok)">✅ '+fname+' — '+matched+' stores · <strong>'+formatPeriod(period)+'</strong></span>';
@@ -3232,6 +3234,17 @@ function applyRTBDIToCoachSheet(){
     if(v.ppd)sd.totalBoxes=v.ppd;
     else if(v.boxes)sd.totalBoxes=v.boxes; // fallback to Boxes column
     // acc/box is calculated in renCoachSheet from accTotal ÷ totalBoxes (PPD)
+  });
+}
+
+function applyRTBDIToMgrSheet(){
+  const d=getRTBDIStoreData();
+  if(!d||!d.data)return;
+  Object.entries(d.data).forEach(([storeName,v])=>{
+    if(!mgrSheetData[storeName])mgrSheetData[storeName]={};
+    const sd=mgrSheetData[storeName];
+    // Acc $ actual from RTBDI — same data coaches use
+    if(v.accTotal)sd['acc']=v.accTotal;
   });
 }
 
@@ -5059,14 +5072,16 @@ function onMgrSheetMonth(){
   // Update display label
   const b=document.getElementById('mgrSheetMonth');
   if(b)b.textContent=formatPeriod(mn);
-  // Re-apply ELB data for this period
+  // Re-apply ELB + RTBDI data for this period
   applyELBToMgrSheet();
+  applyRTBDIToMgrSheet();
   renMgrSheet();
   tst2('Loaded manager data for '+formatPeriod(mn),'ok');
 }
 function renMgrSheet(){
-  // Apply ELB data before rendering
+  // Apply ELB + RTBDI data before rendering
   applyELBToMgrSheet();
+  applyRTBDIToMgrSheet();
   const elbLoaded=!!getELBData();
   const elbObj=getELBData();
   // Update ELB banner if present
@@ -5142,7 +5157,7 @@ function renMgrSheet(){
           <input type="number" min="0" step="0.01" value="${sd[cat.id]||''}" placeholder="actual" style="width:80px;padding:4px 6px;border:1px solid ${act>0?'var(--bo)':'var(--wa)'};border-radius:5px;font-size:11px;font-family:'Nunito',sans-serif;outline:none;text-align:center;background:${act>0?(hit?'#F0FBF4':'#FFF5F5'):'#fff'}" onchange="setMgrSheet('${store.s}','${cat.id}',this.value)" onfocus="this.style.borderColor='var(--pr)'" onblur="this.style.borderColor='var(--bo)'"/>
           ${tgt?`<div style="font-size:8px;color:var(--mu);margin-top:1px">tgt: ${tgt}</div>`:''}
           ${act>0&&cat.id!=='acc'?`<div style="font-size:8px;color:var(--ok);font-weight:700">✓ ELB</div>`:''}
-          ${cat.id==='acc'&&!act?`<div style="font-size:8px;color:var(--wa);font-weight:700">Enter actual ↑</div>`:''}
+          ${cat.id==='acc'&&act?`<div style="font-size:8px;color:var(--ok);font-weight:700">✓ RTBDI</div>`:cat.id==='acc'&&!act?`<div style="font-size:8px;color:var(--wa);font-weight:700">No RTBDI data</div>`:''}
         </td>`;
       }).join('')}
       <td style="padding:5px 10px;text-align:center;background:${bonus>0?'#F0FBF4':'#FFF5F5'}"><strong style="font-family:'Poppins',sans-serif;font-size:13px;color:${isGuar?'var(--pr)':bonus>0?'var(--ok)':'var(--mu)'}">$${bonus.toFixed(2)}</strong>
