@@ -3180,13 +3180,33 @@ function clearELBData(){
 function applyELBToCoachSheet(){
   const elb=getELBData();
   if(!elb||!elb.data)return;
+  // Write per-store data for store-level access
   Object.entries(elb.data).forEach(([storeName,d])=>{
     if(!coachSheetData[storeName])coachSheetData[storeName]={};
     const sd=coachSheetData[storeName];
     if(d.elbRank)sd.elbRank=d.elbRank;
-    if(d.actPct)sd.actPct=d.actPct;
+    if(d.actPct!==undefined)sd.actPct=d.actPct;
     if(d.actActual)sd.actActual=d.actActual;
     if(d.actTarget)sd.actTarget=d.actTarget;
+  });
+  // Aggregate per-store up to coach level (actPct = avg across stores, elbPctile from rank)
+  const elbCutoff=T.elbDQ||DT.elbDQ||3368;
+  COACHES.forEach(coach=>{
+    const stores=SR.filter(s=>s.c===coach);
+    if(!stores.length)return;
+    if(!coachSheetData[coach])coachSheetData[coach]={};
+    const cd=coachSheetData[coach];
+    // Aggregate actPct: average across stores with data
+    // Only auto-fill if no manual entry exists
+    const storePcts=stores.map(s=>coachSheetData[s.s]?.actPct||0).filter(v=>v>0);
+    if(storePcts.length&&!cd._manualActPct)cd.actPct=storePcts.reduce((a,b)=>a+b,0)/storePcts.length;
+    // ELB percentile: use median store rank / cutoff
+    const ranks=stores.map(s=>coachSheetData[s.s]?.elbRank||0).filter(v=>v>0);
+    if(ranks.length){
+      const avgRank=ranks.reduce((a,b)=>a+b,0)/ranks.length;
+      cd.elbPctile=Math.round((avgRank/elbCutoff)*100);
+      cd.elbRank=Math.round(avgRank);
+    }
   });
 }
 function applyELBToMgrSheet(){
@@ -3309,11 +3329,29 @@ function clearRTBDIData(){
 }
 function applyRTBDIToCoachSheet(){
   const d=getRTBDIStoreData();if(!d||!d.data)return;
+  // Write per-store data
   Object.entries(d.data).forEach(([storeName,v])=>{
     if(!coachSheetData[storeName])coachSheetData[storeName]={};
     const sd=coachSheetData[storeName];
-    if(v.accTotal)sd.accTotal=v.accTotal;
+    if(v.accTotal!==undefined)sd.accTotal=v.accTotal;
     if(v.ppd)sd.totalBoxes=v.ppd;else if(v.boxes)sd.totalBoxes=v.boxes;
+  });
+  // Aggregate per-store acc$ and boxes up to coach level
+  COACHES.forEach(coach=>{
+    const stores=SR.filter(s=>s.c===coach);
+    if(!stores.length)return;
+    if(!coachSheetData[coach])coachSheetData[coach]={};
+    const cd=coachSheetData[coach];
+    let totalAcc=0,totalBoxes=0;
+    stores.forEach(store=>{
+      const sd=coachSheetData[store.s]||{};
+      totalAcc+=(+sd.accTotal||0);
+      totalBoxes+=(+sd.totalBoxes||0);
+    });
+    if(totalBoxes>0){
+      cd.totalBoxes=totalBoxes;
+      if(!cd._manualAccPerBox)cd.accPerBox=totalAcc/totalBoxes;
+    }
   });
 }
 function pRTBDI_Store(file){
@@ -5256,6 +5294,9 @@ function setCoachSheet(coach,field,val){
   if(!_pinUnlocked){tst2('Enter PIN in Admin Center to edit.','wn');return;}
   if(!coachSheetData[coach])coachSheetData[coach]={};
   coachSheetData[coach][field]=val;
+  // Mark manually-set fields so auto-fill doesn't overwrite them
+  if(field==='actPct')coachSheetData[coach]._manualActPct=true;
+  if(field==='accPerBox')coachSheetData[coach]._manualAccPerBox=true;
   clearTimeout(window._coachSheetTimer);
   window._coachSheetTimer=setTimeout(()=>{
     renCoachSheet();
