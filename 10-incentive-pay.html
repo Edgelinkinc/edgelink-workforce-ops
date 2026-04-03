@@ -2952,37 +2952,52 @@ function renMgrOv(){
 
 function renCoachOv(){
   const body=document.getElementById('coach-ov-body');if(!body)return;
-  // Show upload banner if no data loaded
+  const srBs=getSR_BS();
+  const ct=T.coach||DT.coach;
+  // Read months from own pickers
+  const _ovMn=document.getElementById('coachOvBonusMonth')?.value||
+    document.getElementById('coachSheetMonth')?.value||window._coachSheetCurrentMonth||'';
+  const _ovMimMn=document.getElementById('coachOvMimMonth')?.value||_ovMn;
+  // Banner
   const hasUploads=getELBData()||getRTBDIStoreData();
   const banner=document.getElementById('coachOvDataBanner');
   if(banner)banner.style.display=hasUploads?'none':'block';
-  const srBs=getSR_BS();
-  const ct=T.coach||DT.coach;
-  // Apply only if upload period matches the selected month
-    const _ovMn=document.getElementById('coachOvBonusMonth')?.value||document.getElementById('coachSheetMonth')?.value||window._coachSheetCurrentMonth||'';
-  const _ovMimMn=document.getElementById('coachOvMimMonth')?.value||_ovMn;
-  const _spEp=getELBData()?.period,_spRp=getRTBDIStoreData()?.period,_spMp=getMIMData()?.period;
-  if(_ovMn&&_spEp===_ovMn)applyELBToCoachSheet();
-  if(_ovMn&&_spRp===_ovMn)applyRTBDIToCoachSheet();
-  if(_ovMn&&_spMp&&_spMp===_ovMn)applyMIMToCoachSheet();
+  // Read DIRECTLY from upload objects for the selected month — never from coachSheetData
+  const elbPeriod=getELBData()?.period;
+  const rtbdiPeriod=getRTBDIStoreData()?.period;
+  const elbData=(_ovMn&&elbPeriod===_ovMn)?getELBData()?.data||{}:{};
+  const rtbdiData=(_ovMn&&rtbdiPeriod===_ovMn)?getRTBDIStoreData()?.data||{}:{};
+  // Company acc total for kicker (sum all stores from RTBDI this period)
+  const coAcc=Object.values(rtbdiData).reduce((s,v)=>s+(+v.accTotal||0),0);
   let tGross=0,tMim=0,tKick=0,tGuard=0;
   body.innerHTML=COACHES.map((coach,ci)=>{
     const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
     let actBonus=0,accBonus=0,kicker=0,guardrails=[];let hasData=false;
     stores.forEach(store=>{
-      const sd=coachSheetData[store.s]||{};
+      const ed=elbData[store.s]||{};
+      const rd=rtbdiData[store.s]||{};
+      const sd={
+        actPct:+ed.actPct||0,
+        elbRank:+ed.elbRank||0,
+        actActual:+ed.actActual||0,
+        accTotal:+rd.accTotal||0,
+        totalBoxes:+(rd.ppd||rd.boxes)||0,
+        shrinkPct:+coachSheetData[store.s]?.shrinkPct||0,
+      };
       if(!sd.actPct&&!sd.accTotal&&!sd.totalBoxes)return;
       hasData=true;
       const res=calcStoreCoachBonus(store.s,sd);
-      actBonus+=res.actBonus;accBonus+=res.accBonus;kicker+=res.kicker||0;
+      actBonus+=res.actBonus;accBonus+=res.accBonus;
       guardrails=[...guardrails,...res.guardrails];
     });
-    // MIM: read from monthly Coach MIM Payout data (wfo_coach_mim_pay_YYYY-MM)
-    const _monthlyMimD=_ovMimMn?getCoachMimPayData(_ovMimMn):null;
-    const mimBans=_monthlyMimD
-      ?stores.reduce((sum,s)=>{const sd=_monthlyMimD.stores?.[s.s];return sum+(sd?(sd.overrideOrders??sd.orders??0):0);},0)
-      :stores.reduce((sum,s)=>sum+(coachSheetData[s.s]?.mimOrders||0),0)
-      ||reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
+    // Kicker: company-wide based on total RTBDI acc
+    if(coAcc>=350000)kicker=ct.kick2||750;
+    else if(coAcc>=300000)kicker=ct.kick1||500;
+    // MIM from monthly Coach MIM Payout data
+    const _mimD=_ovMimMn?getCoachMimPayData(_ovMimMn):null;
+    const mimBans=_mimD
+      ?stores.reduce((sum,s)=>{const sd=_mimD.stores?.[s.s];return sum+(sd?(sd.overrideOrders??sd.orders??0):0);},0)
+      :reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
     const mimSpiff=mimBans*(ct.mimRate||10);
     const gross=actBonus+accBonus;const total=gross+mimSpiff+kicker;
     const hasGuard=guardrails.length>0;
@@ -3005,8 +3020,6 @@ function renCoachOv(){
   upd('ck-kick','$'+tKick.toFixed(2));
   upd('ck-guard',tGuard+' coach'+(tGuard!==1?'es':''));
 }
-
-// ── PERIOD CONFIRM MODAL ──
 function showPeriodConfirm({fname,count,type,defaultPeriod,onConfirm}){
   const existing=document.getElementById('periodConfirmModal');if(existing)existing.remove();
   const modal=document.createElement('div');
