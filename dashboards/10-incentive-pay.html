@@ -2666,12 +2666,17 @@ function parseELBCSV(txt, fname){
   const sep=isTab?'\t':',';
   const hdr0=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
 
-  // AUTO-DETECT format:
-  // Format A: HierarchyValue4PBI column exists → 2 header rows, EL store IDs
-  // Format B: No HierarchyValue4PBI → 1 header row, "10216464: 734 Western Ave" store IDs
+  // AUTO-DETECT: check if row 1 is a second header row or data
+  // If row 1 col 2 looks like a store (has digits or EL pattern) → 1 header row
+  // If row 1 col 2 looks like a category label → 2 header rows
+  const row1cols=lines[1].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const row1store=row1cols[2]||'';
   const hasHierarchy=hdr0.some(c=>/hierarchyvalue4pbi/i.test(c));
-  const dataStartRow=hasHierarchy?2:1;
-  const hdr1=hasHierarchy?lines[1].split(sep).map(c=>c.replace(/"/g,'').trim()):[];
+  // Detect actual data start: if row1 has a store ID pattern → dataStartRow=1
+  const row1isData=/^\d{7,10}/.test(row1store) || /EL\d+/.test(row1store);
+  const dataStartRow=row1isData?1:2;
+  const hdr1=row1isData?[]:row1cols;
+  console.log('ELB: hasHierarchy='+hasHierarchy+' row1isData='+row1isData+' dataStart='+dataStartRow);
 
   // Find fixed columns in header row 0
   const rankI=hdr0.findIndex(c=>/national.?rank/i.test(c));
@@ -2741,13 +2746,18 @@ function parseELBCSV(txt, fname){
     if(!rawStore)continue;
 
     let storeId=null;
-    if(hasHierarchy){
-      // Format A: rawStore is the EL store ID number directly
-      storeId=rawStore.replace(/[^0-9]/g,'').slice(0,10)||null;
+    // Try "10216464: 734 Western Ave" format first (digits before colon)
+    const colonM=rawStore.match(/^(\d{7,10})[:\s]/);
+    if(colonM){
+      storeId=colonM[1];
+    } else if(/EL\d+/i.test(rawStore)){
+      // EL store ID format — extract numeric ID only
+      const elM=rawStore.match(/^(\d{7,10})$/);
+      storeId=elM?elM[1]:rawStore.replace(/[^0-9]/g,'').slice(0,8)||null;
     } else {
-      // Format B: "10216464: 734 Western Ave" → extract digits before colon
-      const m=rawStore.match(/^(\d{7,10})/);
-      storeId=m?m[1]:null;
+      // Just digits
+      const dm=rawStore.match(/^(\d{7,10})/);
+      storeId=dm?dm[1]:null;
     }
     if(!storeId)continue;
 
@@ -3554,9 +3564,19 @@ function showPeriodConfirm({fname, count, type, defaultPeriod, onConfirm}){
   modal.id = 'periodConfirmModal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(74,26,107,.75);z-index:960;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
 
-  const isMonth = type === 'month';
+  const monthlyTypes=['elb','rtbdi','mimcoach','metro_mgr','metro_coach'];
+  const isMonth=monthlyTypes.includes(type);
   const inputType = isMonth ? 'month' : 'date';
-  const labelText = isMonth ? 'Which month is this data for?' : 'Which week does this data belong to?';
+  const labelLabels={
+    elb:'Which month is this Metro ELB data for?',
+    rtbdi:'Which month is this RTBDI store data for?',
+    mim:'Which week does this MIM data belong to?',
+    mimcoach:'Which month is this Coach MIM payout for?',
+    metro_mgr:'Which month is this manager data for?',
+    metro_coach:'Which month is this coach data for?',
+    rtpos:'Which week does this RTPOS data belong to?',
+  };
+  const labelText=labelLabels[type]||(isMonth?'Which month is this data for?':'Which week does this data belong to?');
   const inputId = 'periodConfirmInput';
 
   const typeLabels = {
