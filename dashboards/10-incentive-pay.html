@@ -35,7 +35,7 @@ body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--tx);min-he
 .si .ic{font-size:15px;width:20px;text-align:center}
 .content{flex:1;min-width:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;height:calc(100vh - 60px)}
 #adminContent .sub-tab{font-size:11px!important;padding:6px 11px!important;white-space:nowrap!important;flex-shrink:0!important}
-.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%;padding:22px;box-sizing:border-box}
+.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%;padding:16px;box-sizing:border-box;position:relative;top:0}
 .sub-tabs{display:flex;gap:8px;margin-bottom:16px}
 .sub-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--bo);background:var(--sf);color:var(--mu);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
 .sub-tab:hover{border-color:var(--se);color:var(--se)}.sub-tab.active{background:var(--se);color:#fff;border-color:var(--se)}
@@ -1138,7 +1138,145 @@ body.page-pg-assign .week-bar{display:none!important;}
   </div>
 
   <!-- PAGE: CHARGEBACKS -->
-  <div class="page" id="pg-chargebacks">
+  
+  <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
+  <div class="page" id="pg-coaches">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
+      <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
+      <button class="sub-tab" onclick="swSub('coach','mim',this)">📱 MIM Spiffs</button>
+      <button class="sub-tab" onclick="swSub('coach','mimpay',this)">💵 Coach MIM Payout</button>
+      <button class="sub-tab" onclick="swSub('coach','structure',this)">📋 Bonus Structure</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="sub-pane active" id="coach-overview">
+      <div class="card"><div class="card-hdr"><div class="card-title">🎯 Coach Bonus Overview</div></div>
+        <div class="card-body" style="min-height:200px">
+          <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:16px">
+            <div class="kc kcg"><div class="kl">Total Coach Gross</div><div class="kv" id="ck-gross">$—</div><div class="ks">all coaches</div></div>
+            <div class="kc kct"><div class="kl">MIM Spiff Total</div><div class="kv" id="ck-mim">$—</div><div class="ks">$10/BAN</div></div>
+            <div class="kc kcp"><div class="kl">Kicker Earned</div><div class="kv" id="ck-kick">$—</div><div class="ks">company-wide</div></div>
+            <div class="kc kcw"><div class="kl">Guardrails Hit</div><div class="kv" id="ck-guard">—</div><div class="ks">this period</div></div>
+          </div>
+          <div class="tw"><table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="background:var(--thb)">
+              <th style="padding:7px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Coach</th>
+              <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Stores</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr)">Act Bonus</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--se);text-transform:uppercase;border-bottom:2px solid var(--pr)">Acc Bonus</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr)">MIM Spiff</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Kicker</th>
+              <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr)">Total</th>
+              <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Status</th>
+            </tr></thead>
+            <tbody id="coach-ov-body"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN & PAYOUTS -->
+    <div class="sub-pane" id="coach-calc">
+      <div class="card"><div class="card-hdr" style="background:var(--dk)">
+        <div class="card-title">🎯 Coach Actuals — By Coach / By Store</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn bghost sm" onclick="expCoachSheet()">⬇ Export CSV</button>
+          <button class="btn bghost sm" onclick="generateAllCoachSlips()">🖨 All Pay Slips</button>
+          <button class="btn bghost sm" onclick="saveAllCoachData()">💾 Save</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+          <div class="fi" style="min-width:160px"><label>Period</label><input type="month" id="coachSheetMonth" onchange="onCoachSheetMonth()"/></div>
+          <div class="fi" style="min-width:160px"><label>Company Acc Total ($)</label><input type="number" id="coachSheetCoAcc" placeholder="e.g. 310000" min="0" onchange="renCoachSheet()"/></div>
+          <div style="background:#FFF8E1;border:1px solid var(--wa);border-radius:8px;padding:8px 12px;font-size:12px;color:#8a6000;flex:1">
+            ⚡ Enter actuals per store. Each coach section shows their stores. Bonus calculates automatically.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:#F3E8FF;border:1px solid var(--se);border-radius:8px;font-size:12px;">
+            <span>📊</span>
+            <div id="coachELBBannerText" style="color:var(--mu)">No ELB data — upload in Admin → Data Management</div>
+          </div>
+        </div>
+        <div id="coachSheetSections"></div>
+      </div></div>
+    </div>
+
+    <!-- MIM SPIFFS -->
+    <div class="sub-pane" id="coach-mim">
+      <div class="card"><div class="card-hdr"><div class="card-title">📱 MIM Spiffs — By Coach</div></div>
+        <div class="card-body">
+          <div id="coachMimBody" style="color:var(--mu);font-size:13px;padding:20px 0">Upload MIM report to see spiff data.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COACH MIM PAYOUT -->
+    <div class="sub-pane" id="coach-mimpay">
+      <div class="card"><div class="card-hdr" style="background:linear-gradient(135deg,var(--dk),var(--se))">
+        <div class="card-title">💵 Coach MIM Payout</div>
+      </div>
+      <div class="card-body">
+        <!-- Upload Instructions -->
+        <div style="background:linear-gradient(135deg,#E8F5E9,#F3E8FF);border:1px solid var(--ok);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start">
+          <span style="font-size:28px;flex-shrink:0">📂</span>
+          <div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;color:var(--se);margin-bottom:6px">What to Upload for Coach MIM Payout</div>
+            <div style="font-size:12px;color:var(--tx);line-height:1.8">
+              <strong>1. MIM Report (Coach Period)</strong> — Metro portal → MIM report → export CSV<br>
+              &nbsp;&nbsp;&nbsp;• Must include: <code>Store Name</code>, <code>Employee Name</code>, <code>Orders</code> columns<br>
+              &nbsp;&nbsp;&nbsp;• Store rows have <code>Employee Name = "Total"</code><br>
+              <strong>2. Set the month</strong> → verify per-store BANs → lock &amp; export when paid
+            </div>
+          </div>
+        </div>
+        <!-- Controls -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="fi" style="min-width:160px"><label>Coach MIM Month</label><input type="month" id="coachMimPayMonth" onchange="onCoachMimPayMonth()"/></div>
+          <div style="display:flex;flex-direction:column;gap:4px;min-width:200px">
+            <label style="font-size:11px;font-weight:700;color:var(--mu)">MIM Report (Coach Period)</label>
+            <label style="cursor:pointer">
+              <input type="file" accept=".csv,.txt" style="display:none" onchange="requirePin(()=>pMIMCoach(this.files[0]))"/>
+              <div class="btn bok sm">⬆ Upload Coach MIM Report</div>
+            </label>
+            <div id="fnMIMCoach" style="font-size:11px;color:var(--ok)"></div>
+          </div>
+          <div class="fi" style="min-width:120px"><label>Rate ($/BAN)</label><input type="number" id="coachMimPayRate" value="10" min="0" step="0.5" onchange="renCoachMimPay()"/></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:16px">
+            <div class="lk-dot open" id="coachMimPayDot"></div>
+            <span class="lk-lbl open" id="coachMimPayLbl">Unlocked</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn bok sm" id="coachMimPayLkBtn" onclick="requirePin(toggleCoachMimPayLock)">🔒 Lock &amp; Mark Paid</button>
+            <button class="btn bo sm" onclick="expCoachMimPayCSV()">⬇ Export CSV</button>
+          </div>
+        </div>
+        <!-- Summary -->
+        <div class="kstrip" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:16px">
+          <div class="kc"><div class="kl">Total Coaches</div><div class="kv" id="cmpTotalCoaches">—</div></div>
+          <div class="kc kcp"><div class="kl">Total BANs</div><div class="kv" id="cmpTotalBans">—</div></div>
+          <div class="kc kcg"><div class="kl">Total MIM Payout</div><div class="kv" id="cmpTotalPayout">—</div></div>
+          <div class="kc kct"><div class="kl">Avg BANs/Store</div><div class="kv" id="cmpAvgBans">—</div></div>
+          <div class="kc kcw"><div class="kl">Month</div><div class="kv" id="cmpMonth" style="font-size:13px">—</div></div>
+        </div>
+        <div id="coachMimPayBody">
+          <div style="text-align:center;padding:40px;color:var(--mu)">
+            <div style="font-size:36px;margin-bottom:10px">📱</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--se);margin-bottom:6px">No Coach MIM data loaded</div>
+            <div style="font-size:13px">Upload the MIM Report above and set the month</div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- BONUS STRUCTURE -->
+    <div class="sub-pane" id="coach-structure">
+      <div id="coachFlyerInline"></div>
+    </div>
+
+  </div><!-- /pg-coaches -->
+
+<div class="page" id="pg-chargebacks">
     <div class="card"><div class="card-hdr card-hdr-pr">
       <div class="card-title">⚠️ Chargeback Log</div>
       <span id="cbTL" style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px">$0.00 total</span>
@@ -2367,7 +2505,7 @@ function goPage(id,el){
   if(id==="pg-leaderboard")renLB();
   if(id==="pg-summary")renSum();
   if(id==="pg-managers")renMgrOverview();
-  if(id==="pg-coaches"){renCoachOv();renCoachMim();}
+  if(id==="pg-coaches"){const _cc=document.querySelector('.content');if(_cc)_cc.scrollTop=0;renCoachOv();renCoachMim();setTimeout(()=>{const _cc2=document.querySelector('.content');if(_cc2)_cc2.scrollTop=0;},300);setTimeout(()=>{const c=document.querySelector('.content');if(c)c.scrollTop=0;},200);}
   if(id==="pg-home")initHomePage();
   if(id==="pg-roster")renRoster();
   if(id==="pg-employee"){initEmpView();}
@@ -2676,6 +2814,17 @@ function formatPeriod(p){if(!p)return'—';if(p.match(/^\d{4}-\d{2}$/)){const[y,
 function defaultWeek(){const t=new Date(),d=t.getDay();const tm=new Date(t);tm.setDate(t.getDate()-d+(d===0?-6:1));const lm=new Date(tm);lm.setDate(tm.getDate()-7);return lm.toISOString().split('T')[0];}
 
 // ── RTBDI → MANAGER APPLY ──
+
+function applyMIMToCoachSheet(){
+  const mim=getMIMData();
+  if(!mim||!mim.storeData)return;
+  Object.entries(mim.storeData).forEach(([storeName,d])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    coachSheetData[storeName].mimOrders=d.orders||0;
+    coachSheetData[storeName].eligBans=d.eligBans||0;
+  });
+}
+
 function applyMIMToMgrSheet(){
   const mim=getMIMData();
   if(!mim||!mim.storeData)return;
@@ -2712,7 +2861,7 @@ function generateCoachSlipPDF(coachName){
   const mimBans=mimFromStores||mimFromReps;totalMim=mimBans*(ct.mimRate||10);
   const grandTotal=totalAct+totalAcc+totalMim+totalKick;
   const period=mn?formatPeriod(mn):'—';
-  const html=`<!DOCTYPE html><html><head><title>Coach Pay Slip — ${coachName}</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#1A1A1A;padding:20px;}.header{background:#4A1A6B;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0;}.header h1{font-size:18px;font-weight:800;}.header h2{font-size:13px;opacity:.8;margin-top:4px;}.meta{background:#F3E8FF;padding:12px 20px;display:flex;gap:30px;flex-wrap:wrap;border-bottom:2px solid #6E2B8B;}.meta-item label{font-size:9px;font-weight:700;text-transform:uppercase;color:#6E2B8B;display:block;}.meta-item span{font-size:13px;font-weight:700;}table{width:100%;border-collapse:collapse;margin:16px 0;font-size:11px;}th{background:#F3E8FF;color:#6E2B8B;font-weight:700;font-size:9px;text-transform:uppercase;padding:6px 8px;border-bottom:2px solid #6E2B8B;text-align:left;}td{padding:6px 8px;border-bottom:1px solid #E8E8E8;}tr:nth-child(even) td{background:#FAFAFA;}.totals{background:#4A1A6B;color:#fff;padding:16px 20px;border-radius:0 0 8px 8px;display:flex;gap:30px;flex-wrap:wrap;align-items:center;}.tot-item label{font-size:9px;font-weight:700;text-transform:uppercase;opacity:.7;display:block;}.tot-item span{font-size:16px;font-weight:800;}.grand span{font-size:24px;font-weight:900;color:#E20074;}.footer{margin-top:16px;font-size:9px;color:#666;text-align:center;border-top:1px solid #E8E8E8;padding-top:8px;}@media print{.no-print{display:none;}}</style></head><body>
+  const html=`<!DOCTYPE html><html><head><title>Coach Pay Slip — ${coachName}</title></head><body>
   <div class="no-print" style="margin-bottom:12px"><button onclick="window.print()" style="background:#E20074;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:700">🖨 Print / Save PDF</button><button onclick="window.close()" style="background:#666;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;margin-left:8px">✕ Close</button></div>
   <div class="header"><h1>EDGELINK INC — WORK FORCE OPS</h1><h2>Coach Bonus Pay Slip · ${coachName}</h2></div>
   <div class="meta"><div class="meta-item"><label>Coach</label><span>${coachName}</span></div><div class="meta-item"><label>Period</label><span>${period}</span></div><div class="meta-item"><label>Stores</label><span>${stores.length}</span></div><div class="meta-item"><label>Generated</label><span>${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></div></div>
@@ -2740,28 +2889,7 @@ function generateMgrSlipPDF(storeName){
   const res=calcMgrBonus(storeName,sd);
 
   const html=`<!DOCTYPE html><html><head><title>Manager Pay Slip — ${storeName}</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#1A1A1A;padding:20px;}
-    .header{background:#4A1A6B;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0;}
-    .header h1{font-size:18px;font-weight:800;}
-    .header h2{font-size:13px;font-weight:400;opacity:.8;margin-top:4px;}
-    .meta{background:#F3E8FF;padding:12px 20px;display:flex;gap:30px;flex-wrap:wrap;border-bottom:2px solid #6E2B8B;margin-bottom:16px;}
-    .meta-item label{font-size:9px;font-weight:700;text-transform:uppercase;color:#6E2B8B;display:block;}
-    .meta-item span{font-size:13px;font-weight:700;}
-    .cat-table{width:100%;border-collapse:collapse;margin-bottom:16px;}
-    .cat-table th{background:#F3E8FF;color:#6E2B8B;font-weight:700;font-size:9px;text-transform:uppercase;padding:7px 10px;border-bottom:2px solid #6E2B8B;text-align:left;}
-    .cat-table td{padding:8px 10px;border-bottom:1px solid #E8E8E8;font-size:12px;}
-    .cat-table tr:nth-child(even) td{background:#FAFAFA;}
-    .hit{color:#00A651;font-weight:700;}
-    .miss{color:#D32F2F;font-weight:700;}
-    .totals{background:#4A1A6B;color:#fff;padding:16px 20px;border-radius:8px;display:flex;gap:30px;flex-wrap:wrap;align-items:center;margin-top:8px;}
-    .tot-item label{font-size:9px;font-weight:700;text-transform:uppercase;opacity:.7;display:block;}
-    .tot-item span{font-size:16px;font-weight:800;}
-    .grand span{font-size:24px;font-weight:900;color:#E20074;}
-    .footer{margin-top:16px;font-size:9px;color:#666;text-align:center;border-top:1px solid #E8E8E8;padding-top:8px;}
-    @media print{.no-print{display:none;}}
-  </style></head><body>
+  </head><body>
   <div class="no-print" style="margin-bottom:12px">
     <button onclick="window.print()" style="background:#E20074;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:700">🖨 Print / Save PDF</button>
     <button onclick="window.close()" style="background:#666;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;margin-left:8px">✕ Close</button>
@@ -2878,6 +3006,602 @@ function calcMgrBonus(storeName, sd){
 function generateAllCoachSlips(){
   COACHES.forEach(coach=>generateCoachSlipPDF(coach));
 }
+
+// ── UPDATE HOME KPIS (upK) ──
+// Called after data changes to refresh home page summary stats
+function upK(){
+  try{
+    // Update week display
+    const homeWkEl=document.getElementById('homeWeek');
+    const wkbEl=document.getElementById('wkb');
+    if(homeWkEl&&wkbEl)homeWkEl.textContent=wkbEl.textContent||'—';
+    // Update lock status
+    const ls=document.getElementById('homeLockStatus');
+    const lb=document.getElementById('homeLockBadge');
+    if(ls)ls.textContent=wkLocked?'Locked — Paid':'Unlocked — Open';
+    if(lb)lb.style.background=wkLocked?'rgba(0,166,81,.25)':'rgba(226,0,116,.2)';
+    // Refresh pending actions and status
+    if(typeof renPendingActions==='function')renPendingActions();
+    if(typeof refreshHomeStatus==='function')refreshHomeStatus();
+  }catch(e){console.error('upK:',e);}
+}
+
+
+// ══════════════════════════════════════════════════════
+// REBUILT MISSING FUNCTIONS
+// ══════════════════════════════════════════════════════
+
+// ── BACKSHEET ACCESSOR ──
+function getBacksheet(tier){
+  // Returns the current month's backsheet categories filtered for a tier
+  // tier: 1, 2, or 3
+  const month=document.getElementById('mgrSheetMonthIn')?.value||
+    document.getElementById('bsMonth')?.value||
+    new Date().toISOString().slice(0,7);
+  const bs=getOrCreateBs(month);
+  const tKey=tier===1?'t1':tier===2?'t2':'t3';
+  const uKey=tKey+'up'; const bKey=tKey+'base';
+  // Build a flat object: {actsTarget, actsBase, actsUpside, btsTarget...}
+  const result={qualifiers:bs.qualifiers,targets:bs.targets||{},categories:bs.categories};
+  bs.categories.forEach(cat=>{
+    result[cat.id+'Base']=cat[bKey]||0;
+    result[cat.id+'Upside']=cat[uKey]||0;
+  });
+  return result;
+}
+
+function getMgrMimForStore(storeName, month){
+  const store=SR.find(s=>s.s===storeName);if(!store)return{enabled:false,rate:0};
+  const bs=getBs(month)||getOrCreateBs(month);
+  const q=bs.qualifiers||{};
+  const tier=store.tier||1;
+  const enabled=tier===1?q.t1MimEnabled:tier===2?q.t2MimEnabled:q.t3MimEnabled;
+  const rate=tier===1?q.t1MimRate:tier===2?q.t2MimRate:q.t3MimRate;
+  return{enabled:!!enabled,rate:+rate||0};
+}
+
+// ── ELB DATA ACCESSORS ──
+function getELBData(){
+  try{return JSON.parse(localStorage.getItem('wfo_elb_data')||'null');}catch{return null;}
+}
+function getELBMetricMap(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('wfo_elb_map')||'null');
+    if(saved)return saved;
+  }catch{}
+  return{coachActR:1,mgrActR:1,mgrBtsR:2,mgrHsiR:3,mgrProtR:5,useResult:true};
+}
+function saveELBMetricMap(map){
+  localStorage.setItem('wfo_elb_map',JSON.stringify(map));
+  tst2('ELB metric mapping saved','ok');
+}
+function updELBStatus(){
+  const elb=getELBData();
+  const el=document.getElementById('elbStatusBadge');
+  if(!el)return;
+  if(elb&&elb.matched>0){
+    el.innerHTML=`<span style="color:var(--ok);font-weight:700">✅ Loaded</span> — ${elb.matched} stores · <strong>${formatPeriod(elb.period)||'period not set'}</strong> · ${elb.loadedAt||''} · <button class="btn bd xs" onclick="clearELBData()">Clear</button>`;
+  } else {
+    el.innerHTML=`<span style="color:var(--mu)">Not loaded — upload Metro ELB report</span>`;
+  }
+}
+function clearELBData(){
+  if(!confirm('Clear ELB data?'))return;
+  localStorage.removeItem('wfo_elb_data');
+  updELBStatus();
+  const fnEl=document.getElementById('fnELB');
+  if(fnEl)fnEl.textContent='';
+  tst2('ELB data cleared','ok');
+}
+function applyELBToCoachSheet(){
+  const elb=getELBData();
+  if(!elb||!elb.data)return;
+  Object.entries(elb.data).forEach(([storeName,d])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    const sd=coachSheetData[storeName];
+    if(d.elbRank)sd.elbRank=d.elbRank;
+    if(d.actPct)sd.actPct=d.actPct;
+    if(d.actActual)sd.actActual=d.actActual;
+    if(d.actTarget)sd.actTarget=d.actTarget;
+  });
+}
+function applyELBToMgrSheet(){
+  const elb=getELBData();
+  if(!elb||!elb.data)return;
+  Object.entries(elb.data).forEach(([storeName,d])=>{
+    if(!mgrSheetData[storeName])mgrSheetData[storeName]={};
+    const sd=mgrSheetData[storeName];
+    if(d.mgrActActual)sd['acts']=d.mgrActActual;
+    if(d.mgrBtsActual)sd['bts']=d.mgrBtsActual;
+    if(d.mgrHsiActual)sd['hsi']=d.mgrHsiActual;
+    if(d.mgrProtPct)sd['attach']=d.mgrProtPct;
+    if(d.elbRank)sd['elb']=d.elbRank;
+  });
+}
+
+// ── ELB UPLOAD + PARSER ──
+function pELB(file){
+  const fnEl=document.getElementById('fnELB');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseELBCSV(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read ELB file','er');
+  rd.readAsText(file);
+}
+function parseELBCSV(txt,fname){
+  const lines=txt.trim().split('\n');
+  if(lines.length<2){tst2('ELB file empty','er');return;}
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr0=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const row1cols=lines[1].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const row1store=row1cols[2]||'';
+  const row1isData=/^\d{7,10}/.test(row1store)||/EL\d+/.test(row1store);
+  const dataStartRow=row1isData?1:2;
+  const hdr1=row1isData?[]:row1cols;
+  const rankI=hdr0.findIndex(c=>/national.?rank/i.test(c));
+  const storeI=2; // HierarchyValue4PBI always col 2
+  const rBlocks={};
+  for(let i=0;i<hdr0.length;i++){
+    const m=hdr0[i].match(/^R(\d+)$/);if(!m)continue;
+    const rn=+m[1];let actI=-1,tgtI=-1,resI=-1;
+    for(let j=i+1;j<Math.min(i+6,hdr0.length);j++){
+      const v0=hdr0[j].toLowerCase().replace(/\s/g,'');
+      if(v0==='actual'&&actI<0){actI=j;continue;}
+      if((v0.includes('target')||v0.includes('mtd'))&&tgtI<0){tgtI=j;continue;}
+      if(v0==='result'&&resI<0){resI=j;continue;}
+    }
+    rBlocks[rn]={actI,tgtI,resI};
+  }
+  const map=getELBMetricMap();
+  const idMap={};SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+  const elbData={};let matched=0;const unmatched=[];
+  const parseVal=(cols,b)=>{
+    const actual=b.actI>=0?+(cols[b.actI]||'').replace(/[",]/g,'')||0:0;
+    const target=b.tgtI>=0?+(cols[b.tgtI]||'').replace(/[",]/g,'')||0:0;
+    let pct=0;
+    if(map.useResult&&b.resI>=0){
+      pct=parseFloat((cols[b.resI]||'').replace(/[",]/g,'').replace(/%/g,''))||0;
+      if(pct>0&&pct<2)pct=Math.round(pct*1000)/10;
+    }else if(actual>0&&target>0)pct=Math.round((actual/target)*1000)/10;
+    return{actual,target,pct};
+  };
+  for(let i=dataStartRow;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<4)continue;
+    const rawStore=(cols[storeI]||'').replace(/"/g,'').trim();if(!rawStore)continue;
+    const colonM=rawStore.match(/^(\d{7,10})[:\s]/);
+    let storeId=colonM?colonM[1]:null;
+    if(!storeId){const elM=rawStore.match(/^(\d{7,10})$/);storeId=elM?elM[1]:null;}
+    if(!storeId)continue;
+    const rank=parseInt((cols[rankI>=0?rankI:1]||'').replace(/[",]/g,''))||0;
+    const storeName=idMap[storeId]||idMap[String(+storeId)]||null;
+    if(!storeName){if(storeId)unmatched.push(storeId);continue;}
+    const rData={};
+    for(let rn=1;rn<=10;rn++){if(!rBlocks[rn])continue;rData[rn]=parseVal(cols,rBlocks[rn]);}
+    elbData[storeName]={
+      elbRank:rank,storeId,
+      actPct:rData[map.coachActR]?.pct||0,actActual:rData[map.coachActR]?.actual||0,actTarget:rData[map.coachActR]?.target||0,
+      mgrActActual:rData[map.mgrActR]?.actual||0,mgrActTarget:rData[map.mgrActR]?.target||0,
+      mgrBtsActual:rData[map.mgrBtsR]?.actual||0,mgrHsiActual:rData[map.mgrHsiR]?.actual||0,
+      mgrProtPct:rData[map.mgrProtR]?.pct||0,r:rData
+    };
+    matched++;
+  }
+  localStorage.setItem('wfo_elb_data',JSON.stringify({data:elbData,loadedAt:new Date().toLocaleString(),fname,matched,unmatched:unmatched.slice(0,20)}));
+  const saveELBWithPeriod=(period)=>{
+    const saved=JSON.parse(localStorage.getItem('wfo_elb_data')||'{}');
+    saved.period=period;localStorage.setItem('wfo_elb_data',JSON.stringify(saved));
+    applyELBToCoachSheet();applyELBToMgrSheet();
+    const fnEl=document.getElementById('fnELB');
+    if(fnEl)fnEl.innerHTML='<span style="color:var(--ok)">✅ '+fname+' — '+matched+' stores · <strong>'+formatPeriod(period)+'</strong></span>';
+    updELBStatus();
+    tst2('ELB saved for '+formatPeriod(period)+' — '+matched+' stores','ok');
+    const csmEl=document.getElementById('coachSheetMonth');if(csmEl&&!csmEl.value)csmEl.value=period;
+    const mgrInEl=document.getElementById('mgrSheetMonthIn');if(mgrInEl&&!mgrInEl.value)mgrInEl.value=period;
+    if(document.getElementById('coachSheetSections')?.innerHTML.trim())renCoachSheet();
+    if(document.getElementById('mgrSheetBody'))renMgrSheet();
+  };
+  if(unmatched.length)console.warn('ELB unmatched:',unmatched);
+  showPeriodConfirm({fname,count:matched,type:'elb',defaultPeriod:defaultMonth(),onConfirm:saveELBWithPeriod});
+}
+
+// ── RTBDI STORE ACCESSORS + UPLOAD ──
+function getRTBDIStoreData(){
+  try{return JSON.parse(localStorage.getItem('wfo_rtbdi_store')||'null');}catch{return null;}
+}
+function updRTBDIStatus(){
+  const d=getRTBDIStoreData();
+  const el=document.getElementById('rtbdiStatusBadge');if(!el)return;
+  if(d&&d.matched>0){
+    el.innerHTML=`<span style="color:var(--ok);font-weight:700">✅ Loaded</span> — ${d.matched} stores · <strong>${formatPeriod(d.period)||'period not set'}</strong> · ${d.loadedAt||''} · <button class="btn bd xs" onclick="clearRTBDIData()">Clear</button>`;
+  }else{el.innerHTML=`<span style="color:var(--mu)">Not loaded</span>`;}
+}
+function clearRTBDIData(){
+  if(!confirm('Clear RTBDI store data?'))return;
+  localStorage.removeItem('wfo_rtbdi_store');updRTBDIStatus();
+  const fnEl=document.getElementById('fnRTBDIStore');if(fnEl)fnEl.textContent='';
+  tst2('RTBDI data cleared','ok');
+}
+function applyRTBDIToCoachSheet(){
+  const d=getRTBDIStoreData();if(!d||!d.data)return;
+  Object.entries(d.data).forEach(([storeName,v])=>{
+    if(!coachSheetData[storeName])coachSheetData[storeName]={};
+    const sd=coachSheetData[storeName];
+    if(v.accTotal)sd.accTotal=v.accTotal;
+    if(v.ppd)sd.totalBoxes=v.ppd;else if(v.boxes)sd.totalBoxes=v.boxes;
+  });
+}
+function pRTBDI_Store(file){
+  const fnEl=document.getElementById('fnRTBDIStore');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseRTBDIStore(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read RTBDI file','er');
+  rd.readAsText(file);
+}
+function extractRTBDIStoreName(raw){
+  if(!raw)return null;
+  const m=raw.match(/EL\d+[-\s]+(.+)/i);return m?m[1].trim().toUpperCase():null;
+}
+function matchRTBDIStore(extracted){
+  if(!extracted)return null;
+  const typos={'MA-CAPE CODE MALL':'MA-CAPE COD MALL','TN-NORTH BROARDWAY':'TN-NORTH BROADWAY','MA- SOUTH SHORE MALL':'MA-SOUTH SHORE MALL','MA-EXCHANGE ST.':'MA-EXCHANGE ST'};
+  const corrected=typos[extracted.trim()]||extracted;
+  const norm=s=>s.replace(/[\s\-\.]/g,'').toUpperCase();
+  const en=norm(corrected);
+  let found=SR.find(s=>norm(s.s)===en);if(found)return found.s;
+  found=SR.find(s=>en.includes(norm(s.s))||norm(s.s).includes(en));if(found)return found.s;
+  function lcs(a,b){
+    const m=a.length,n=b.length;
+    const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+    for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)
+      dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+    return dp[m][n];
+  }
+  let bestScore=0,bestMatch=null;
+  SR.forEach(s=>{const sn=norm(s.s);const score=lcs(en,sn)/Math.max(en.length,sn.length);if(score>bestScore){bestScore=score;bestMatch=s.s;}});
+  return bestScore>=0.85?bestMatch:null;
+}
+function parseRTBDIStore(content,fname){
+  const parseNum=v=>{if(!v)return 0;return +(v.replace(/[$,\s%]/g,'').trim())||0;};
+  const storeMap={};
+  const isHTML=content.trim().startsWith('<')||/<table/i.test(content.slice(0,500));
+  if(isHTML){
+    const div=document.createElement('div');div.innerHTML=content;
+    div.querySelectorAll('tr').forEach(tr=>{
+      const cells=Array.from(tr.querySelectorAll('td,th')).map(td=>td.textContent.trim());
+      cells.forEach((cell,i)=>{
+        if(!/EL\d+/i.test(cell))return;
+        const get=offset=>{const idx=i+offset;return(idx>=0&&idx<cells.length)?cells[idx]:'';};
+        if(storeMap[cell])return;
+        storeMap[cell]={boxes:parseNum(get(2)),ppd:parseNum(get(7)),accTotal:parseNum(get(9)),bts:parseNum(get(21)),hint:parseNum(get(24))};
+      });
+    });
+  }else{
+    const lines=content.trim().split('\n');
+    let hdrRow=-1,storeCol=1,ppdCol=8,accCol=10,boxCol=3,btsCol=25,hintCol=28;
+    for(let i=0;i<Math.min(lines.length,8);i++){
+      const cols=csvSp(lines[i]);
+      const si=cols.findIndex(c=>c.trim().toLowerCase().includes('store id'));
+      const pi=cols.findIndex(c=>c.trim().toLowerCase()==='ppd');
+      if(si>=0&&pi>=0){
+        hdrRow=i;storeCol=si;ppdCol=pi;
+        accCol=cols.findIndex(c=>c.trim().replace(/\s/g,'').toLowerCase()==='acc$');
+        if(accCol<0)accCol=cols.findIndex(c=>/acc.*\$/i.test(c.trim()));
+        boxCol=cols.findIndex(c=>c.trim().toLowerCase()==='boxes');
+        btsCol=cols.findIndex(c=>c.trim().toLowerCase()==='bts');
+        hintCol=cols.findIndex(c=>c.trim().toLowerCase()==='hint');
+        break;
+      }
+    }
+    for(let i=Math.max(hdrRow+1,1);i<lines.length;i++){
+      const cols=csvSp(lines[i]);if(!cols||cols.length<10)continue;
+      const rawStore=(cols[storeCol]||'').trim();if(!/EL\d+/i.test(rawStore))continue;
+      if(storeMap[rawStore])continue;
+      storeMap[rawStore]={
+        boxes:parseNum(boxCol>=0?cols[boxCol]:''),ppd:parseNum(ppdCol>=0?cols[ppdCol]:''),
+        accTotal:parseNum(accCol>=0?cols[accCol]:''),bts:parseNum(btsCol>=0?cols[btsCol]:''),
+        hint:parseNum(hintCol>=0?cols[hintCol]:'')
+      };
+    }
+  }
+  const rtbdiData={};let matched=0;const unmatched=[];
+  Object.entries(storeMap).forEach(([rawStore,data])=>{
+    const extracted=extractRTBDIStoreName(rawStore);
+    const storeName=matchRTBDIStore(extracted);
+    if(!storeName){if(extracted)unmatched.push(extracted);return;}
+    rtbdiData[storeName]=data;matched++;
+  });
+  localStorage.setItem('wfo_rtbdi_store',JSON.stringify({data:rtbdiData,fname,matched,loadedAt:new Date().toLocaleString(),unmatched:unmatched.slice(0,20)}));
+  const saveRTBDIWithPeriod=(period)=>{
+    const existing=JSON.parse(localStorage.getItem('wfo_rtbdi_store')||'{}');
+    existing.period=period;localStorage.setItem('wfo_rtbdi_store',JSON.stringify(existing));
+    applyRTBDIToCoachSheet();applyRTBDIToMgrSheet();
+    const fnEl=document.getElementById('fnRTBDIStore');
+    if(matched>0){
+      if(fnEl)fnEl.innerHTML='<span style="color:var(--ok)">✅ '+fname+' — '+matched+' stores · <strong>'+formatPeriod(period)+'</strong></span>';
+      tst2('RTBDI saved for '+formatPeriod(period)+' — '+matched+' stores','ok');
+    }else{
+      if(fnEl)fnEl.innerHTML='<span style="color:var(--da)">⚠ 0 stores matched — check console</span>';
+      tst2('RTBDI: 0 stores matched','er');
+      console.error('RTBDI storeMap:',Object.keys(storeMap).slice(0,5));
+    }
+    updRTBDIStatus();
+    const csmR=document.getElementById('coachSheetMonth');
+    if(csmR&&!csmR.value){csmR.value=period;window._coachSheetCurrentMonth=period;loadCoachSheetForPeriod(period);}
+    if(document.getElementById('coachSheetSections')?.innerHTML.trim())renCoachSheet();
+  };
+  if(unmatched.length)console.warn('RTBDI unmatched:',unmatched);
+  console.log('RTBDI: matched='+matched+' storeMap='+Object.keys(storeMap).length);
+  showPeriodConfirm({fname,count:matched,type:'rtbdi',defaultPeriod:defaultMonth(),onConfirm:saveRTBDIWithPeriod});
+}
+
+// ── MIM UPLOAD + PARSER ──
+function getMIMData(){
+  try{return JSON.parse(localStorage.getItem('wfo_mim_data')||'null');}catch{return null;}
+}
+function applyMIMToReps(){
+  const mim=getMIMData();if(!mim||!mim.repData)return;
+  reps.forEach(r=>{
+    const ntid=(r.ri||'').toLowerCase().trim();
+    const repRow=ntid?mim.repData[ntid]:null;
+    if(repRow)r.mb=repRow.orders||0;
+  });
+  saveSession();
+}
+function pMIM(file){
+  const fnEl=document.getElementById('fnMIM');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseMIM(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read MIM file','er');
+  rd.readAsText(file);
+}
+function parseMIM(txt,fname){
+  const lines=txt.trim().split('\n');if(lines.length<2){tst2('MIM file empty','er');return;}
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const fc=(...names)=>hdr.findIndex(c=>names.some(n=>c.toLowerCase().replace(/\s/g,'').includes(n.toLowerCase().replace(/\s/g,''))));
+  const storeNameI=fc('Store Name','storename');
+  const empNameI=fc('Employee Name','employeename');
+  const ordersI=fc('Orders');
+  const eligBansI=fc('Eligible BANs','eligiblebans');
+  const migrI=fc('Migrations');
+  if(storeNameI<0||ordersI<0){tst2('Cannot find Store Name or Orders columns','er');return;}
+  const idMap={};SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+  const mimStoreData={};const mimRepData={};let storeMatched=0,repRows=0;const unmatched=[];
+  const pn=v=>+(v||'').replace(/[",\s%]/g,'')||0;
+  for(let i=1;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<2)continue;
+    const rawStore=(cols[storeNameI]||'').replace(/"/g,'').trim();
+    const rawEmp=empNameI>=0?(cols[empNameI]||'').replace(/"/g,'').trim():'';
+    if(!rawStore)continue;
+    const storeIdM=rawStore.match(/^(\d{7,8})/);if(!storeIdM)continue;
+    const orders=pn(cols[ordersI]);
+    const eligBans=eligBansI>=0?pn(cols[eligBansI]):0;
+    const migr=migrI>=0?pn(cols[migrI]):0;
+    if(rawEmp==='Total'){
+      const storeName=idMap[storeIdM[1]]||idMap[String(+storeIdM[1])]||null;
+      if(!storeName){unmatched.push(storeIdM[1]);continue;}
+      mimStoreData[storeName]={orders,eligBans,migrations:migr};storeMatched++;
+    }else if(rawEmp&&!rawEmp.startsWith('~')){
+      const ntidM=rawEmp.match(/\(([^)]+)\)\s*$/);
+      const ntid=ntidM?ntidM[1].toLowerCase().trim():null;
+      if(ntid&&ntid!=='~'){mimRepData[ntid]={storeName:idMap[storeIdM[1]],orders,eligBans};repRows++;}
+    }
+  }
+  localStorage.setItem('wfo_mim_data',JSON.stringify({storeData:mimStoreData,repData:mimRepData,loadedAt:new Date().toLocaleString(),fname,storeMatched,repRows,unmatched:unmatched.slice(0,20)}));
+  const saveMIMWithPeriod=(period)=>{
+    const existing=JSON.parse(localStorage.getItem('wfo_mim_data')||'{}');
+    existing.period=period;localStorage.setItem('wfo_mim_data',JSON.stringify(existing));
+    applyMIMToReps();applyMIMToCoachSheet();applyMIMToMgrSheet();
+    const fnEl=document.getElementById('fnMIM');
+    if(fnEl)fnEl.textContent='✅ '+fname+' — '+storeMatched+' stores + '+repRows+' reps · Week of '+formatPeriod(period);
+    tst2('MIM saved for '+formatPeriod(period),'ok');
+    renR();if(document.getElementById('coachSheetSections')?.innerHTML.trim())renCoachSheet();
+  };
+  if(unmatched.length)console.warn('MIM unmatched:',unmatched);
+  showPeriodConfirm({fname,count:storeMatched+repRows,type:'mim',defaultPeriod:defaultWeek(),onConfirm:saveMIMWithPeriod});
+}
+
+// ── COACH MIM PAYOUT UPLOAD ──
+function pMIMCoach(file){
+  const fnEl=document.getElementById('fnMIMCoach');
+  if(fnEl)fnEl.textContent='Reading '+file.name+'...';
+  const rd=new FileReader();
+  rd.onload=e=>parseMIMCoach(e.target.result,file.name);
+  rd.onerror=()=>tst2('Failed to read coach MIM file','er');
+  rd.readAsText(file);
+}
+function getCoachMimPayData(month){
+  try{return JSON.parse(localStorage.getItem('wfo_coach_mim_pay_'+month)||'null');}catch{return null;}
+}
+function saveCoachMimPayData(month,data){
+  localStorage.setItem('wfo_coach_mim_pay_'+month,JSON.stringify(data));
+}
+function parseMIMCoach(txt,fname){
+  const lines=txt.trim().split('\n');if(lines.length<2){tst2('Coach MIM file empty','er');return;}
+  const isTab=lines[0].split('\t').length>lines[0].split(',').length;
+  const sep=isTab?'\t':',';
+  const hdr=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const fc=(...names)=>hdr.findIndex(c=>names.some(n=>c.toLowerCase().replace(/\s/g,'').includes(n.toLowerCase().replace(/\s/g,''))));
+  const storeNameI=fc('Store Name','storename');
+  const empNameI=fc('Employee Name','employeename');
+  const ordersI=fc('Orders');
+  if(storeNameI<0||ordersI<0){tst2('Cannot find Store Name or Orders columns','er');return;}
+  const idMap={};SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+  const storeOrders={};let matched=0;const unmatched=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=isTab?lines[i].split('\t'):csvSp(lines[i]);
+    if(!cols||cols.length<2)continue;
+    const rawStore=(cols[storeNameI]||'').replace(/"/g,'').trim();
+    const rawEmp=empNameI>=0?(cols[empNameI]||'').replace(/"/g,'').trim():'';
+    if(!rawStore||rawEmp!=='Total')continue;
+    const storeIdM=rawStore.match(/^(\d{7,8})/);if(!storeIdM)continue;
+    const storeName=idMap[storeIdM[1]]||idMap[String(+storeIdM[1])]||null;
+    if(!storeName){unmatched.push(storeIdM[1]);continue;}
+    const orders=+(cols[ordersI]||'').replace(/[",]/g,'')||0;
+    storeOrders[storeName]=orders;matched++;
+  }
+  const mn=document.getElementById('coachMimPayMonth')?.value||defaultMonth();
+  const existing=getCoachMimPayData(mn)||{stores:{},locked:false};
+  Object.entries(storeOrders).forEach(([store,orders])=>{
+    if(!existing.stores[store])existing.stores[store]={orders,overrideOrders:null};
+    else existing.stores[store].orders=orders;
+  });
+  existing.fname=fname;existing.loadedAt=new Date().toLocaleString();existing.matched=matched;
+  saveCoachMimPayData(mn,existing);
+  if(unmatched.length)console.warn('Coach MIM unmatched:',unmatched);
+  showPeriodConfirm({
+    fname,count:matched,type:'mimcoach',
+    defaultPeriod:document.getElementById('coachMimPayMonth')?.value||defaultMonth(),
+    onConfirm:(period)=>{
+      const monthEl=document.getElementById('coachMimPayMonth');if(monthEl)monthEl.value=period;
+      const fnEl=document.getElementById('fnMIMCoach');
+      if(fnEl)fnEl.textContent='✅ '+fname+' — '+matched+' stores · '+formatPeriod(period);
+      tst2('Coach MIM saved for '+formatPeriod(period),'ok');
+      onCoachMimPayMonth();
+    }
+  });
+}
+
+// ── COACH MIM PAYOUT RENDER ──
+function renCoachMimPay(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  const rate=+document.getElementById('coachMimPayRate')?.value||10;
+  const body=document.getElementById('coachMimPayBody');if(!body)return;
+  const mnEl=document.getElementById('cmpMonth');if(mnEl)mnEl.textContent=mn?formatPeriod(mn):'—';
+  if(!mn){body.innerHTML='<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:36px">📅</div><div style="margin-top:10px;font-weight:700;color:var(--se)">Select a month above</div></div>';return;}
+  const data=getCoachMimPayData(mn);
+  if(!data||!Object.keys(data.stores||{}).length){
+    body.innerHTML=`<div style="text-align:center;padding:40px;color:var(--mu)"><div style="font-size:36px;margin-bottom:10px">📱</div><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;color:var(--se);margin-bottom:6px">No data for ${formatPeriod(mn)}</div><div style="font-size:13px">Upload the Coach MIM Report above</div></div>`;
+    return;
+  }
+  const srBs=getSR_BS();let totalBans=0,totalPayout=0,totalStores=0;
+  const byCoach={};COACHES.forEach(c=>{byCoach[c]={stores:[],totalBans:0,totalPayout:0};});
+  SR.forEach(store=>{
+    const coach=srBs[store.s]?.coach||store.c||'TBD';
+    const sd=data.stores[store.s];if(!sd)return;
+    const bans=sd.overrideOrders??sd.orders??0;const payout=bans*rate;
+    if(!byCoach[coach])byCoach[coach]={stores:[],totalBans:0,totalPayout:0};
+    byCoach[coach].stores.push({storeName:store.s,bans,payout,orders:sd.orders,overrideOrders:sd.overrideOrders,mgr:srBs[store.s]?.mgr||store.mgr});
+    byCoach[coach].totalBans+=bans;byCoach[coach].totalPayout+=payout;
+    totalBans+=bans;totalPayout+=payout;totalStores++;
+  });
+  const u=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  u('cmpTotalCoaches',COACHES.length);u('cmpTotalBans',totalBans);
+  u('cmpTotalPayout','$'+totalPayout.toFixed(2));u('cmpAvgBans',totalStores?(totalBans/totalStores).toFixed(1):'—');
+  const locked=coachMimPayLocked;
+  body.innerHTML=COACHES.map(coach=>{
+    const cg=byCoach[coach];if(!cg||!cg.stores.length)return'';
+    return`<div style="margin-bottom:20px;border:1px solid var(--bo);border-radius:12px;overflow:hidden">
+      <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">${coach}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${cg.stores.length} stores · ${cg.totalBans} BANs</div></div>
+        <div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase">MIM Payout</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:#fff">$${cg.totalPayout.toFixed(2)}</div></div>
+      </div>
+      <div class="tw"><table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:var(--thb)">
+          <th style="padding:7px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Store</th>
+          <th style="padding:7px 10px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Manager</th>
+          <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">BANs</th>
+          <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--wa);text-transform:uppercase;border-bottom:2px solid var(--pr)">Override</th>
+          <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Used</th>
+          <th style="padding:7px 10px;text-align:right;font-size:9px;color:var(--ok);text-transform:uppercase;border-bottom:2px solid var(--pr)">Payout</th>
+        </tr></thead>
+        <tbody>${cg.stores.map((s,si)=>`<tr style="border-bottom:1px solid var(--bo);background:${si%2===0?'#fff':'#FAFAFA'}">
+          <td style="padding:7px 12px;font-weight:700;color:var(--se);font-size:12px">${X(s.storeName)}</td>
+          <td style="padding:7px 10px;font-size:11px;color:var(--mu)">${X(s.mgr==='TBD'?'—':s.mgr||'—')}</td>
+          <td style="padding:7px 10px;text-align:center;font-weight:700">${s.orders??'—'}</td>
+          <td style="padding:4px 8px;text-align:center">${locked?`<span style="font-size:12px;color:var(--mu)">${s.overrideOrders??'—'}</span>`:`<input type="number" value="${s.overrideOrders??''}" placeholder="—" min="0" style="width:70px;padding:4px 7px;border:1px solid var(--bo);border-radius:6px;font-size:12px;text-align:center" onchange="setCoachMimOverride('${mn}','${s.storeName}',this.value)"/>`}</td>
+          <td style="padding:7px 10px;text-align:center;font-weight:800;color:var(--se)">${s.bans}</td>
+          <td style="padding:7px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;color:var(--ok)">$${s.payout.toFixed(2)}</td>
+        </tr>`).join('')}
+        <tr style="background:linear-gradient(135deg,var(--dk),var(--se))">
+          <td colspan="4" style="padding:9px 12px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#fff">${coach} Total</td>
+          <td style="padding:9px 10px;text-align:center;font-family:'Poppins',sans-serif;font-weight:800;color:#fff">${cg.totalBans}</td>
+          <td style="padding:9px 10px;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;font-size:15px;color:#fff">$${cg.totalPayout.toFixed(2)}</td>
+        </tr></tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+}
+function setCoachMimOverride(mn,storeName,val){
+  const data=getCoachMimPayData(mn);if(!data||!data.stores[storeName])return;
+  data.stores[storeName].overrideOrders=val===''||val===null?null:+val;
+  saveCoachMimPayData(mn,data);renCoachMimPay();
+}
+function onCoachMimPayMonth(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;if(!mn)return;
+  const data=getCoachMimPayData(mn);
+  coachMimPayLocked=data?.locked||false;
+  updCoachMimPayLock();renCoachMimPay();
+}
+function toggleCoachMimPayLock(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  if(!mn){tst2('Select a month first','er');return;}
+  const data=getCoachMimPayData(mn)||{stores:{},locked:false};
+  if(coachMimPayLocked){
+    if(!confirm('Unlock coach MIM for '+formatPeriod(mn)+'?'))return;
+    coachMimPayLocked=false;data.locked=false;data.unlockedAt=new Date().toLocaleString();
+    tst2('Coach MIM unlocked','ok');
+  }else{
+    if(!confirm('Lock coach MIM payout for '+formatPeriod(mn)+'? This marks it as paid.'))return;
+    coachMimPayLocked=true;data.locked=true;data.lockedAt=new Date().toLocaleString();
+    tst2('Coach MIM locked & marked paid ✅','ok');
+  }
+  saveCoachMimPayData(mn,data);updCoachMimPayLock();renCoachMimPay();
+}
+function updCoachMimPayLock(){
+  const dot=document.getElementById('coachMimPayDot');
+  const lbl=document.getElementById('coachMimPayLbl');
+  const btn=document.getElementById('coachMimPayLkBtn');
+  if(dot)dot.className='lk-dot'+(coachMimPayLocked?' locked':' open');
+  if(lbl){lbl.className='lk-lbl'+(coachMimPayLocked?' locked':' open');lbl.textContent=coachMimPayLocked?'Locked — Paid':'Unlocked';}
+  if(btn){btn.textContent=coachMimPayLocked?'🔓 Unlock':'🔒 Lock & Mark Paid';btn.className=coachMimPayLocked?'btn bd sm':'btn bok sm';}
+}
+function expCoachMimPayCSV(){
+  const mn=document.getElementById('coachMimPayMonth')?.value;
+  const rate=+document.getElementById('coachMimPayRate')?.value||10;
+  if(!mn){tst2('Select a month first','er');return;}
+  const data=getCoachMimPayData(mn);
+  if(!data||!Object.keys(data.stores||{}).length){tst2('No data to export','wn');return;}
+  const srBs=getSR_BS();
+  const hd=['Coach','Store','Manager','BANs (Report)','BANs (Override)','BANs Used','Rate $','MIM Payout $','Month','Status'];
+  const rows=[];
+  COACHES.forEach(coach=>{
+    SR.forEach(store=>{
+      const storeCoach=srBs[store.s]?.coach||store.c;if(storeCoach!==coach)return;
+      const sd=data.stores[store.s];if(!sd)return;
+      const bans=sd.overrideOrders??sd.orders??0;
+      rows.push([coach,store.s,srBs[store.s]?.mgr||store.mgr,sd.orders??'',sd.overrideOrders??'',bans,rate,(bans*rate).toFixed(2),mn,data.locked?'Paid':'Open']);
+    });
+    const coachStores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coach);
+    const coachBans=coachStores.reduce((sum,s)=>{const sd=data.stores[s.s];return sum+(sd?(sd.overrideOrders??sd.orders??0):0);},0);
+    if(coachBans>0)rows.push([coach,'— TOTAL —','','','',coachBans,rate,(coachBans*rate).toFixed(2),mn,'']);
+  });
+  dlC([hd,...rows],'WFO_CoachMIM_'+mn+'.csv');tst2('Coach MIM CSV exported','ok');
+}
+
+// ── ADMIN DECELERATOR ──
+function adA(i){
+  // Add a new custom decelerator row in the admin backsheet
+  const cont=document.getElementById('aExtraDecels');if(!cont)return;
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap';
+  row.innerHTML=`<input placeholder="Label (e.g. CSAT)" style="padding:6px 10px;border:1px solid var(--bo);border-radius:7px;font-size:12px;width:140px"/>
+    <select style="padding:6px 10px;border:1px solid var(--bo);border-radius:7px;font-size:12px">
+      <option value="pct">% Penalty</option><option value="flat">Flat $ Reduction</option>
+    </select>
+    <input type="number" placeholder="Amount" min="0" style="padding:6px 10px;border:1px solid var(--bo);border-radius:7px;font-size:12px;width:90px"/>
+    <button class="btn bd xs" onclick="this.closest('div').remove()">✕</button>`;
+  cont.appendChild(row);
+}
+let coachMimPayLocked=false;
 
 // ── CSV UPLOAD ──
 function handleAdminDrop(e,src,dzId){
@@ -3657,7 +4381,7 @@ function lCBs(){try{return JSON.parse(localStorage.getItem("wfo_cbs")||"[]");}ca
 function saveSession(){localStorage.setItem("wfo_reps",JSON.stringify(reps));localStorage.setItem("wfo_cbs",JSON.stringify(CBs));}
 
 // ── PDF SLIPS ──
-function slipStyle(){return `<style>@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Nunito:wght@400;600;700&display=swap');*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Nunito",sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.slip{page-break-after:always;min-height:100vh;display:flex;flex-direction:column}.slip:last-child{page-break-after:avoid}.pbar{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(135deg,#E20074,#6E2B8B);display:flex;align-items:center;justify-content:space-between;padding:0 22px;z-index:9999}.pbar-t{font-family:"Poppins",sans-serif;font-weight:800;font-size:14px;color:#fff}.pbt{border:none;border-radius:8px;padding:8px 18px;font-family:"Poppins",sans-serif;font-weight:800;font-size:13px;cursor:pointer;margin-left:8px}.pbt.p{background:#fff;color:#E20074}.pbt.c{background:rgba(255,255,255,.15);color:#fff}.sp{height:52px}@media print{.pbar,.sp{display:none!important}}</style>`;}
+function slipStyle(){return ``;}
 function buildSlipHTML(r,c,wk2){
   const bT=bBd(r.ta||0),aT=aBd(r.ap||0),repCBs=CBs.filter(x=>x.rp===r.n);
   return`<div class="slip"><div style="background:linear-gradient(135deg,#E20074 0%,#6E2B8B 60%,#4A1A6B 100%);padding:26px 34px;color:#fff"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="display:flex;gap:11px;align-items:center"><div style="width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px">⚡</div><div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:17px;text-transform:uppercase;letter-spacing:.04em">Edgelink Inc</div><div style="font-size:10px;opacity:.65;letter-spacing:.08em;text-transform:uppercase;margin-top:2px">Work Force Ops - Incentive Pay</div></div></div><div style="text-align:right"><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:14px">Weekly Bonus Slip</div><div style="font-size:11px;opacity:.7;margin-top:2px">Week of ${wk2}</div></div></div><div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2)"><div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:28px">${X(r.n)}</div><div style="font-size:12px;opacity:.72;margin-top:4px;display:flex;gap:13px"><span>${X(r.s||"—")}</span><span>Coach: ${X(r.c||"—")}</span>${r.ri?`<span>NTID: ${r.ri}</span>`:""}</div></div><div style="text-align:right"><div style="font-size:9px;opacity:.6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Net Owed</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:40px;color:${c.nt<0?"#FFB3D1":"#fff"}">$${c.nt.toFixed(2)}</div><div style="font-size:10px;opacity:.7;margin-top:3px">${c.nt<0?"Carry forward":"Approved"}</div></div></div></div>
