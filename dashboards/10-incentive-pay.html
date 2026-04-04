@@ -1866,6 +1866,69 @@ body.page-pg-assign .week-bar{display:none!important;}
 
       <!-- REP ROSTER -->
       <div class="sub-pane" id="admin-roster">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hdr card-hdr-dk">
+            <div class="card-title">🎓 Coach Roster</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn bghost sm" onclick="showAddCoachModal()">+ Add Coach</button>
+              <button class="btn bghost sm" onclick="expCoachRosterCSV()">⬇ Export</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div style="padding:10px 16px;font-size:11px;color:var(--mu);background:var(--thb)">
+              Active coaches appear in all dropdowns and calc sheets. Inactive coaches appear in payout history only.
+            </div>
+            <div class="tw"><table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="background:var(--thb)">
+                <th style="padding:7px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Coach</th>
+                <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Status</th>
+                <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Start Date</th>
+                <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">End Date</th>
+                <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Stores</th>
+                <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Actions</th>
+              </tr></thead>
+              <tbody id="coachRosterBody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <!-- ADD/EDIT COACH MODAL -->
+        <div id="coachModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
+          <div style="background:#fff;border-radius:16px;padding:28px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3)">
+            <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:18px;color:var(--se);margin-bottom:20px" id="coachModalTitle">Add Coach</div>
+            <input type="hidden" id="coachModalId"/>
+            <div class="fi" style="margin-bottom:12px">
+              <label style="font-size:12px;font-weight:700;color:var(--se)">Coach Name</label>
+              <input type="text" id="coachModalName" placeholder="Full name" style="width:100%;padding:10px 12px;border:2px solid var(--bo);border-radius:8px;font-size:14px;font-family:'Nunito',sans-serif;outline:none"/>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+              <div class="fi">
+                <label style="font-size:12px;font-weight:700;color:var(--se)">Start Date</label>
+                <input type="date" id="coachModalStart" style="width:100%;padding:10px 12px;border:2px solid var(--bo);border-radius:8px;font-size:13px;outline:none"/>
+              </div>
+              <div class="fi">
+                <label style="font-size:12px;font-weight:700;color:var(--mu)">End Date <span style="font-weight:400">(leave blank if active)</span></label>
+                <input type="date" id="coachModalEnd" style="width:100%;padding:10px 12px;border:2px solid var(--bo);border-radius:8px;font-size:13px;outline:none"/>
+              </div>
+            </div>
+            <div class="fi" style="margin-bottom:12px">
+              <label style="font-size:12px;font-weight:700;color:var(--se)">Status</label>
+              <select id="coachModalStatus" style="width:100%;padding:10px 12px;border:2px solid var(--bo);border-radius:8px;font-size:14px;outline:none">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="fi" style="margin-bottom:20px">
+              <label style="font-size:12px;font-weight:700;color:var(--se)">Notes</label>
+              <input type="text" id="coachModalNotes" placeholder="e.g. Left 4/1/26" style="width:100%;padding:10px 12px;border:2px solid var(--bo);border-radius:8px;font-size:13px;outline:none"/>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn bghost" onclick="document.getElementById('coachModal').style.display='none'">Cancel</button>
+              <button class="btn bp" onclick="saveCoachModal()">Save Coach</button>
+            </div>
+          </div>
+        </div>
+
         <div class="card"><div class="card-hdr card-hdr-dk">
           <div class="card-title">👥 Rep Roster</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -2626,6 +2689,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   const mn=document.getElementById("mgrMonth");if(mn){const n=new Date();mn.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
   const cm=document.getElementById("coachMonth");if(cm){const n=new Date();cm.value=n.getFullYear()+"-"+(String(n.getMonth()+1).padStart(2,"0"));}
   loadCustomRoster();
+  // Init coach roster (pre-seeds Mike Cobbs as inactive if first load)
+  if(!localStorage.getItem('wfo_coach_roster'))saveCoachRoster(DEFAULT_COACH_ROSTER);
+  rebuildCOACHES();
   initSidebar();
   updSheetStatus();
   try{initHomePage();}catch(e){console.error('Home init error:',e);}
@@ -3411,8 +3477,8 @@ function parseELBCSV(txt,fname){
   if(lines.length<2){tst2('ELB file empty','er');return;}
   const isTab=lines[0].split('\t').length>lines[0].split(',').length;
   const sep=isTab?'\t':',';
-  const hdr0=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
-  const row1cols=lines[1].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const hdr0=csvSp(lines[0]);
+  const row1cols=csvSp(lines[1]);
   const row1store=row1cols[2]||'';
   const row1isData=/^\d{7,10}/.test(row1store)||/EL\d+/.test(row1store);
   const dataStartRow=row1isData?1:2;
@@ -3432,7 +3498,20 @@ function parseELBCSV(txt,fname){
     rBlocks[rn]={actI,tgtI,resI};
   }
   const map=getELBMetricMap();
-  const idMap={};SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+  const idMap={};
+  SR.forEach(s=>{
+    idMap[s.id]=s.s;
+    idMap[String(+s.id)]=s.s;
+    // Also index by last 6 digits of ID (some Metro exports truncate)
+    if(s.id&&s.id.length>6)idMap[s.id.slice(-6)]=s.s;
+  });
+  // Hardcoded aliases for stores that Metro exports inconsistently
+  const _storeAliases={
+    '216464':'MA-WESTERN AVE','10216464':'MA-WESTERN AVE',
+    'WESTERN AVE':'MA-WESTERN AVE','734 WESTERN':'MA-WESTERN AVE',
+    'MA WESTERN':'MA-WESTERN AVE','MA-WESTERN':'MA-WESTERN AVE',
+  };
+  Object.assign(idMap,_storeAliases);
   const elbData={};let matched=0;const unmatched=[];
   const parseVal=(cols,b)=>{
     const actual=b.actI>=0?+(cols[b.actI]||'').replace(/[",]/g,'')||0:0;
@@ -3459,7 +3538,12 @@ function parseELBCSV(txt,fname){
       const rawUp=rawStore.toUpperCase();
       const nameMatch=SR.find(s=>{
         const sn=s.s.replace(/^[A-Z]{2}-/,'').toUpperCase();
-        return rawUp.includes(sn)||sn.split(' ').filter(w=>w.length>3).every(w=>rawUp.includes(w));
+        const snWords=sn.split(' ').filter(w=>w.length>3);
+        // Check alias map first
+        if(_storeAliases[rawUp.trim()]||_storeAliases[sn])return s.s===(_storeAliases[rawUp.trim()]||_storeAliases[sn]);
+        return rawUp.includes(sn)||
+          (snWords.length>0&&snWords.every(w=>rawUp.includes(w)))||
+          sn.split(' ').some(w=>w.length>5&&rawUp.includes(w));
       });
       if(nameMatch)storeName=nameMatch.s;
     }
@@ -3489,8 +3573,11 @@ function parseELBCSV(txt,fname){
     if(document.getElementById('coachSheetSections')?.innerHTML.trim())renCoachSheet();
     if(document.getElementById('mgrSheetBody'))renMgrSheet();
   };
-  if(unmatched.length)console.warn('ELB unmatched:',unmatched);
-  showPeriodConfirm({fname,count:matched,type:'elb',defaultPeriod:defaultMonthCurrent(),onConfirm:saveELBWithPeriod});
+  if(unmatched.length){
+    console.warn('ELB unmatched:',unmatched);
+    setTimeout(()=>tst2('⚠ '+unmatched.length+' stores unmatched in ELB. Check Admin → Data Status.','wn'),1500);
+  }
+  showPeriodConfirm({fname,count:matched,type:'elb',defaultPeriod:defaultMonthCurrent(),onConfirm:saveELBWithPeriod,unmatched});
 }
 
 // ── RTBDI STORE ACCESSORS + UPLOAD ──
@@ -3910,16 +3997,8 @@ let coachMimPayLocked=false;
 // ══════════════════════════════════════════════════════
 
 function initCoachPayoutPage(){
-  // Populate coach dropdown
-  const sel=document.getElementById('cpCoachSel');
-  if(!sel)return;
-  // Keep default empty option
-  while(sel.options.length>1)sel.remove(1);
-  COACHES.forEach(c=>{
-    const opt=document.createElement('option');
-    opt.value=c;opt.textContent=c;
-    sel.appendChild(opt);
-  });
+  // Populate coach dropdown with ALL coaches (active + inactive) for historical payout
+  populateCoachPayoutSel('cpCoachSel');
   // Set default months
   const mn=defaultMonth();
   const bm=document.getElementById('cpBonusMonth');
@@ -4174,10 +4253,33 @@ function renMgrPayout(){
   // Load mgr sheet data for bonus month
   let bsd={};
   try{bsd=JSON.parse(localStorage.getItem(getMgrSheetKey(bonusMn))||'{}');}catch{}
-  // Merge with live mgrSheetData if matching period
-  if(window._mgrSheetCurrentMonth===bonusMn){
+  // Strip upload-sourced fields — must come fresh from period-matched uploads
+  const _mUpFields=['acts','bts','hsi','attach','elb','acc'];
+  stores.forEach(s=>{
+    if(bsd[s.s]){const _mm=bsd[s.s]._manual||{};_mUpFields.forEach(f=>{if(!_mm[f])delete bsd[s.s][f];});}
+  });
+  // Overlay ELB data ONLY if upload period matches
+  const elbPeriodMp=getELBData()?.period;
+  const rtbdiPeriodMp=getRTBDIStoreData()?.period;
+  if(elbPeriodMp===bonusMn){
+    const elbD=getELBData()?.data||{};
     stores.forEach(s=>{
-      if(mgrSheetData[s.s])Object.assign(bsd[s.s]||(bsd[s.s]={}),mgrSheetData[s.s]);
+      const ed=elbD[s.s];if(!ed)return;
+      if(!bsd[s.s])bsd[s.s]={};
+      if(ed.elbRank)bsd[s.s].elb=ed.elbRank;
+      if(ed.mgrActActual!==undefined)bsd[s.s].acts=ed.mgrActActual;
+      if(ed.mgrBtsActual!==undefined)bsd[s.s].bts=ed.mgrBtsActual;
+      if(ed.mgrHsiActual!==undefined)bsd[s.s].hsi=ed.mgrHsiActual;
+      if(ed.mgrProtPct!==undefined)bsd[s.s].protection=ed.mgrProtPct;
+    });
+  }
+  if(rtbdiPeriodMp===bonusMn){
+    const rtbdiD=getRTBDIStoreData()?.data||{};
+    stores.forEach(s=>{
+      const rd=rtbdiD[s.s];if(!rd)return;
+      if(!bsd[s.s])bsd[s.s]={};
+      if(rd.accTotal!==undefined)bsd[s.s].acc=rd.accTotal;
+      if(rd.attach!==undefined)bsd[s.s].attach=rd.attach;
     });
   }
 
@@ -4495,6 +4597,222 @@ function saveAllCoachData(){
   if(!mn){tst2('Select a period first','er');return;}
   saveCoachSheetForPeriod(mn);
   tst2('Coach data saved for '+formatPeriod(mn),'ok');
+}
+
+
+function saveAllMgrData(){
+  const mn=document.getElementById('mgrSheetMonthIn')?.value;
+  if(!mn){tst2('Select a period first','er');return;}
+  saveMgrSheetForPeriod(mn);
+  tst2('Manager data saved for '+formatPeriod(mn),'ok');
+}
+
+function lockMgrPeriod(){
+  const mn=document.getElementById('adminMgrLockMonth')?.value;
+  if(!mn){tst2('Select a month to lock','er');return;}
+  if(!confirm('Lock manager period '+formatPeriod(mn)+'? This freezes all manager actuals.'))return;
+  const key='wfo_mgr_lock_'+mn;
+  localStorage.setItem(key,JSON.stringify({locked:true,lockedAt:new Date().toLocaleString()}));
+  tst2('Manager period '+formatPeriod(mn)+' locked','ok');
+  updMgrSheetBonuses();
+}
+
+function calcStoreMgrBonus(storeName,sd,tier,ct,bs,coAcc){
+  // Thin wrapper — actual calc is inline in renMgrSheet and renMgrPayout
+  // Returns {total,guardrails} for use in overview calculations
+  const q=ct?.tiers?.[tier]||ct?.[tier]||{};
+  const elbCutoff=q.elbCutoff||(ct?.elbDQ||3368);
+  const attachCutoff=q.attachCutoff||(ct?.attachDQ||60);
+  const elb=+sd.elb||0,attach=+sd.attach||0;
+  const elbFail=elb>0&&elb>=elbCutoff;
+  const attachFail=attach>0&&attach<attachCutoff;
+  const guardrails=[];
+  if(elbFail)guardrails.push('ELB DQ');
+  if(attachFail)guardrails.push('Attach DQ');
+  let total=0;
+  if(!elbFail){
+    const cats=(T.mgr?.cats||DT.mgr?.cats||[]);
+    cats.forEach(cat=>{
+      const act=+sd[cat.id]||0;
+      const tgt=bs?.targets?.[storeName]?.[cat.id]||0;
+      if(tgt>0&&act>0){
+        const pct=act/tgt;
+        const bKey=tier===1?'t1base':tier===2?'t2base':'t3base';
+        const uKey=tier===1?'t1up':tier===2?'t2up':'t3up';
+        const b=cat[bKey]||0,u=cat[uKey]||0;
+        total+=attachFail?b:pct>=1?u:pct>=0.9?b:0;
+      }
+    });
+  }
+  return {total,guardrails,elbFail,attachFail};
+}
+
+
+// ══════════════════════════════════════════════════════
+// COACH ROSTER MANAGEMENT
+// ══════════════════════════════════════════════════════
+
+const DEFAULT_COACH_ROSTER = [
+  {id:'cr_001',name:'Ambulai Sheku',status:'active',startDate:'',endDate:'',notes:''},
+  {id:'cr_002',name:'Cheryl',status:'active',startDate:'',endDate:'',notes:''},
+  {id:'cr_003',name:'Joel Montero',status:'active',startDate:'',endDate:'',notes:''},
+  {id:'cr_004',name:'Manny',status:'active',startDate:'',endDate:'',notes:''},
+  {id:'cr_005',name:'Mr. Watts',status:'active',startDate:'',endDate:'',notes:''},
+  {id:'cr_006',name:'Rose Perez',status:'active',startDate:'',endDate:'',notes:''},
+  {id:'cr_007',name:'Mike Cobbs',status:'inactive',startDate:'',endDate:'2026-03-31',notes:'Left 4/1/26 — 5 CT/RI stores moved to TBD'},
+];
+
+function loadCoachRoster(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('wfo_coach_roster')||'null');
+    return saved||DEFAULT_COACH_ROSTER;
+  }catch{return DEFAULT_COACH_ROSTER;}
+}
+
+function saveCoachRoster(roster){
+  localStorage.setItem('wfo_coach_roster',JSON.stringify(roster));
+  rebuildCOACHES();
+}
+
+function rebuildCOACHES(){
+  // Rebuild active COACHES array from roster
+  const roster=loadCoachRoster();
+  const active=roster.filter(c=>c.status==='active').map(c=>c.name);
+  // Update global COACHES array
+  COACHES.length=0;
+  active.forEach(n=>COACHES.push(n));
+  // Re-render anything that depends on it
+  if(document.getElementById('coach-ov-body'))renCoachOv();
+  initCoachDD();
+}
+
+function getAllCoaches(){
+  // Returns ALL coaches (active + inactive) for historical payout selectors
+  return loadCoachRoster();
+}
+
+function renCoachRoster(){
+  const el=document.getElementById('coachRosterBody');if(!el)return;
+  const roster=loadCoachRoster();
+  if(!roster.length){
+    el.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--mu)">No coaches. Click + Add Coach.</td></tr>';
+    return;
+  }
+  el.innerHTML=roster.map((c,i)=>{
+    const isActive=c.status==='active';
+    const rowBg=i%2===0?'#fff':'#FAFAFA';
+    // Find stores assigned to this coach
+    const coachStores=SR.filter(s=>s.c===c.name).map(s=>s.s);
+    return`<tr style="border-bottom:1px solid var(--bo);background:${rowBg}">
+      <td style="padding:8px 12px;font-weight:700;color:var(--se)">${c.name}</td>
+      <td style="padding:8px 10px;text-align:center">
+        <span class="bdg ${isActive?'bok2':'bno'}" style="font-size:10px">${isActive?'Active':'Inactive'}</span>
+      </td>
+      <td style="padding:8px 10px;text-align:center;font-size:11px;color:var(--mu)">${c.startDate||'—'}</td>
+      <td style="padding:8px 10px;text-align:center;font-size:11px;color:${c.endDate?'var(--da)':'var(--mu)'}">${c.endDate||'—'}</td>
+      <td style="padding:8px 10px;text-align:center;font-size:11px;color:var(--mu)">${coachStores.length} store${coachStores.length!==1?'s':''}</td>
+      <td style="padding:8px 10px;text-align:center">
+        <button class="btn bghost sm" onclick="editCoachModal('${c.id}')" style="margin-right:4px">✏ Edit</button>
+        <button class="btn sm" onclick="toggleCoachStatus('${c.id}')" 
+          style="background:${isActive?'var(--da)':'var(--ok)'};color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:6px;cursor:pointer">
+          ${isActive?'Deactivate':'Reactivate'}
+        </button>
+      </td>
+    </tr>
+    ${c.notes?`<tr style="background:${rowBg}"><td colspan="6" style="padding:2px 12px 8px;font-size:11px;color:var(--mu);font-style:italic">📝 ${c.notes}</td></tr>`:''}`;
+  }).join('');
+}
+
+function showAddCoachModal(){
+  document.getElementById('coachModalId').value='';
+  document.getElementById('coachModalName').value='';
+  document.getElementById('coachModalStart').value='';
+  document.getElementById('coachModalEnd').value='';
+  document.getElementById('coachModalStatus').value='active';
+  document.getElementById('coachModalNotes').value='';
+  document.getElementById('coachModalTitle').textContent='Add Coach';
+  document.getElementById('coachModal').style.display='flex';
+}
+
+function editCoachModal(id){
+  const roster=loadCoachRoster();
+  const c=roster.find(r=>r.id===id);if(!c)return;
+  document.getElementById('coachModalId').value=c.id;
+  document.getElementById('coachModalName').value=c.name;
+  document.getElementById('coachModalStart').value=c.startDate||'';
+  document.getElementById('coachModalEnd').value=c.endDate||'';
+  document.getElementById('coachModalStatus').value=c.status;
+  document.getElementById('coachModalNotes').value=c.notes||'';
+  document.getElementById('coachModalTitle').textContent='Edit Coach';
+  document.getElementById('coachModal').style.display='flex';
+}
+
+function saveCoachModal(){
+  const id=document.getElementById('coachModalId').value;
+  const name=document.getElementById('coachModalName').value.trim();
+  const startDate=document.getElementById('coachModalStart').value;
+  const endDate=document.getElementById('coachModalEnd').value;
+  const status=document.getElementById('coachModalStatus').value;
+  const notes=document.getElementById('coachModalNotes').value.trim();
+  if(!name){tst2('Coach name is required','er');return;}
+  const roster=loadCoachRoster();
+  if(id){
+    const idx=roster.findIndex(r=>r.id===id);
+    if(idx>=0)roster[idx]={...roster[idx],name,startDate,endDate,status,notes};
+  }else{
+    roster.push({id:'cr_'+Date.now(),name,startDate,endDate,status,notes});
+  }
+  saveCoachRoster(roster);
+  renCoachRoster();
+  document.getElementById('coachModal').style.display='none';
+  tst2((id?'Coach updated':'Coach added')+': '+name,'ok');
+}
+
+function toggleCoachStatus(id){
+  const roster=loadCoachRoster();
+  const c=roster.find(r=>r.id===id);if(!c)return;
+  const newStatus=c.status==='active'?'inactive':'active';
+  if(!confirm((newStatus==='inactive'?'Deactivate':'Reactivate')+' '+c.name+'?'))return;
+  c.status=newStatus;
+  if(newStatus==='inactive'&&!c.endDate)c.endDate=new Date().toISOString().slice(0,10);
+  saveCoachRoster(roster);
+  renCoachRoster();
+  tst2(c.name+' is now '+newStatus,'ok');
+}
+
+function expCoachRosterCSV(){
+  const roster=loadCoachRoster();
+  const rows=[['Name','Status','Start Date','End Date','Stores','Notes']];
+  roster.forEach(c=>{
+    const stores=SR.filter(s=>s.c===c.name).map(s=>s.s).join('; ');
+    rows.push([c.name,c.status,c.startDate||'',c.endDate||'',stores,c.notes||'']);
+  });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download='coach_roster.csv';a.click();URL.revokeObjectURL(u);
+}
+
+// Populate payout coach selector with ALL coaches (active + inactive)
+function populateCoachPayoutSel(selId){
+  const sel=document.getElementById(selId);if(!sel)return;
+  const cur=sel.value;
+  const all=getAllCoaches();
+  sel.innerHTML='<option value="">— Select Coach —</option>';
+  // Active first, then inactive
+  ['active','inactive'].forEach(status=>{
+    const group=all.filter(c=>c.status===status);
+    if(!group.length)return;
+    const og=document.createElement('optgroup');
+    og.label=status==='active'?'Active Coaches':'Inactive Coaches';
+    group.forEach(c=>{
+      const opt=document.createElement('option');
+      opt.value=c.name;
+      opt.textContent=c.name+(status==='inactive'?' (inactive)':'');
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  if(cur)sel.value=cur;
 }
 
 // ── CSV UPLOAD ──
