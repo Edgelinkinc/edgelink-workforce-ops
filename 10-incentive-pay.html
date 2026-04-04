@@ -3411,8 +3411,8 @@ function parseELBCSV(txt,fname){
   if(lines.length<2){tst2('ELB file empty','er');return;}
   const isTab=lines[0].split('\t').length>lines[0].split(',').length;
   const sep=isTab?'\t':',';
-  const hdr0=lines[0].split(sep).map(c=>c.replace(/"/g,'').trim());
-  const row1cols=lines[1].split(sep).map(c=>c.replace(/"/g,'').trim());
+  const hdr0=csvSp(lines[0]);
+  const row1cols=csvSp(lines[1]);
   const row1store=row1cols[2]||'';
   const row1isData=/^\d{7,10}/.test(row1store)||/EL\d+/.test(row1store);
   const dataStartRow=row1isData?1:2;
@@ -3432,7 +3432,20 @@ function parseELBCSV(txt,fname){
     rBlocks[rn]={actI,tgtI,resI};
   }
   const map=getELBMetricMap();
-  const idMap={};SR.forEach(s=>{idMap[s.id]=s.s;idMap[String(+s.id)]=s.s;});
+  const idMap={};
+  SR.forEach(s=>{
+    idMap[s.id]=s.s;
+    idMap[String(+s.id)]=s.s;
+    // Also index by last 6 digits of ID (some Metro exports truncate)
+    if(s.id&&s.id.length>6)idMap[s.id.slice(-6)]=s.s;
+  });
+  // Hardcoded aliases for stores that Metro exports inconsistently
+  const _storeAliases={
+    '216464':'MA-WESTERN AVE','10216464':'MA-WESTERN AVE',
+    'WESTERN AVE':'MA-WESTERN AVE','734 WESTERN':'MA-WESTERN AVE',
+    'MA WESTERN':'MA-WESTERN AVE','MA-WESTERN':'MA-WESTERN AVE',
+  };
+  Object.assign(idMap,_storeAliases);
   const elbData={};let matched=0;const unmatched=[];
   const parseVal=(cols,b)=>{
     const actual=b.actI>=0?+(cols[b.actI]||'').replace(/[",]/g,'')||0:0;
@@ -3459,7 +3472,12 @@ function parseELBCSV(txt,fname){
       const rawUp=rawStore.toUpperCase();
       const nameMatch=SR.find(s=>{
         const sn=s.s.replace(/^[A-Z]{2}-/,'').toUpperCase();
-        return rawUp.includes(sn)||sn.split(' ').filter(w=>w.length>3).every(w=>rawUp.includes(w));
+        const snWords=sn.split(' ').filter(w=>w.length>3);
+        // Check alias map first
+        if(_storeAliases[rawUp.trim()]||_storeAliases[sn])return s.s===(_storeAliases[rawUp.trim()]||_storeAliases[sn]);
+        return rawUp.includes(sn)||
+          (snWords.length>0&&snWords.every(w=>rawUp.includes(w)))||
+          sn.split(' ').some(w=>w.length>5&&rawUp.includes(w));
       });
       if(nameMatch)storeName=nameMatch.s;
     }
@@ -3489,8 +3507,11 @@ function parseELBCSV(txt,fname){
     if(document.getElementById('coachSheetSections')?.innerHTML.trim())renCoachSheet();
     if(document.getElementById('mgrSheetBody'))renMgrSheet();
   };
-  if(unmatched.length)console.warn('ELB unmatched:',unmatched);
-  showPeriodConfirm({fname,count:matched,type:'elb',defaultPeriod:defaultMonthCurrent(),onConfirm:saveELBWithPeriod});
+  if(unmatched.length){
+    console.warn('ELB unmatched:',unmatched);
+    setTimeout(()=>tst2('⚠ '+unmatched.length+' stores unmatched in ELB. Check Admin → Data Status.','wn'),1500);
+  }
+  showPeriodConfirm({fname,count:matched,type:'elb',defaultPeriod:defaultMonthCurrent(),onConfirm:saveELBWithPeriod,unmatched});
 }
 
 // ── RTBDI STORE ACCESSORS + UPLOAD ──
