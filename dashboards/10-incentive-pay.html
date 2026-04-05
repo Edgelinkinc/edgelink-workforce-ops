@@ -250,7 +250,7 @@ body.page-pg-home .week-bar,body.page-pg-home .stbar,body.page-pg-home .kstrip{d
 body.admin-active .content{padding:0!important;}
 body:not(.page-pg-reps):not(.page-pg-chargebacks) .week-bar{display:none!important;}
 body.page-pg-managers .week-bar,body.page-pg-coaches .week-bar,
-body.page-pg-leaderboard .week-bar,body.page-pg-summary .week-bar,
+body.page-pg-summary .week-bar,
 body.page-pg-history .week-bar,body.page-pg-roster .week-bar,
 body.page-pg-assign .week-bar{display:none!important;}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
@@ -1293,8 +1293,28 @@ body.admin-unlocked .admin-back-bar{display:flex}
           <button class="lb-tab" onclick="swLB('coach',this)">🎯 By Coach</button>
         </div>
       </div>
-      <div class="card-body">
-        <div id="lbGrid" class="lb-grid">
+      <div class="card-body" style="padding:0">
+        <!-- TOP 5 PODIUM CARDS — company mode only -->
+        <div id="lbPodium" style="display:none;padding:16px 16px 0"></div>
+        <!-- FULL RANKED TABLE -->
+        <div id="lbTable" style="display:none">
+          <div style="padding:10px 18px 6px;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--bo)">Full Rankings</div>
+          <div class="tw">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="background:var(--thb)">
+                <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr);width:40px">#</th>
+                <th style="padding:7px 12px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Rep</th>
+                <th style="padding:7px 10px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Store</th>
+                <th style="padding:7px 10px;text-align:left;font-size:9px;color:var(--tht);text-transform:uppercase;border-bottom:2px solid var(--pr)">Coach</th>
+                <th style="padding:7px 10px;text-align:center;font-size:9px;color:var(--se);text-transform:uppercase;border-bottom:2px solid var(--pr)">PPD</th>
+                <th style="padding:7px 12px;text-align:right;font-size:9px;color:var(--pr);text-transform:uppercase;border-bottom:2px solid var(--pr)">Gross $</th>
+              </tr></thead>
+              <tbody id="lbTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- LEGACY GRID — used for store/coach modes -->
+        <div id="lbGrid" class="lb-grid" style="padding:16px">
           <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--mu)">Load rep data to see leaderboard.</div>
         </div>
       </div>
@@ -3060,7 +3080,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const abm=document.getElementById('aBsMonth');if(abm&&!abm.value)abm.value=_mn;
   // Always start on home page if no session or if session is pg-admin/pg-history
   const _stored=sessionStorage.getItem("wfo_page");
-  const _skipPages=['pg-admin','pg-history','pg-roster','pg-assign','pg-reps','pg-managers','pg-coaches','pg-leaderboard','pg-summary','pg-coach-payout','pg-mgr-payout','pg-chargebacks'];
+  const _skipPages=['pg-admin','pg-history','pg-roster','pg-assign','pg-reps','pg-managers','pg-coaches','pg-summary','pg-coach-payout','pg-mgr-payout','pg-chargebacks'];
   const last=(!_stored||_skipPages.includes(_stored))?'pg-home':_stored;
   // Set initial body page class
   document.body.classList.add('page-'+last);
@@ -3125,7 +3145,7 @@ function updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+
 // ── PAGE NAV ──
 function goPage(id,el){
   // Staff pages require PIN on mobile (shared device protection)
-  const _staffPages=['pg-reps','pg-managers','pg-coaches','pg-leaderboard',
+  const _staffPages=['pg-reps','pg-managers','pg-coaches',
     'pg-summary','pg-coach-payout','pg-mgr-payout','pg-chargebacks','pg-history',
     'pg-roster','pg-assign'];
   if(_staffPages.includes(id)&&!_pinUnlocked){
@@ -9884,6 +9904,9 @@ function onAdminMimToggle(tier,type,val){
 
 function renLB(){
   const grid=document.getElementById('lbGrid');
+  const podium=document.getElementById('lbPodium');
+  const tableWrap=document.getElementById('lbTable');
+  const tableBody=document.getElementById('lbTableBody');
   if(!grid)return;
 
   // Get reps for this page's week context (may differ from main wk)
@@ -9900,6 +9923,9 @@ function renLB(){
   }
 
   if(!srcReps.length){
+    if(podium)podium.style.display='none';
+    if(tableWrap)tableWrap.style.display='none';
+    grid.style.display='block';
     grid.innerHTML="<div style='grid-column:1/-1;text-align:center;padding:40px;color:var(--mu)'>No rep data — load RTPOS CSV to see leaderboard.</div>";
     return;
   }
@@ -9913,16 +9939,83 @@ function renLB(){
     return true;
   });
 
-  let groups=[];
+  // ── COMPANY MODE — podium cards + full table ──
   if(lbMode==='company'){
-    const sorted=[...filtered].map(r=>({...r,_c:cRp(r)})).sort((a,b)=>b._c.gr-a._c.gr).slice(0,10);
-    groups=sorted.map((r,i)=>{
-      const storeLbl=r.s&&r.s!=='TBD'?r.s:'';
-      const coachLbl=r.c&&r.c!=='TBD'?r.c:'';
-      const sub=[storeLbl,coachLbl].filter(Boolean).join(' · ')||'Unassigned';
-      return{rank:i+1,label:dispName(r),sub,r};
-    });
-  } else if(lbMode==='store'){
+    if(podium)podium.style.display='block';
+    if(tableWrap)tableWrap.style.display='block';
+    grid.style.display='none';
+
+    // Sort ALL reps by gross descending
+    const allSorted=[...filtered].map(r=>({...r,_c:cRp(r)})).sort((a,b)=>b._c.gr-a._c.gr);
+
+    if(!allSorted.length){
+      if(podium)podium.innerHTML="<div style='text-align:center;padding:30px;color:var(--mu)'>No results match the current filters.</div>";
+      if(tableBody)tableBody.innerHTML='';
+      return;
+    }
+
+    // ── TOP 5 PODIUM CARDS ──
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+    const borderColors=['#FFD700','#C0C0C0','#CD7F32','var(--se)','var(--pr)'];
+    const top5=allSorted.slice(0,5);
+
+    if(podium){
+      podium.innerHTML=`
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:18px">
+          ${top5.map((r,i)=>{
+            const c=r._c;
+            const storeLbl=r.s&&r.s!=='TBD'?r.s:'';
+            const coachLbl=r.c&&r.c!=='TBD'?r.c:'';
+            const sub=[storeLbl,coachLbl].filter(Boolean).join(' · ')||'Unassigned';
+            const aT=aBd(r.ap||0);
+            const tier=bBd(r.ta||0);
+            return`<div style="background:#fff;border-radius:12px;border:1px solid var(--bo);border-top:4px solid ${borderColors[i]};padding:14px 14px 12px;position:relative;box-shadow:var(--sh)">
+              <div style="position:absolute;top:10px;right:12px;font-size:${i<3?'20px':'14px'}">${medals[i]}</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:var(--dk);padding-right:28px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${X(dispName(r))}</div>
+              <div style="font-size:10px;color:var(--mu);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${X(sub)}</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--pr);margin-bottom:6px">$${c.gr.toFixed(2)}</div>
+              <div style="font-size:10px;color:var(--mu);margin-bottom:4px">PPD: <strong style="color:var(--se)">${r.ta||0}</strong> · ${tier.l}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px">
+                ${c.gr>=200?'<span class="bdg btop">⭐ Top Earner</span>':''}
+                ${aT.c!=='bno'?'<span class="bdg '+aT.c+'">Acc '+aT.l+'</span>':''}
+                ${c.mi&&c.mi.p>0?'<span class="bdg bok2">MIM $'+c.mi.p.toFixed(0)+'</span>':''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    // ── FULL RANKED TABLE — all reps ──
+    if(tableBody){
+      const medals3=['🥇','🥈','🥉'];
+      tableBody.innerHTML=allSorted.map((r,i)=>{
+        const c=r._c;
+        const isTop3=i<3;
+        const isTop5=i<5;
+        const rowBg=i===0?'#FFFDF0':i===1?'#FAFAFA':i===2?'#FFF8F5':'';
+        const rankDisplay=isTop3?medals3[i]:`${i+1}`;
+        const storeLbl=r.s&&r.s!=='TBD'?r.s:'—';
+        const coachLbl=r.c&&r.c!=='TBD'?r.c:'—';
+        return`<tr style="border-bottom:1px solid var(--bo);${rowBg?'background:'+rowBg+';':''}${isTop5?'font-weight:600;':''}">
+          <td style="padding:8px 10px;text-align:center;font-size:${isTop3?'16px':'12px'};font-weight:${isTop3?'800':'600'};color:${i===0?'#B8860B':i===1?'#808080':i===2?'#8B4513':'var(--mu)'}">${rankDisplay}</td>
+          <td style="padding:8px 12px;font-family:'${isTop5?'Poppins':'Nunito'}',sans-serif;font-weight:${isTop5?'700':'500'};font-size:13px;color:var(--dk)">${X(dispName(r))}</td>
+          <td style="padding:8px 10px;font-size:11px;color:var(--mu)">${X(storeLbl)}</td>
+          <td style="padding:8px 10px;font-size:11px;color:var(--mu)">${X(coachLbl)}</td>
+          <td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;color:var(--se)">${r.ta||0}</td>
+          <td style="padding:8px 12px;text-align:right;font-family:'Poppins',sans-serif;font-weight:${isTop5?'800':'700'};font-size:13px;color:var(--pr)">$${c.gr.toFixed(2)}</td>
+        </tr>`;
+      }).join('');
+    }
+    return;
+  }
+
+  // ── STORE / COACH MODES — original grid ──
+  if(podium)podium.style.display='none';
+  if(tableWrap)tableWrap.style.display='none';
+  grid.style.display='block';
+
+  let groups=[];
+  if(lbMode==='store'){
     const byStore={};
     filtered.forEach(r=>{const c=cRp(r);if(!byStore[r.s])byStore[r.s]={store:r.s,gross:0,reps:[]};byStore[r.s].gross+=c.gr;byStore[r.s].reps.push({...r,_c:c});});
     groups=Object.values(byStore).sort((a,b)=>b.gross-a.gross).slice(0,10).map((sg,i)=>{
@@ -9959,14 +10052,10 @@ function renLB(){
       <div class="lb-name" style="font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:var(--dk);padding-right:32px;margin-bottom:2px">${X(g.label)}</div>
       <div class="lb-store" style="font-size:10px;color:var(--mu);margin-bottom:8px">${X(g.sub)}</div>
       <div class="lb-gross" style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--pr);margin-bottom:4px">$${gross.toFixed(2)}</div>
-      ${lbMode==='company'?`
-        <div style="font-size:10px;color:var(--mu);margin-bottom:2px">PPD: <strong style="color:var(--se)">${ta}</strong> · ${tier.l}</div>
-        <div style="font-size:10px;color:var(--mu);margin-bottom:8px">Acc: <strong style="color:var(--se)">$${(g.r?.ap||0).toFixed(0)}</strong> · ${aT.l}
-      </div>`:''}
       <div style="display:flex;flex-wrap:wrap;gap:4px">
-        ${isTop&&lbMode==='company'?'<span class="bdg btop">⭐ Top Earner</span>':''}
-        ${lbMode==='company'&&aT.c!=='bno'?'<span class="bdg '+aT.c+'">Acc '+aT.l+'</span>':''}
-        ${lbMode==='company'&&c.mi&&c.mi.p>0?'<span class="bdg bok2">MIM $'+c.mi.p.toFixed(0)+'</span>':''}
+        ${isTop?'<span class="bdg btop">⭐ Top Earner</span>':''}
+        ${aT.c!=='bno'?'<span class="bdg '+aT.c+'">Acc '+aT.l+'</span>':''}
+        ${c.mi&&c.mi.p>0?'<span class="bdg bok2">MIM $'+c.mi.p.toFixed(0)+'</span>':''}
       </div>
     </div>`;
   }).join('');
