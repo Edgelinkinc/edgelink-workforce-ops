@@ -32,8 +32,6 @@ body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--tx);min-he
 .si{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:13px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;transition:all .2s;border-left:3px solid transparent;user-select:none}
 .si:hover{background:rgba(255,255,255,.07);color:#fff}
   .si .si-lock{font-size:10px;opacity:.5;margin-left:auto}
-  body:not(.admin-unlocked) .si.staff-only{opacity:.65}
-  body:not(.admin-unlocked) .si.staff-only:hover{opacity:1}
 .si.active{background:rgba(226,0,116,.2);color:#fff;border-left-color:var(--pr)}
 .si .ic{font-size:15px;width:20px;text-align:center}
 .content{flex:1;min-width:0;min-height:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
@@ -249,7 +247,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .pin-cancel{font-size:12px;color:var(--mu);background:none;border:none;cursor:pointer;margin-top:4px;text-decoration:underline}
 body.admin-active .week-bar,body.admin-active .kstrip,body.admin-active .stbar{display:none!important;}
 body.page-pg-home .week-bar,body.page-pg-home .stbar,body.page-pg-home .kstrip{display:none!important;}
-body.admin-active .content{padding:0!important;}body.admin-active #pg-admin{margin:0;width:100%;position:fixed;inset:0;z-index:500;overflow-y:auto;background:var(--bg);}
+body.admin-active .content{padding:0!important;}
 body:not(.page-pg-reps):not(.page-pg-chargebacks) .week-bar{display:none!important;}
 body.page-pg-managers .week-bar,body.page-pg-coaches .week-bar,
 body.page-pg-leaderboard .week-bar,body.page-pg-summary .week-bar,
@@ -464,7 +462,13 @@ body.page-pg-assign .week-bar{display:none!important;}
 }
 
 /* Admin-only home buttons hidden until PIN unlock */
-  body:not(.admin-unlocked) .home-admin-btn{display:none!important}
+body:not(.admin-unlocked) .home-admin-btn{display:none!important}
+/* Admin back-bar — shown on staff report pages when admin unlocked */
+.admin-back-bar{display:none;align-items:center;gap:10px;background:var(--dk);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+body.admin-unlocked .admin-back-bar{display:flex}
+.admin-back-bar button{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:5px 12px;border-radius:7px;cursor:pointer}
+.admin-back-bar button:hover{background:var(--pr)}
+.admin-back-bar span{font-size:12px;color:rgba(255,255,255,.65);font-weight:600}
 
 /* ── HOME PAGE ── */
 .home-nav-btn{background:#F8F8F8;border:2px solid var(--bo);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif}
@@ -524,59 +528,26 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="si si-solo active" data-page="pg-home" onclick="goPage('pg-home',this)"><span class="ic">🏠</span><span class="si-label">Home</span></div>
   </div>
 
-  <!-- RETAIL SALES REP (employee-facing) -->
+  <!-- MY BONUS SLIP (employee-facing) -->
   <div class="sg-wrap">
     <div class="si si-solo" data-page="pg-employee" onclick="goPage('pg-employee',this)"><span class="ic">🏷️</span><span class="si-label">My Bonus Slip</span></div>
   </div>
 
-  <div class="sb-divider"></div>
-  <div class="sb-section-lbl">Staff</div>
-
-  <!-- REPS GROUP -->
+  <!-- LEADERBOARD — visible to all -->
   <div class="sg-wrap">
-    <div class="sg-hdr" onclick="toggleSG('sg-reps')">
-      <span class="sg-label">👤 Reps</span>
-      <span class="sg-arrow" id="sg-reps-arrow">▾</span>
-    </div>
-    <div class="sg-items" id="sg-reps">
-      <div class="si" data-page="pg-reps" class="si staff-only" onclick="goPage('pg-reps',this)"><span class="ic">💵</span><span class="si-label">Breakdown & Payouts</span></div>
-      <div class="si" data-page="pg-leaderboard" class="si staff-only" onclick="goPage('pg-leaderboard',this)"><span class="ic">🏆</span><span class="si-label">Leaderboard</span></div>
-      <div class="si" data-page="pg-summary" class="si staff-only" onclick="goPage('pg-summary',this)"><span class="ic">📊</span><span class="si-label">Summary</span></div>
-      <div class="si" data-page="pg-chargebacks" class="si staff-only" onclick="requirePin(()=>goPage('pg-chargebacks',null))"><span class="ic">⚡</span><span class="si-label">Chargebacks</span></div>
-    </div>
+    <div class="si si-solo" data-page="pg-leaderboard" onclick="goPage('pg-leaderboard',this)"><span class="ic">🏆</span><span class="si-label">Leaderboard</span></div>
   </div>
 
-  <!-- MANAGERS GROUP -->
-  <div class="sg-wrap">
-    <div class="sg-hdr" onclick="toggleSG('sg-managers')">
-      <span class="sg-label">🏢 Managers</span>
-      <span class="sg-arrow" id="sg-managers-arrow">▾</span>
+  <!-- ADMIN-UNLOCKED STAFF SECTION — revealed after PIN entry -->
+  <div id="sb-admin-section" style="display:none">
+    <div class="sb-divider"></div>
+    <div class="sb-section-lbl">Admin</div>
+    <div class="sg-wrap">
+      <div class="si si-solo" data-page="pg-admin" onclick="goPage('pg-admin',this)" style="color:rgba(226,0,116,.9)"><span class="ic">📊</span><span class="si-label">Staff Reports</span></div>
     </div>
-    <div class="sg-items" id="sg-managers">
-      <div class="si" data-page="pg-managers" class="si staff-only" onclick="goPage('pg-managers',this)"><span class="ic">📋</span><span class="si-label">Actuals & Bonus</span></div>
-      <div class="si" data-page="pg-mgr-payout" class="si staff-only" onclick="goPage('pg-mgr-payout',this)"><span class="ic">💵</span><span class="si-label">Manager Payout</span></div>
-    </div>
-  </div>
-
-  <!-- COACHES GROUP -->
-  <div class="sg-wrap">
-    <div class="sg-hdr" onclick="toggleSG('sg-coaches')">
-      <span class="sg-label">🎯 Coaches</span>
-      <span class="sg-arrow" id="sg-coaches-arrow">▾</span>
-    </div>
-    <div class="sg-items" id="sg-coaches">
-      <div class="si" data-page="pg-coaches" class="si staff-only" onclick="goPage('pg-coaches',this)"><span class="ic">📋</span><span class="si-label">Actuals & Bonus</span></div>
-      <div class="si" data-page="pg-coach-payout" class="si staff-only" onclick="goPage('pg-coach-payout',this)"><span class="ic">💵</span><span class="si-label">Coach Payout</span></div>
-    </div>
-  </div>
+  </div><!-- /sb-admin-section -->
 
   <div class="sb-divider"></div>
-  <div class="sb-section-lbl">Records</div>
-
-  <!-- HISTORY -->
-  <div class="sg-wrap">
-    <div class="si si-solo" data-page="pg-history" class="si staff-only" onclick="requirePin(()=>goPage('pg-history',null))"><span class="ic">📋</span><span class="si-label">Pay History</span></div>
-  </div>
 
   <!-- ADMIN -->
   <div class="sg-wrap">
@@ -827,10 +798,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
 
   <div class="page" id="pg-reps">
-    
-
-  
-
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Reps</span></div>
   <!-- PAGE: REPS -->
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="swSub('reps','overview',this)">👤 Overview</button>
@@ -986,6 +954,7 @@ body.page-pg-assign .week-bar{display:none!important;}
   </div>
 
   <div class="page" id="pg-managers">
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Managers</span></div>
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="swSub('mgr','overview',this)">📋 Actuals Overview</button>
       <button class="sub-tab" onclick="swSub('mgr','calc',this)">🏢 Breakdown &amp; Payouts</button>
@@ -1101,8 +1070,8 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
   <div class="page" id="pg-coaches">
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Coaches</span></div>
     <div class="sub-tabs">
-      <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Actuals Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('coach','mimpay',this)">💵 Coach MIM Payout</button>
       <button class="sub-tab" onclick="swSub('coach','structure',this)">📋 Bonus Structure</button>
@@ -1260,6 +1229,7 @@ body.page-pg-assign .week-bar{display:none!important;}
   </div><!-- /pg-coaches -->
 
 <div class="page" id="pg-chargebacks">
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Chargebacks</span></div>
     <div class="card"><div class="card-hdr card-hdr-pr">
       <div class="card-title">⚠️ Chargeback Log</div>
       <span id="cbTL" style="font-family:'Poppins',sans-serif;font-weight:800;font-size:15px">$0.00 total</span>
@@ -1333,6 +1303,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <!-- PAGE: SUMMARY -->
   <div class="page" id="pg-summary">
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Summary</span></div>
     <!-- SUMMARY WEEK BAR -->
     <div class="week-bar" style="border-bottom:1px solid var(--bo);padding-bottom:10px;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <label style="font-weight:700;font-size:12px;color:var(--mu)">Week:</label>
@@ -1363,6 +1334,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <!-- PAGE: HISTORY -->
   <div class="page" id="pg-history">
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Pay History</span></div>
     <div class="card"><div class="card-hdr" style="background:var(--dk)"><div class="card-title">📋 Paid Week History</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:rgba(255,255,255,.6)">Locked &amp; paid weeks</span><button class="btn bghost sm" onclick="requirePin(()=>expHistCSV(0))">⬇ Export CSV</button></div></div>
       <div class="card-body"><div id="histList"><p style="font-size:13px;color:var(--mu)">No paid weeks yet.</p></div></div>
     </div>
@@ -1505,6 +1477,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <!-- ════════════════════ COACH BONUS PAYOUT ════════════════════ -->
   <div class="page" id="pg-coach-payout">
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Coach Payout</span></div>
     <div style="background:linear-gradient(135deg,var(--dk),var(--se));border-radius:12px;padding:18px 22px;margin-bottom:20px;color:#fff">
       <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px">🎯 Coach Bonus Payout</div>
       <div style="font-size:12px;opacity:.75;margin-top:4px">Per-store breakdown + MIM spiff by coach and period</div>
@@ -1623,6 +1596,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <!-- ════════════════════ MANAGER BONUS PAYOUT ════════════════════ -->
   <div class="page" id="pg-mgr-payout">
+    <div class="admin-back-bar"><button onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('reports',document.querySelector('#adminContent .sub-tab[onclick*=\'reports\']')),200)">← Admin Center</button><span>🔐 Staff Reports · Manager Payout</span></div>
     <div style="background:linear-gradient(135deg,var(--se),var(--dk));border-radius:12px;padding:18px 22px;margin-bottom:20px;color:#fff">
       <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:20px">🏢 Manager Bonus Payout</div>
       <div style="font-size:12px;opacity:.75;margin-top:4px">Per-category breakdown + MIM spiff by manager and period</div>
@@ -1779,23 +1753,24 @@ body.page-pg-assign .week-bar{display:none!important;}
 </div>
 
       <!-- ADMIN NAV TABS -->
-      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch">
-        <button class="sub-tab" onclick="swAdmin('bonuses',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:6px 12px;background:var(--pr);color:#fff;border-color:var(--pr)">💼 Bonuses</button>
-        <button class="sub-tab active" onclick="swAdmin('lock',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:6px 12px">🔒 Lock Controls</button>
-        <button class="sub-tab" onclick="swAdmin('stores',this)">🏪 Store Roster</button>
-        <button class="sub-tab" onclick="swAdmin('roster',this)">👥 Rep Roster</button>
-        <button class="sub-tab" onclick="swAdmin('assignments',this)">🏪 Store Assignments</button>
-        <button class="sub-tab" onclick="swAdmin('backsheet',this)">📋 Backsheet Setup</button>
-        <button class="sub-tab" onclick="swAdmin('tiers',this)">⚙️ Tier Editor</button>
-        <button class="sub-tab" onclick="swAdmin('spiffs',this)">⚡ Spiff Manager</button>
-        <button class="sub-tab" onclick="swAdmin('data',this)">📊 Data Management</button>
-        <button class="sub-tab" onclick="swAdmin('datastatus',this)">🔗 Data Status</button>
-        <button class="sub-tab" onclick="swAdmin('history',this)">📋 History</button>
-        <button class="sub-tab" onclick="swAdmin('actions',this)">⚠️ Pending Actions</button>
+      <div style="display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap;padding-bottom:2px">
+        <button class="sub-tab active" onclick="swAdmin('bonuses',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">💼 Bonuses</button>
+        <button class="sub-tab" onclick="swAdmin('reports',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">📊 Reports</button>
+        <button class="sub-tab" onclick="swAdmin('lock',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">🔒 Lock Controls</button>
+        <button class="sub-tab" onclick="swAdmin('stores',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">🏪 Store Roster</button>
+        <button class="sub-tab" onclick="swAdmin('roster',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">👥 Rep Roster</button>
+        <button class="sub-tab" onclick="swAdmin('assignments',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">🏪 Store Assignments</button>
+        <button class="sub-tab" onclick="swAdmin('backsheet',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">📋 Backsheet Setup</button>
+        <button class="sub-tab" onclick="swAdmin('tiers',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">⚙️ Tier Editor</button>
+        <button class="sub-tab" onclick="swAdmin('spiffs',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">⚡ Spiff Manager</button>
+        <button class="sub-tab" onclick="swAdmin('data',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">📊 Data Management</button>
+        <button class="sub-tab" onclick="swAdmin('datastatus',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">🔗 Data Status</button>
+        <button class="sub-tab" onclick="swAdmin('history',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">📋 History</button>
+        <button class="sub-tab" onclick="swAdmin('actions',this)" style="white-space:nowrap;flex-shrink:0;font-size:11px;padding:5px 11px">⚠️ Pending Actions</button>
       </div>
 
-      <!-- LOCK CONTROLS -->
-      <div class="sub-pane active" <div class="sub-pane active" id="admin-bonuses">
+      <!-- BONUSES -->
+      <div class="sub-pane active" id="admin-bonuses">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px">
 
           <!-- REPS -->
@@ -1854,6 +1829,72 @@ body.page-pg-assign .week-bar{display:none!important;}
           <button class="btn bs sm" onclick="goPage('pg-mgr-payout',null)">💵 Manager Payout Slip</button>
         </div>
       </div><!-- /admin-bonuses -->
+
+      <!-- ── REPORTS PANE ── -->
+      <div class="sub-pane" id="admin-reports">
+        <div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:18px;color:var(--se);margin-bottom:6px">📊 Staff Reports</div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:20px">All payroll and bonus reports — PIN required to access. Changes here affect live calculations.</div>
+
+        <!-- REPS ROW -->
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;background:var(--dk);border-radius:8px 8px 0 0;padding:8px 16px;margin-bottom:1px">👤 Reps</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px">
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--pr);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-reps',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(226,0,116,.15)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">💵</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Breakdown & Payouts</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Per-rep weekly bonus, MIM, power ups, chargebacks</div>
+          </div>
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--se);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-summary',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(110,43,139,.15)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">📊</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Summary</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Store-level rollup, totals by coach and region</div>
+          </div>
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--da);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-chargebacks',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(211,47,47,.15)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">⚡</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Chargebacks</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Log and review rep chargebacks deducted from payout</div>
+          </div>
+        </div>
+
+        <!-- MANAGERS ROW -->
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;background:var(--se);border-radius:8px 8px 0 0;padding:8px 16px;margin-bottom:1px">🏢 Managers</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px">
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--se);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-managers',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(110,43,139,.15)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">📋</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Actuals & Bonus</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Monthly actuals entry, tier calculation, store breakdown</div>
+          </div>
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--ok);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-mgr-payout',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,166,81,.15)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">💵</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Manager Payout Slip</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Per-manager payout summary with PDF download</div>
+          </div>
+        </div>
+
+        <!-- COACHES ROW -->
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;background:var(--dk);border-radius:8px 8px 0 0;padding:8px 16px;margin-bottom:1px">🎯 Coaches</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px">
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--dk);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-coaches',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(74,26,107,.15)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">📋</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Actuals & Bonus</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Monthly actuals, MIM payout, store-by-store breakdown</div>
+          </div>
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--pr);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-coach-payout',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(226,0,116,.15)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">💵</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Coach Payout Slip</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Per-coach payout summary with PDF download</div>
+          </div>
+        </div>
+
+        <!-- RECORDS ROW -->
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;background:var(--se);border-radius:8px 8px 0 0;padding:8px 16px;margin-bottom:1px">📁 Records</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+          <div style="background:#fff;border-radius:0 0 10px 10px;border:1px solid var(--bo);border-top:3px solid var(--wa);padding:14px 16px;cursor:pointer;transition:box-shadow .2s" onclick="goPage('pg-history',null)" onmouseover="this.style.boxShadow='0 4px 16px rgba(255,179,0,.2)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:22px;margin-bottom:6px">📋</div>
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">Pay History</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:3px">Locked weekly records, paid status, archived payroll</div>
+          </div>
+        </div>
+      </div><!-- /admin-reports -->
 
       <div class="sub-pane" id="admin-lock">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
@@ -2553,8 +2594,8 @@ body.page-pg-assign .week-bar{display:none!important;}
 <nav class="bnav" id="bnav">
     <button class="bn" onclick="goPage('pg-home',this)" data-page="pg-home"><span class="bn-ic">🏠</span><span class="bn-lbl">Home</span></button>
     <button class="bn" onclick="goPage('pg-employee',this)" data-page="pg-employee"><span class="bn-ic">🏷️</span><span class="bn-lbl">My Slip</span></button>
-    <button class="bn" onclick="goPage('pg-leaderboard',null)" data-page="pg-leaderboard"><span class="bn-ic">🏆</span><span class="bn-lbl">Leaderboard</span></button>
-    <button class="bn" onclick="requirePin(()=>goPage('pg-reps',null))" data-page="pg-reps"><span class="bn-ic">🔐</span><span class="bn-lbl">Staff</span></button>
+    <button class="bn" onclick="goPage('pg-leaderboard',this)" data-page="pg-leaderboard"><span class="bn-ic">🏆</span><span class="bn-lbl">Leaderboard</span></button>
+    <button class="bn" onclick="goPage('pg-admin',this)" data-page="pg-admin"><span class="bn-ic">🔐</span><span class="bn-lbl">Admin</span></button>
     <button class="bn" onclick="toggleMobileMenu()" id="moreBtn"><span class="bn-ic">☰</span><span class="bn-lbl">More</span></button>
   </nav></div>
 <div id="pf"></div>
@@ -3072,8 +3113,8 @@ document.addEventListener('keydown', function(e){
 
 function pinSubmit(){
   if(_pinEntry===PIN){_pinUnlocked=true;document.body.classList.add("admin-unlocked");const _pov2=document.getElementById("pinOv");if(_pov2){_pov2.classList.remove("open");_pov2.style.display="none";}_pinEntry="";updPinDots();const _ps=document.getElementById("pinStatus");if(_ps){_ps.textContent="✅ Admin Mode — Editing ON";_ps.style.background="var(--ok)";_ps.style.color="#fff";}
-    const _sb=document.querySelector('.bn[data-page="pg-reps"]');
-    if(_sb){_sb.querySelector('.bn-ic').textContent='👥';_sb.querySelector('.bn-lbl').textContent='Staff';}
+    // Reveal admin staff section in sidebar
+    const _sba=document.getElementById('sb-admin-section');if(_sba)_sba.style.display='block';
     if(_pinCb){const cb=_pinCb;_pinCb=null;cb();}clearTimeout(_renTimer);_renTimer=setTimeout(()=>{renR();if(typeof updSheetStatus==="function")updSheetStatus();},80);}
   else{document.getElementById("pinErr").textContent="Incorrect PIN. Try again.";document.getElementById("pinBox").classList.add("shake");setTimeout(()=>document.getElementById("pinBox").classList.remove("shake"),350);_pinEntry="";updPinDots();}
 }
@@ -7184,9 +7225,8 @@ function adminPinSubmit(){
   if(_adminPinEntry===PIN){
     _pinUnlocked=true;
     document.body.classList.add('admin-unlocked');
-    // Update staff button in bottom nav
-    const _sb2=document.querySelector('.bn[data-page="pg-reps"]');
-    if(_sb2){_sb2.querySelector('.bn-ic').textContent='👥';_sb2.querySelector('.bn-lbl').textContent='Staff';}
+    // Reveal admin staff section in sidebar
+    const _sba=document.getElementById('sb-admin-section');if(_sba)_sba.style.display='block';
     document.getElementById('adminGate').style.display='none';
     document.getElementById('adminContent').style.display='block';
     _adminPinEntry='';updAdminPinDots();
@@ -7222,6 +7262,8 @@ function toggleMobileMenu(){
 function adminLockOut(){
   _pinUnlocked=false;
   document.body.classList.remove('admin-unlocked');
+  // Hide staff sidebar section
+  const _sba=document.getElementById('sb-admin-section');if(_sba)_sba.style.display='none';
   document.getElementById('adminGate').style.display='flex';
   document.getElementById('adminContent').style.display='none';
   _adminPinEntry='';updAdminPinDots();
@@ -7236,6 +7278,7 @@ function swAdmin(tab,btn){
   const p=document.getElementById('admin-'+tab);if(p)p.classList.add('active');
   if(btn)btn.classList.add('active');
   if(tab==='bonuses'){renAdminSysInfo();}
+  if(tab==='reports'){/* nav cards — no extra render needed */}
   if(tab==='lock'){initAdminCenter();updAdminLockUI();}
   if(tab==='stores'){renStoreRoster();}
   if(tab==='roster')renAdminRoster();
@@ -8314,7 +8357,7 @@ function viewNewReps(){
   // Go to admin roster filtered to new reps
   goPage('pg-admin', document.querySelector('[data-page="pg-admin"]'));
   setTimeout(()=>{
-    swAdmin('roster', document.querySelector('#adminContent .sub-tab:nth-child(2)'));
+    swAdmin('roster', document.querySelector('#adminContent .sub-tab[onclick*="roster"]'));
     // Filter to show only new reps
     const search = document.getElementById('aRosterSearch');
     if(search){
