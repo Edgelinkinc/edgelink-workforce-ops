@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <title>Incentive Pay — Work Force Ops</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
@@ -26,16 +26,19 @@ body{font-family:"Nunito",sans-serif;background:var(--bg);color:var(--tx);min-he
 .bghost{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff}.bghost:hover{background:rgba(255,255,255,.25)}
 .sm{padding:5px 12px;font-size:12px}
 .xs{padding:3px 8px;font-size:11px;border-radius:6px}
-.layout{display:flex;min-height:calc(100vh - 60px);background:var(--bg)}
+.layout{position:relative;display:flex;height:calc(100vh - 60px);background:var(--bg)}
 .sidebar{width:220px;min-width:220px;background:var(--dk);position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;flex-shrink:0;padding:12px 0;z-index:10}
 .sg{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:10px 18px 4px}
 .si{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:13px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;transition:all .2s;border-left:3px solid transparent;user-select:none}
 .si:hover{background:rgba(255,255,255,.07);color:#fff}
+  .si .si-lock{font-size:10px;opacity:.5;margin-left:auto}
+  body:not(.admin-unlocked) .si.staff-only{opacity:.65}
+  body:not(.admin-unlocked) .si.staff-only:hover{opacity:1}
 .si.active{background:rgba(226,0,116,.2);color:#fff;border-left-color:var(--pr)}
 .si .ic{font-size:15px;width:20px;text-align:center}
-.content{flex:1;min-width:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;height:calc(100vh - 60px);scroll-behavior:auto}
+.content{flex:1;min-width:0;min-height:0;background:var(--bg);overflow-y:auto;overflow-x:hidden;scroll-behavior:auto;-webkit-overflow-scrolling:touch}
 #adminContent .sub-tab{font-size:11px!important;padding:6px 11px!important;white-space:nowrap!important;flex-shrink:0!important}
-.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);min-height:100%;padding:16px;box-sizing:border-box}
+.page{display:none;background:var(--bg)}.page.active{display:block;background:var(--bg);padding:16px;box-sizing:border-box}
 .sub-tabs{display:flex;gap:8px;margin-bottom:16px}
 .sub-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--bo);background:var(--sf);color:var(--mu);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
 .sub-tab:hover{border-color:var(--se);color:var(--se)}.sub-tab.active{background:var(--se);color:#fff;border-color:var(--se)}
@@ -179,6 +182,12 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .lb-card.r2::before{background:linear-gradient(90deg,#C0C0C0,#A0A0A0)}
 .lb-card.r3::before{background:linear-gradient(90deg,#CD7F32,#A0522D)}
 .lb-card.ro::before{background:var(--pr)}
+  .lb-card.rank-other::before{background:var(--pr)}
+  .zone-bar{height:6px;background:var(--bo);border-radius:3px;overflow:hidden}
+  .zone-fill{height:100%;background:linear-gradient(90deg,var(--pr),var(--se));border-radius:3px;transition:width .3s}
+  .sb-divider{height:1px;background:rgba(255,255,255,.1);margin:10px 12px}
+  .sb-section-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);padding:6px 16px 2px}
+  .mm-section-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);padding:10px 16px 4px;pointer-events:none}
 .lb-rank{position:absolute;top:9px;right:11px;font-family:"Poppins",sans-serif;font-weight:900;font-size:18px;color:var(--bo)}
 .lb-rank.r1{color:#FFD700}.lb-rank.r2{color:#C0C0C0}.lb-rank.r3{color:#CD7F32}
 .lb-name{font-family:"Poppins",sans-serif;font-weight:700;font-size:13px;color:var(--se);padding-right:26px;margin-bottom:2px}
@@ -221,7 +230,7 @@ tfoot td{padding:8px;font-weight:700;border-top:2px solid var(--pr);background:v
 .spiff-meta{font-size:11px;color:var(--mu);display:flex;flex-wrap:wrap;gap:8px}
 .spiff-form{border:2px dashed var(--bo);border-radius:9px;padding:14px;background:#FFF0F7;margin-top:8px}
 .spiff-form-t{font-family:"Poppins",sans-serif;font-weight:700;font-size:12px;color:var(--pr);margin-bottom:10px}
-.pin-ov{display:none;position:fixed;inset:0;background:rgba(74,26,107,.8);z-index:900;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.pin-ov{display:none;position:fixed;inset:0;background:rgba(74,26,107,.92);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-overflow-scrolling:touch}
 .pin-ov.open{display:flex}
 .pin-box{background:var(--sf);border-radius:18px;padding:32px 28px;width:300px;box-shadow:var(--shm);text-align:center}
 .pin-logo{font-size:32px;margin-bottom:4px}
@@ -258,7 +267,22 @@ body.page-pg-assign .week-bar{display:none!important;}
 @media print{body>*:not(#pf){display:none!important}#pf{display:block!important;position:absolute!important;inset:0!important}}
 
 /* ── BOTTOM NAV ── */
-.bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--dk);border-top:1px solid rgba(255,255,255,.1);z-index:600;flex-direction:row;align-items:center;justify-content:space-around}
+.bnav{
+  display:none;
+  width:100%;
+  background:var(--dk);
+  border-top:2px solid rgba(255,255,255,.15);
+  flex-direction:row;
+  align-items:center;
+  justify-content:space-around;
+  min-height:56px;
+  flex-shrink:0;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+/* Force bnav visible on any mobile/tablet screen - CSS beats inline styles only when !important */
+@media screen and (max-width:1024px){
+  .bnav{display:flex!important;flex-direction:row!important;flex-shrink:0!important;}
+}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;padding:6px 0;gap:2px;transition:color .2s;height:100%}
 .bn.active,.bn:active{color:var(--pr)}
 .bn-ic{font-size:22px;line-height:1}
@@ -273,19 +297,33 @@ body.page-pg-assign .week-bar{display:none!important;}
   .card{border-radius:8px}.card-hdr{padding:10px 14px}.card-body{padding:12px 14px}
   .kc{padding:10px 12px}.kv{font-size:20px}
   .bn-lbl{display:none}.bn-ic{font-size:24px}.bnav{height:52px}}
-@media(min-width:431px) and (max-width:900px){.bn-ic{font-size:20px}.bn-lbl{font-size:8px}}
-.mobile-more{display:none;position:fixed;inset:0;background:var(--dk);z-index:700;flex-direction:column}
-.mobile-more.open{display:flex}
+@media(min-width:431px) and (max-width:900px){
+  .bn-ic{font-size:20px}
+  .bn-lbl{font-size:9px}
+  .content{padding:16px!important;padding-bottom:16px!important}
+  .kstrip{grid-template-columns:repeat(3,1fr)}
+  .card-hdr{flex-wrap:wrap;gap:6px}
+  .sub-tabs{flex-wrap:wrap}
+  .sub-tab{font-size:11px;padding:5px 10px}
+  .week-bar{flex-wrap:wrap;gap:8px}
+  .fg.fc5{grid-template-columns:1fr 1fr 1fr}
+  table{font-size:11px}
+}
+.mobile-more{display:none;position:absolute;top:0;left:0;right:0;bottom:0;flex-direction:column;background:var(--dk);overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:800;width:100%}
+.mobile-more.open{display:flex;flex-direction:column}
 .mm-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.1);font-family:'Poppins',sans-serif;font-weight:700;font-size:18px;color:#fff}
 .mm-items{display:flex;flex-direction:column;padding:16px}
 .mm-item{background:rgba(255,255,255,.08);border:none;border-radius:10px;color:#fff;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;padding:16px 20px;margin-bottom:10px;text-align:left;cursor:pointer}
 .mm-item:active{background:var(--pr)}
 
 @media(max-width:900px){
+  .layout{flex-direction:column!important;height:calc(100vh - 60px)!important}
+  .content{height:auto!important;flex:1!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:16px!important;min-height:0!important}
+  .bnav{display:flex!important}
+  
   .sidebar-toggle{display:none!important}
   .sidebar{display:none!important;width:0!important}
-  .bnav{display:flex}
-  .content{padding:14px;padding-bottom:74px;width:100%!important;max-width:100vw}
+  
   .dz-row{grid-template-columns:1fr}
   .kstrip{grid-template-columns:1fr 1fr}
   .cat-hdr,.cat-row{grid-template-columns:1.5fr 1fr 1fr 80px 100px}
@@ -316,17 +354,18 @@ body.page-pg-assign .week-bar{display:none!important;}
   /* KPI strip */
   .kc{padding:12px}
   .kv{font-size:22px}
+  .bnav{display:flex}
 }
 
 @media(max-width:430px){
   .sidebar{display:none!important;width:0!important}
   .bnav{display:flex!important}
-  .content{width:100%!important;padding:12px!important;padding-bottom:74px!important}
+  .content{width:100%!important;padding:12px!important;padding-bottom:16px!important}
 }
 @media(max-width:500px){
   .kstrip{grid-template-columns:1fr 1fr}
   .kv{font-size:20px}
-  .content{padding:10px;padding-bottom:74px}
+  .content{padding:10px;padding-bottom:16px}
   table{min-width:500px}
   #coachSheetSections .tw table{min-width:900px}
   .week-bar{padding:8px 10px}
@@ -424,6 +463,9 @@ body.page-pg-assign .week-bar{display:none!important;}
   .flyer-pane.active{display:block!important}
 }
 
+/* Admin-only home buttons hidden until PIN unlock */
+  body:not(.admin-unlocked) .home-admin-btn{display:none!important}
+
 /* ── HOME PAGE ── */
 .home-nav-btn{background:#F8F8F8;border:2px solid var(--bo);border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif}
 .home-nav-btn:hover{background:var(--thb);border-color:var(--pr);transform:translateY(-2px);box-shadow:0 4px 12px rgba(226,0,116,.15)}
@@ -437,11 +479,13 @@ body.page-pg-assign .week-bar{display:none!important;}
   #pg-home .home-nav-btn{padding:12px 8px}
 }
 
+
 /* ── MOBILE CRITICAL OVERRIDES ── */
 @media(max-width:900px){
-  .layout{flex-direction:column}
+  .layout{display:flex!important;flex-direction:column!important;height:calc(100vh - 60px)!important}
   .sidebar,.sidebar-toggle{display:none!important;width:0!important;min-width:0!important;flex:none!important}
-  .content{width:100%!important;max-width:100vw!important;padding:14px!important;padding-bottom:74px!important;background:#F8F8F8!important;min-height:calc(100vh - 60px);overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+  .content{flex:1!important;width:100%!important;max-width:100vw!important;padding:14px!important;padding-bottom:16px!important;background:#F8F8F8!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;height:auto!important;min-height:0!important}
+  .bnav{display:flex!important;flex-shrink:0!important}
   .page.active{background:#F8F8F8!important}
 }
 </style>
@@ -449,7 +493,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 </head>
-<body>
+<body style="-webkit-text-size-adjust:100%">
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:10px">
     <div class="tb-logo">WFO</div>
@@ -462,6 +506,7 @@ body.page-pg-assign .week-bar{display:none!important;}
     <span class="tb-updated" id="lu">—</span>
     <div id="pinStatus" class="btn bw sm" onclick="goPage('pg-admin',document.querySelector('[data-page=\'pg-admin\']'))" style="font-size:11px;font-weight:700;cursor:pointer">🔐 Admin</div>
   </div>
+
 </header>
 <div class="layout">
 
@@ -479,36 +524,61 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="si si-solo active" data-page="pg-home" onclick="goPage('pg-home',this)"><span class="ic">🏠</span><span class="si-label">Home</span></div>
   </div>
 
-  
-
-  <!-- ANALYTICS GROUP -->
+  <!-- RETAIL SALES REP (employee-facing) -->
   <div class="sg-wrap">
-    <div class="sg-hdr" onclick="toggleSG('sg-analytics')">
-      <span class="sg-label">Analytics</span>
-      <span class="sg-arrow" id="sg-analytics-arrow">▾</span>
+    <div class="si si-solo" data-page="pg-employee" onclick="goPage('pg-employee',this)"><span class="ic">🏷️</span><span class="si-label">My Bonus Slip</span></div>
+  </div>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section-lbl">Staff</div>
+
+  <!-- REPS GROUP -->
+  <div class="sg-wrap">
+    <div class="sg-hdr" onclick="toggleSG('sg-reps')">
+      <span class="sg-label">👤 Reps</span>
+      <span class="sg-arrow" id="sg-reps-arrow">▾</span>
     </div>
-    <div class="sg-items" id="sg-analytics">
-      <div class="si" data-page="pg-leaderboard" onclick="goPage('pg-leaderboard',this)"><span class="ic">🏆</span><span class="si-label">Leaderboard</span></div>
-      <div class="si" data-page="pg-summary" onclick="goPage('pg-summary',this)"><span class="ic">📊</span><span class="si-label">Summary</span></div>
+    <div class="sg-items" id="sg-reps">
+      <div class="si" data-page="pg-reps" class="si staff-only" onclick="goPage('pg-reps',this)"><span class="ic">💵</span><span class="si-label">Breakdown & Payouts</span></div>
+      <div class="si" data-page="pg-leaderboard" class="si staff-only" onclick="goPage('pg-leaderboard',this)"><span class="ic">🏆</span><span class="si-label">Leaderboard</span></div>
+      <div class="si" data-page="pg-summary" class="si staff-only" onclick="goPage('pg-summary',this)"><span class="ic">📊</span><span class="si-label">Summary</span></div>
+      <div class="si" data-page="pg-chargebacks" class="si staff-only" onclick="requirePin(()=>goPage('pg-chargebacks',null))"><span class="ic">⚡</span><span class="si-label">Chargebacks</span></div>
     </div>
   </div>
 
-
-
-  <!-- EMPLOYEE VIEW — no group, standalone -->
+  <!-- MANAGERS GROUP -->
   <div class="sg-wrap">
-    <div class="si si-solo" data-page="pg-employee" onclick="goPage('pg-employee',this)"><span class="ic">🏷️</span><span class="si-label">Retail Sales Rep</span></div>
+    <div class="sg-hdr" onclick="toggleSG('sg-managers')">
+      <span class="sg-label">🏢 Managers</span>
+      <span class="sg-arrow" id="sg-managers-arrow">▾</span>
+    </div>
+    <div class="sg-items" id="sg-managers">
+      <div class="si" data-page="pg-managers" class="si staff-only" onclick="goPage('pg-managers',this)"><span class="ic">📋</span><span class="si-label">Actuals & Bonus</span></div>
+      <div class="si" data-page="pg-mgr-payout" class="si staff-only" onclick="goPage('pg-mgr-payout',this)"><span class="ic">💵</span><span class="si-label">Manager Payout</span></div>
+    </div>
   </div>
 
+  <!-- COACHES GROUP -->
   <div class="sg-wrap">
-    <div class="si si-solo" data-page="pg-coach-payout" onclick="goPage('pg-coach-payout',this)"><span class="ic">🎯</span><span class="si-label">Coach Payout</span></div>
+    <div class="sg-hdr" onclick="toggleSG('sg-coaches')">
+      <span class="sg-label">🎯 Coaches</span>
+      <span class="sg-arrow" id="sg-coaches-arrow">▾</span>
+    </div>
+    <div class="sg-items" id="sg-coaches">
+      <div class="si" data-page="pg-coaches" class="si staff-only" onclick="goPage('pg-coaches',this)"><span class="ic">📋</span><span class="si-label">Actuals & Bonus</span></div>
+      <div class="si" data-page="pg-coach-payout" class="si staff-only" onclick="goPage('pg-coach-payout',this)"><span class="ic">💵</span><span class="si-label">Coach Payout</span></div>
+    </div>
   </div>
 
+  <div class="sb-divider"></div>
+  <div class="sb-section-lbl">Records</div>
+
+  <!-- HISTORY -->
   <div class="sg-wrap">
-    <div class="si si-solo" data-page="pg-mgr-payout" onclick="goPage('pg-mgr-payout',this)"><span class="ic">🏢</span><span class="si-label">Manager Payout</span></div>
+    <div class="si si-solo" data-page="pg-history" class="si staff-only" onclick="requirePin(()=>goPage('pg-history',null))"><span class="ic">📋</span><span class="si-label">Pay History</span></div>
   </div>
 
-  <!-- ADMIN — standalone -->
+  <!-- ADMIN -->
   <div class="sg-wrap">
     <div class="si si-solo" data-page="pg-admin" onclick="goPage('pg-admin',this)"><span class="ic">🔐</span><span class="si-label">Admin Center</span></div>
   </div>
@@ -517,7 +587,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 <main class="content">
   <div class="stbar" id="stb"></div>
 
-  <div class="page active" id="pg-home" style="background:#F8F8F8;overflow-y:auto;padding-bottom:80px;min-height:400px">
+  <div class="page active" id="pg-home">
 
   <!-- WELCOME -->
   <div style="background:linear-gradient(135deg,#4A1A6B,#6E2B8B);border-radius:12px;padding:20px;margin-bottom:12px;color:#fff">
@@ -536,53 +606,40 @@ body.page-pg-assign .week-bar{display:none!important;}
     </div>
   </div>
 
-  <!-- QUICK NAV - static buttons, always visible -->
+  <!-- QUICK NAV -->
   <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
     <div style="background:#6E2B8B;padding:11px 16px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">🧭 Quick Navigation</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr)">
-      <button onclick="goPage('pg-reps',null)" style="background:#fff;border:none;border-right:1px solid #E8E8E8;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+    <div style="display:grid;grid-template-columns:repeat(2,1fr)">
+      <button onclick="goPage('pg-employee',this)" style="background:#fff;border:none;border-right:1px solid #E8E8E8;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">🏷️</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">My Bonus Slip</span>
+      </button>
+      <button onclick="goPage('pg-leaderboard',null)" style="background:#fff;border:none;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+        <span style="font-size:24px">🏆</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Leaderboard</span>
+      </button>
+      <button onclick="requirePin(()=>goPage('pg-reps',null))" class="home-admin-btn" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
         <span style="font-size:24px">👤</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Reps</span>
       </button>
-      <button onclick="goPage('pg-managers',null)" style="background:#fff;border:none;border-right:1px solid #E8E8E8;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
+      <button onclick="requirePin(()=>goPage('pg-managers',null))" class="home-admin-btn" style="background:#fff;border:none;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
         <span style="font-size:24px">🏢</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Managers</span>
       </button>
-      <button onclick="goPage('pg-coaches',null)" style="background:#fff;border:none;border-bottom:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
-        <span style="font-size:24px">🎯</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Coaches</span>
-      </button>
-      <button onclick="goPage('pg-employee',null)" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
-        <span style="font-size:24px">💵</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Retail Sales Rep</span>
-      </button>
-      <button onclick="goPage('pg-reps',null);setTimeout(()=>swSub('reps','structure',document.getElementById('ift-rep')),150)" style="background:#fff;border:none;border-right:1px solid #E8E8E8;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent">
-        <span style="font-size:24px">📋</span><span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;color:#6E2B8B">Structure</span>
-      </button>
-
     </div>
   </div>
 
-  <!-- PENDING ACTIONS -->
+
+  <!-- BONUS STRUCTURE -->
   <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
-    <div style="background:#FFB300;padding:11px 16px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#1A1A1A">⚠️ Pending Actions</div>
-    <div id="homePending" style="padding:12px 16px">
-      <div style="color:#666;font-size:13px">Checking for pending actions…</div>
+    <div style="background:linear-gradient(135deg,var(--dk),var(--se));padding:11px 16px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">📋 Your Bonus Structure</span>
+      <button onclick="goPage('pg-employee',null)" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer">My Slip →</button>
     </div>
+    <div id="homeRepFlyer" style="padding:12px 16px"></div>
   </div>
 
-  <!-- SYSTEM STATUS -->
-  <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
-    <div style="background:#6E2B8B;padding:11px 16px;display:flex;align-items:center;justify-content:space-between">
-      <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">⚡ System Status</span>
-      <button onclick="refreshHomeStatus()" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer">↺</button>
-    </div>
-    <div id="homeStatusList" style="padding:12px 16px">
-      <div style="color:#666;font-size:13px">Loading status…</div>
-    </div>
-  </div>
-
-  <!-- ANNOUNCEMENTS -->
+    <!-- ANNOUNCEMENTS -->
   <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
     <div style="background:#E20074;padding:11px 16px;display:flex;align-items:center;justify-content:space-between">
       <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">📢 Announcements</span>
-      <button onclick="requirePin(()=>openAddAnnouncement())" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">+ Post</button>
+      <button onclick="requirePin(()=>openAddAnnouncement())" class="home-admin-btn" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">+ Post</button>
     </div>
     <div id="homeAnnouncements" style="padding:12px 16px">
       <div style="color:#666;font-size:13px;text-align:center;padding:8px 0">No announcements yet</div>
@@ -593,7 +650,7 @@ body.page-pg-assign .week-bar{display:none!important;}
   <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
     <div style="background:#4A1A6B;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleHomeSection('homeDates','homeDateArrow')">
       <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">📅 Important Dates <span id="homeDateArrow" style="font-size:10px;opacity:.7">▾</span></span>
-      <button onclick="event.stopPropagation();requirePin(()=>openAddDate())" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">+ Add</button>
+      <button onclick="event.stopPropagation();requirePin(()=>openAddDate())" class="home-admin-btn" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">+ Add</button>
     </div>
     <div id="homeDates" style="padding:12px 16px">
       <div style="color:#666;font-size:13px;text-align:center;padding:8px 0">No dates added yet</div>
@@ -604,7 +661,7 @@ body.page-pg-assign .week-bar{display:none!important;}
   <div style="background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden;border:1px solid #E8E8E8">
     <div style="background:#4A1A6B;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleHomeSection('homeContacts','homeContactArrow')">
       <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#fff">📞 Contacts <span id="homeContactArrow" style="font-size:10px;opacity:.7">▾</span></span>
-      <button onclick="event.stopPropagation();requirePin(()=>editContacts())" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">✎ Edit</button>
+      <button onclick="event.stopPropagation();requirePin(()=>editContacts())" class="home-admin-btn" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer">✎ Edit</button>
     </div>
     <div id="homeContacts" style="padding:12px 16px">
       <div style="color:#666;font-size:13px;text-align:center;padding:8px 0">No contacts added yet</div>
@@ -755,7 +812,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
     <!-- ACTIONS -->
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-      <button class="btn bp" onclick="printEmpBonus()">🖨 Print My Bonus Slip</button>
+      <button class="btn bp" onclick="printEmpBonus()">🖨 Print / Save PDF</button>
       <button class="btn bghost" onclick="document.getElementById('empSelect').value='';loadEmpBonus()">✕ Clear</button>
     </div>
 
@@ -776,6 +833,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <!-- PAGE: REPS -->
     <div class="sub-tabs">
+      <button class="sub-tab active" onclick="swSub('reps','overview',this)">👤 Overview</button>
       <button class="sub-tab" onclick="swSub('reps','payouts',this)">💵 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('reps','mim',this)">📱 MIM Spiffs</button>
       <button class="sub-tab" onclick="swSub('reps','structure',this)">📋 Bonus Structure</button>
@@ -795,14 +853,14 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div style="display:flex;align-items:center;gap:6px">
       <div class="lk-dot open" id="lkDot"></div>
       <span class="lk-lbl open" id="lkLbl">Unlocked</span>
-      <button id="pinStatus" class="btn bw sm" onclick="goPage('pg-admin',document.querySelector('[data-page=\"pg-admin\"]'))" style="font-size:11px;font-weight:700">🔐 Admin Center</button>
+      <button id="pinStatus" class="btn bw sm" onclick="goPage('pg-admin',null)" style="font-size:11px;font-weight:700">🔐 Admin Center</button>
       <span style="font-size:11px;color:var(--mu)" id="lkMeta">Ready</span>
     </div>
     <button class="btn bok sm" id="lkBtn" onclick="requirePin(lockWk)">🔒 Lock &amp; Mark Paid</button>
   </div>
     
 
-    <div class="sub-pane" id="reps-overview">
+    <div class="sub-pane active" id="reps-overview">
       <div class="card"><div class="card-hdr"><div class="card-title">👤 Rep Overview</div></div>
         <div class="card-body">
           <div class="emp" id="rep-ov-emp"><div class="emp-ic">📂</div><div class="emp-t">No rep data loaded</div><div class="emp-s">Go to Breakdown &amp; Payouts to upload CSV or load sample data.</div></div>
@@ -816,7 +874,7 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="sub-pane" id="reps-payouts">
       <!-- UPLOAD BANNER -->
       <div style="background:linear-gradient(135deg,#F3E8FF,#FFF0F7);border:1px solid var(--se);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);flex:1">📂 Load Data — Upload in Admin Center</div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se);flex:1">📂 Upload rep data in Admin → Data Management to get started</div>
         <button class="btn bp sm" onclick="goPage('pg-admin',null);setTimeout(()=>swAdmin('data',null),300)">⬆ Go to Upload</button>
         <div style="font-size:11px;color:var(--mu)" id="repUploadStatus"></div>
       </div>
@@ -825,6 +883,7 @@ body.page-pg-assign .week-bar{display:none!important;}
         <div style="display:flex;gap:8px;flex-wrap:wrap">
 
           <button class="btn bp sm" onclick="printAllStubs()">🖨️ Print All</button>
+              <button class="btn bp" onclick="downloadAllRepSlipsZIP()">⬇ Download All as ZIP</button>
           <button class="btn bok sm" onclick="doExp()">⬇ Payroll CSV</button>
         </div>
       </div>
@@ -836,7 +895,7 @@ body.page-pg-assign .week-bar{display:none!important;}
     <div class="kc kct"><div class="kl">Arcade MIM</div><div class="kv" id="kA">$—</div><div class="ks">coach-paid</div></div>
     <div class="kc kcr"><div class="kl">Chargebacks</div><div class="kv" id="kC">$—</div><div class="ks" id="kCs">0 this week</div></div>
     <div class="kc kcp"><div class="kl">Rep Net Owed</div><div class="kv" id="kN">$—</div><div class="ks">gross-arc-CB</div></div>
-    <div class="kc kcw"><div class="kl">Top Earner Zone</div><div class="kv" id="kT">—</div><div class="ks">25+ PPD</div></div>
+    <div class="kc kcw"><div class="kl">Top Earner Zone</div><div class="kv" id="kT">—</div><div class="ks">$200+ gross</div></div>
   </div>
 
         
@@ -928,7 +987,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <div class="page" id="pg-managers">
     <div class="sub-tabs">
-      <button class="sub-tab active" onclick="swSub('mgr','overview',this)">📋 Overview</button>
+      <button class="sub-tab active" onclick="swSub('mgr','overview',this)">📋 Actuals Overview</button>
       <button class="sub-tab" onclick="swSub('mgr','calc',this)">🏢 Breakdown &amp; Payouts</button>
 
       <button class="sub-tab" onclick="swSub('mgr','structure',this)">📋 Bonus Structure</button>
@@ -1043,7 +1102,7 @@ body.page-pg-assign .week-bar{display:none!important;}
   <!-- ═══════════════════════════════ COACHES PAGE ═══════════════════════════════ -->
   <div class="page" id="pg-coaches">
     <div class="sub-tabs">
-      <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Overview</button>
+      <button class="sub-tab active" onclick="swSub('coach','overview',this)">📋 Actuals Overview</button>
       <button class="sub-tab" onclick="swSub('coach','calc',this)">🎯 Breakdown &amp; Payouts</button>
       <button class="sub-tab" onclick="swSub('coach','mimpay',this)">💵 Coach MIM Payout</button>
       <button class="sub-tab" onclick="swSub('coach','structure',this)">📋 Bonus Structure</button>
@@ -1106,6 +1165,7 @@ body.page-pg-assign .week-bar{display:none!important;}
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <button class="btn bghost sm" onclick="expCoachSheet()">⬇ Export CSV</button>
           <button class="btn bghost sm" onclick="generateAllCoachSlips()">🖨 All Pay Slips</button>
+              <button class="btn bp" onclick="downloadAllCoachSlipsZIP()">⬇ All Coach Slips ZIP</button>
           <button class="btn bghost sm" onclick="saveAllCoachData()">💾 Save</button>
         </div>
       </div>
@@ -1231,41 +1291,86 @@ body.page-pg-assign .week-bar{display:none!important;}
 
   <!-- PAGE: LEADERBOARD -->
   <div class="page" id="pg-leaderboard">
-    <div class="card"><div class="card-hdr"><div class="card-title">🏆 Leaderboard</div></div>
-      <div class="card-body">
+    <!-- LEADERBOARD WEEK BAR -->
+    <div class="week-bar" style="border-bottom:1px solid var(--bo);padding-bottom:10px;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <label style="font-weight:700;font-size:12px;color:var(--mu)">Week:</label>
+      <span id="lbWkLabel" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">—</span>
+      <select id="lbWkSel" onchange="lbSwitchWeek(this.value)" style="padding:5px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;background:var(--sf);outline:none">
+        <option value="">📋 Switch Week</option>
+      </select>
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <label style="font-size:12px;color:var(--mu)">Coach:</label>
+        <select id="lbCoachFil" onchange="renLB()" style="padding:5px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;background:var(--sf);outline:none">
+          <option value="">All Coaches</option>
+        </select>
+        <label style="font-size:12px;color:var(--mu)">State:</label>
+        <select id="lbStateFil" onchange="renLB()" style="padding:5px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;background:var(--sf);outline:none">
+          <option value="">All States</option>
+          <option value="TN">TN</option>
+          <option value="MA">MA</option>
+          <option value="RI">RI</option>
+          <option value="CT">CT</option>
+          <option value="AR">AR</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">🏆 Leaderboard</div>
         <div class="lb-tabs">
           <button class="lb-tab active" onclick="swLB('company',this)">🌐 Company-Wide</button>
           <button class="lb-tab" onclick="swLB('store',this)">🏪 By Store</button>
           <button class="lb-tab" onclick="swLB('coach',this)">🎯 By Coach</button>
         </div>
-        <div class="lb-grid" id="lbGrid"><div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--mu)">Load rep data to see leaderboard.</div></div>
+      </div>
+      <div class="card-body">
+        <div id="lbGrid" class="lb-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--mu)">Load rep data to see leaderboard.</div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- PAGE: SUMMARY -->
   <div class="page" id="pg-summary">
-    <div class="card"><div class="card-hdr"><div class="card-title">📊 Store / Coach Summary</div></div>
-      <div class="card-body">
+    <!-- SUMMARY WEEK BAR -->
+    <div class="week-bar" style="border-bottom:1px solid var(--bo);padding-bottom:10px;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <label style="font-weight:700;font-size:12px;color:var(--mu)">Week:</label>
+      <span id="sumWkLabel" style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:var(--se)">—</span>
+      <select id="sumWkSel" onchange="sumSwitchWeek(this.value)" style="padding:5px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;background:var(--sf);outline:none">
+        <option value="">📋 Switch Week</option>
+      </select>
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <label style="font-size:12px;color:var(--mu)">Coach:</label>
+        <select id="sumCoachFil" onchange="renSum()" style="padding:5px 10px;border:2px solid var(--bo);border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;background:var(--sf);outline:none">
+          <option value="">All Coaches</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">📊 Store / Coach Summary</div>
         <div class="sum-tabs">
           <button class="sum-tab active" onclick="swSum('store',this)">🏪 By Store</button>
           <button class="sum-tab" onclick="swSum('coach',this)">🎯 By Coach</button>
         </div>
-        <div class="tw"><table class="sum-tbl"><thead id="sumHd"></thead><tbody id="sumBd"></tbody></table></div>
+      </div>
+      <div class="card-body">
+        <div class="tw"><table class="sum-tbl"><thead id="sumHd"></thead><tbody id="sumBd"></tbody><tfoot id="sumFt"></tfoot></table></div>
       </div>
     </div>
   </div>
 
   <!-- PAGE: HISTORY -->
-  <div class="page" id="pg-history" style="display:none">
-    <div class="card"><div class="card-hdr"><div class="card-title">📋 Paid Week History</div><span style="font-size:12px;color:rgba(255,255,255,.7)">Saved when week is locked</span></div>
+  <div class="page" id="pg-history">
+    <div class="card"><div class="card-hdr" style="background:var(--dk)"><div class="card-title">📋 Paid Week History</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;color:rgba(255,255,255,.6)">Locked &amp; paid weeks</span><button class="btn bghost sm" onclick="requirePin(()=>expHistCSV(0))">⬇ Export CSV</button></div></div>
       <div class="card-body"><div id="histList"><p style="font-size:13px;color:var(--mu)">No paid weeks yet.</p></div></div>
     </div>
   </div>
 
 <div class="page" id="pg-roster">
     <div class="card"><div class="card-hdr card-hdr-dk">
-      <div class="card-title">👥 Rep Roster — Admin Only</div>
+      <div class="card-title">👥 Rep Roster</div><span class="bdg bno" style="font-size:9px">🔐 Admin Only</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn bghost sm" onclick="expRosterCSV()">⬇ Export CSV</button>
         <button class="btn bghost sm" onclick="requirePin(addRosterRep)">+ Add Rep</button>
@@ -1358,7 +1463,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 
 <div class="page" id="pg-assign">
     <div class="card"><div class="card-hdr card-hdr-dk">
-      <div class="card-title">🏪 Store Assignments</div>
+      <div class="card-title">🏪 Store Assignments</div><span class="bdg bno" style="font-size:9px">🔐 Admin Only</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <span style="font-size:11px;color:rgba(255,255,255,.6)">Assign stores by NTID — saves permanently, applies on every future upload</span>
         <button class="btn bghost sm" onclick="expAssignCSV()">⬇ Export</button>
@@ -1421,7 +1526,7 @@ body.page-pg-assign .week-bar{display:none!important;}
         <label>MIM Spiff Month</label>
         <input type="month" id="cpMimMonth" onchange="renCoachPayout()" style="padding:9px 12px;border:2px solid var(--bo);border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;width:100%"/>
       </div>
-      <button class="btn bp sm" onclick="generateCoachPayoutSlip()" style="margin-bottom:2px">🖨 Print Slip</button>
+      <button class="btn bp sm" onclick="downloadCoachPayoutSlipPDF()" style="margin-bottom:2px">⬇ Download PDF</button>
     </div>
 
     <!-- EMPTY STATE -->
@@ -1437,7 +1542,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <!-- SECTION 1: STORE BONUS -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-hdr" style="background:var(--se)">
-          <div class="card-title">🏪 Store Bonus Breakdown</div>
+          <div class="card-title">🎯 Coach Store Bonus Breakdown</div>
           <div id="cpBonusPeriodLabel" style="font-size:12px;color:rgba(255,255,255,.7)"></div>
         </div>
         <div class="card-body" style="padding:0">
@@ -1468,7 +1573,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <!-- SECTION 2: MIM SPIFF -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-hdr" style="background:var(--ok)">
-          <div class="card-title">📱 MIM Spiff</div>
+          <div class="card-title">📱 Coach MIM Spiff</div>
           <div id="cpMimPeriodLabel" style="font-size:12px;color:rgba(255,255,255,.7)"></div>
         </div>
         <div class="card-body" style="padding:0">
@@ -1539,7 +1644,7 @@ body.page-pg-assign .week-bar{display:none!important;}
         <label>MIM Spiff Month</label>
         <input type="month" id="mpMimMonth" onchange="renMgrPayout()" style="padding:9px 12px;border:2px solid var(--bo);border-radius:9px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;width:100%"/>
       </div>
-      <button class="btn bs sm" onclick="generateMgrPayoutSlip()" style="margin-bottom:2px">🖨 Print Slip</button>
+      <button class="btn bs sm" onclick="downloadMgrPayoutSlipPDF()" style="margin-bottom:2px">⬇ Download PDF</button>
     </div>
 
     <!-- EMPTY STATE -->
@@ -1555,7 +1660,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <!-- SECTION 1: STORE BONUS -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-hdr" style="background:var(--se)">
-          <div class="card-title">🏪 Store Bonus Breakdown</div>
+          <div class="card-title">🏢 Manager Store Bonus Breakdown</div>
           <div id="mpBonusPeriodLabel" style="font-size:12px;color:rgba(255,255,255,.7)"></div>
         </div>
         <div class="card-body" style="padding:0">
@@ -1585,7 +1690,7 @@ body.page-pg-assign .week-bar{display:none!important;}
       <!-- SECTION 2: MIM SPIFF -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-hdr" style="background:var(--ok)">
-          <div class="card-title">📱 MIM Spiff</div>
+          <div class="card-title">📱 Manager MIM Spiff</div>
           <div id="mpMimPeriodLabel" style="font-size:12px;color:rgba(255,255,255,.7)"></div>
         </div>
         <div class="card-body" style="padding:0">
@@ -1670,7 +1775,8 @@ body.page-pg-assign .week-bar{display:none!important;}
           <button class="btn bghost sm" style="white-space:nowrap;font-size:11px" onclick="goPage('pg-home',null)">← Home</button>
           <button class="btn bd sm" onclick="adminLockOut()">🔒 Lock &amp; Exit</button>
         </div>
-      </div>
+      
+</div>
 
       <!-- ADMIN NAV TABS -->
       <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch">
@@ -1685,6 +1791,7 @@ body.page-pg-assign .week-bar{display:none!important;}
         <button class="sub-tab" onclick="swAdmin('data',this)">📊 Data Management</button>
         <button class="sub-tab" onclick="swAdmin('datastatus',this)">🔗 Data Status</button>
         <button class="sub-tab" onclick="swAdmin('history',this)">📋 History</button>
+        <button class="sub-tab" onclick="swAdmin('actions',this)">⚠️ Pending Actions</button>
       </div>
 
       <!-- LOCK CONTROLS -->
@@ -1784,6 +1891,7 @@ body.page-pg-assign .week-bar{display:none!important;}
                 <button class="btn bok" id="adminMgrBtn" onclick="adminToggleMgrLock()">🔒 Lock Manager Period</button>
                 <button class="btn bo sm" onclick="expMgrSheet()">⬇ Export CSV</button>
               <button class="btn bo sm" onclick="generateAllMgrSlips()">🖨 All Pay Slips</button>
+              <button class="btn bp" onclick="downloadAllMgrSlipsZIP()">⬇ All Manager Slips ZIP</button>
               </div>
             </div>
           </div>
@@ -2250,15 +2358,15 @@ body.page-pg-assign .week-bar{display:none!important;}
           <div class="card-body">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:12px">
               <!-- RTPOS -->
-              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo)">
-                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">📊 RTPOS — Rep Data</div>
+              <div style="background:#F8F8F8;border-radius:8px;padding:12px;border:1px solid var(--bo);border-left:3px solid var(--se)">
+                <div style="font-weight:700;font-size:13px;color:var(--se);margin-bottom:4px">📊 RTPOS — Rep Data <span style="font-size:10px;font-weight:400;color:var(--mu)">→ Weekly Rep Bonuses</span></div>
                 <div style="font-size:11px;color:var(--mu);margin-bottom:8px">Weekly rep performance · hours, activations, accessories</div>
-                <div class="dz" id="dzR" ondragover="dzo(event,'dzR')" ondragleave="dzl('dzR')" ondrop="requirePin(()=>dzd(event,'rtbdi'))">
-                  <input type="file" accept=".csv,.txt" onchange="requirePin(()=>dzfs(event,'rtbdi'))"/>
-                  <div class="dz-ic">📂</div>
-                  <div class="dz-txt">Drop RTPOS CSV or click</div>
-                </div>
-                <div class="dz-fn" id="fnR" style="margin-top:4px;font-size:11px;color:var(--ok)"></div>
+                <label style="cursor:pointer;display:block">
+                  <input type="file" accept=".csv,.txt" style="display:none" onchange="requirePin(()=>dzfs(event,'rtbdi'))"/>
+                  <div class="btn bs sm" style="width:100%;justify-content:center;margin-bottom:4px">⬆ Upload RTPOS CSV</div>
+                </label>
+                <div id="fnR" style="font-size:11px;color:var(--ok);margin-top:4px"></div>
+                <div id="repStatusBadge" style="font-size:11px;margin-top:4px"></div>
               </div>
 
               <!-- METRO ELB -->
@@ -2357,7 +2465,7 @@ body.page-pg-assign .week-bar{display:none!important;}
             <button class="btn bok" onclick="expCoachSheet()">⬇ Coach Actuals CSV</button>
             <button class="btn bok" onclick="expRosterCSV()">⬇ Rep Roster CSV</button>
             <button class="btn bok" onclick="expAssignCSV()">⬇ Store Assignments CSV</button>
-            <button class="btn bok" onclick="printAllStubs()">🖨 Print All Bonus Slips</button>
+            <button class="btn bok" onclick="downloadAllRepSlipsZIP()">⬇ Download All Rep Slips (ZIP)</button>
           </div></div>
           <div class="card"><div class="card-hdr" style="background:var(--se)"><div class="card-title">📋 System Info</div></div>
           <div class="card-body">
@@ -2404,10 +2512,51 @@ body.page-pg-assign .week-bar{display:none!important;}
           </div></div>
         </div>
       </div>
+
+      <!-- PENDING ACTIONS & SYSTEM STATUS -->
+      <div class="sub-pane" id="admin-actions">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-hdr" style="background:#FFB300">
+            <div class="card-title" style="color:#1A1A1A">⚠️ Pending Actions</div>
+            <button class="btn bghost sm" onclick="renPendingActions()">↺ Refresh</button>
+          </div>
+          <div class="card-body" id="homePending">
+            <div style="color:var(--mu);font-size:13px">Loading…</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr" style="background:var(--se)">
+            <div class="card-title">⚡ System Status</div>
+            <button class="btn bghost sm" onclick="refreshHomeStatus()">↺ Refresh</button>
+          </div>
+          <div class="card-body" id="homeStatusList">
+            <div style="color:var(--mu);font-size:13px">Loading…</div>
+          </div>
+        </div>
+      </div>
 </div><!-- /adminContent -->
   </div><!-- /pg-admin -->
 
-</main></div>
+</main>
+<!-- MOBILE MORE MENU -->
+  <div class="mobile-more" id="mobileMore" style="display:none">
+    <div class="mm-hdr"><span>Work Force Ops</span><button onclick="toggleMobileMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">✕</button></div>
+    <div class="mm-items">
+      <div class="mm-section-lbl">Navigation</div>
+      <button class="mm-item" onclick="goPage('pg-home',null);toggleMobileMenu()">🏠 Home</button>
+      <button class="mm-item" onclick="goPage('pg-employee',null);toggleMobileMenu()">🏷️ My Bonus Slip</button>
+      <button class="mm-item" onclick="goPage('pg-leaderboard',null);toggleMobileMenu()">🏆 Leaderboard</button>
+      <div class="mm-section-lbl">Admin</div>
+      <button class="mm-item" onclick="requirePin(()=>{goPage('pg-admin',null);toggleMobileMenu();})">🔐 Admin Center</button>
+    </div>
+  </div>
+<nav class="bnav" id="bnav">
+    <button class="bn" onclick="goPage('pg-home',this)" data-page="pg-home"><span class="bn-ic">🏠</span><span class="bn-lbl">Home</span></button>
+    <button class="bn" onclick="goPage('pg-employee',this)" data-page="pg-employee"><span class="bn-ic">🏷️</span><span class="bn-lbl">My Slip</span></button>
+    <button class="bn" onclick="goPage('pg-leaderboard',null)" data-page="pg-leaderboard"><span class="bn-ic">🏆</span><span class="bn-lbl">Leaderboard</span></button>
+    <button class="bn" onclick="requirePin(()=>goPage('pg-reps',null))" data-page="pg-reps"><span class="bn-ic">🔐</span><span class="bn-lbl">Staff</span></button>
+    <button class="bn" onclick="toggleMobileMenu()" id="moreBtn"><span class="bn-ic">☰</span><span class="bn-lbl">More</span></button>
+  </nav></div>
 <div id="pf"></div>
 
 <!-- ADMIN OVERLAY -->
@@ -2493,7 +2642,7 @@ body.page-pg-assign .week-bar{display:none!important;}
 </div>
 
 <!-- PIN PAD -->
-<div class="pin-ov" id="pinOv">
+<div class="pin-ov" id="pinOv" style="display:none">
   <div class="pin-box" id="pinBox">
     <div class="pin-logo">🔒</div>
     <div class="pin-title">Admin / Payroll Access</div>
@@ -2507,14 +2656,14 @@ body.page-pg-assign .week-bar{display:none!important;}
       <button class="pin-btn" onclick="pinKey('1')">1</button><button class="pin-btn" onclick="pinKey('2')">2</button><button class="pin-btn" onclick="pinKey('3')">3</button>
       <button class="pin-btn" onclick="pinKey('4')">4</button><button class="pin-btn" onclick="pinKey('5')">5</button><button class="pin-btn" onclick="pinKey('6')">6</button>
       <button class="pin-btn" onclick="pinKey('7')">7</button><button class="pin-btn" onclick="pinKey('8')">8</button><button class="pin-btn" onclick="pinKey('9')">9</button>
-      <button class="pin-btn pin-clear" onclick="pinClear()">✕ Clear</button>
+      <button class="pin-btn pin-clear" onclick="pinClear()">&#10005;</button>
       <button class="pin-btn" onclick="pinKey('0')">0</button>
-      <button class="pin-btn pin-enter" onclick="pinSubmit()">✓ OK</button>
+      <button class="pin-btn pin-enter" onclick="pinSubmit()">&#10003;</button>
     </div>
-    <button class="pin-cancel" onclick="pinCancel()">Cancel</button>
+    <div style="font-size:11px;color:var(--mu);margin-top:12px">Session stays unlocked until you close the browser</div>
   </div>
 </div>
-<div class="tst" id="tst"></div>
+
 <script>
 const SR=[
   {s:"AR-COLONEL GLENN",id:"10217203",me:"1ME",tier:3,mgr:"Karmina Mendoza",c:"TBD"},
@@ -2659,13 +2808,24 @@ const REP_ROSTER = {
 // Apply roster data when CSV uploads — enriches each rep
 function applyRosterToRep(rep){
   const ri=rep.ri;if(!ri)return;
-  const r=REP_ROSTER[ri];if(!r)return;
+  const r=REP_ROSTER[ri]||{};
   if(r.full)rep.fullName=r.full;
   if(r.first)rep.firstName=r.first;
   if(r.last)rep.lastName=r.last;
   if(r.coach&&(!rep.c||rep.c===''||rep.c==='TBD'))rep.c=r.coach;
-    const asgn2=getAssignment(ri);if(asgn2?.s&&!rep.s)rep.s=asgn2.s;if(asgn2?.c)rep.c=asgn2.c;
   if(r.state)rep.state=r.state;
+  // Apply user name overrides (from Rep Roster edits) — these win over REP_ROSTER
+  try{
+    const ov=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}')[ri]||{};
+    if(ov.first&&typeof ov.first==='string')rep.firstName=ov.first;
+    if(ov.last&&typeof ov.last==='string')rep.lastName=ov.last;
+    if(rep.firstName||rep.lastName)
+      rep.fullName=(String(rep.firstName||'')+' '+String(rep.lastName||'')).trim()||rep.fullName||rep.n;
+  }catch(e){}
+  // Apply store/coach assignments
+  const asgn2=getAssignment(ri);
+  if(asgn2?.s&&!rep.s)rep.s=asgn2.s;
+  if(asgn2?.c)rep.c=asgn2.c;
 }
 function applyRosterToAll(){reps.forEach(applyRosterToRep);saveSession();}
 
@@ -2678,11 +2838,131 @@ function dispLast(r){return r.lastName||'';}
 let T=lT(),reps=lReps(),CBs=lCBs(),sps=lSp(),wk="",cbST="",wkLocked=false;
 let lbMode="company",sumMode="store",mgrCalcs={},coachCalcs={};
 let _sortKey="",_sortDir=-1,_renTimer=null;
+let _lbReps=null,_lbWk=null,_sumReps=null,_sumWk=null;
 let _pinUnlocked=false,_pinCb=null,_pinEntry="";
+
+
+
+// ── LEADERBOARD + SUMMARY WEEK/FILTER HELPERS ──
+
+function initLBPage(){
+  // Populate coach filter
+  const cf=document.getElementById('lbCoachFil');
+  if(cf){
+    cf.innerHTML='<option value="">All Coaches</option>';
+    COACHES.sort().forEach(c=>cf.innerHTML+=`<option value="${c}">${c}</option>`);
+  }
+  // Populate week selector
+  const sel=document.getElementById('lbWkSel');
+  if(sel){
+    const idx=getWeekIndex();
+    sel.innerHTML='<option value="">📋 Switch Week</option>';
+    idx.forEach(wkDate=>{
+      const s=new Date(wkDate+'T12:00:00'),e=new Date(s);e.setDate(e.getDate()+6);
+      const lbl=s.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const d=getWeekData(wkDate);
+      sel.innerHTML+=`<option value="${wkDate}" ${wkDate===(_lbWk||wk)?'selected':''}>${lbl} ${d.locked?'✓':''}</option>`;
+    });
+  }
+  // Default to current week data if not already set
+  if(!_lbReps){_lbReps=reps;_lbWk=wk;}
+  renLB();
+}
+
+function lbSwitchWeek(wkDate){
+  if(!wkDate)return;
+  const d=getWeekData(wkDate);
+  _lbReps=d.reps||[];
+  _lbWk=wkDate;
+  renLB();
+}
+
+function initSumPage(){
+  const cf=document.getElementById('sumCoachFil');
+  if(cf){
+    cf.innerHTML='<option value="">All Coaches</option>';
+    COACHES.sort().forEach(c=>cf.innerHTML+=`<option value="${c}">${c}</option>`);
+  }
+  const sel=document.getElementById('sumWkSel');
+  if(sel){
+    const idx=getWeekIndex();
+    sel.innerHTML='<option value="">📋 Switch Week</option>';
+    idx.forEach(wkDate=>{
+      const s=new Date(wkDate+'T12:00:00'),e=new Date(s);e.setDate(e.getDate()+6);
+      const lbl=s.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const d=getWeekData(wkDate);
+      sel.innerHTML+=`<option value="${wkDate}" ${wkDate===(_sumWk||wk)?'selected':''}>${lbl} ${d.locked?'✓':''}</option>`;
+    });
+  }
+  if(!_sumReps){_sumReps=reps;_sumWk=wk;}
+  renSum();
+}
+
+function sumSwitchWeek(wkDate){
+  if(!wkDate)return;
+  const d=getWeekData(wkDate);
+  _sumReps=d.reps||[];
+  _sumWk=wkDate;
+  renSum();
+}
+
+// ── CLEAN LEGACY BAD NAME OVERRIDES ──
+(function cleanNameOverrides(){
+  try{
+    const ov=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+    let dirty=false;
+    Object.keys(ov).forEach(ntid=>{
+      if(typeof ov[ntid]==='string'){ov[ntid]={last:ov[ntid]};dirty=true;}
+      if(typeof ov[ntid]==='object'&&ov[ntid]!==null){
+        ['first','last'].forEach(f=>{
+          if(ov[ntid][f]!==undefined&&typeof ov[ntid][f]!=='string'){
+            ov[ntid][f]=String(ov[ntid][f]||'').replace('[object Object]','');
+            dirty=true;
+          }
+        });
+      }
+    });
+    if(dirty)localStorage.setItem('wfo_name_overrides',JSON.stringify(ov));
+  }catch(e){}
+})();
+
+// ── NAV INIT (runs immediately for WebView compatibility) ──
+(function initNav(){
+  function showNav(){
+    var w=window.innerWidth||screen.width||document.documentElement.clientWidth||375;
+    var b=document.getElementById('bnav');
+    var s=document.getElementById('sidebar');
+    if(w<=1024){
+      if(b){b.style.display='flex';b.style.flexDirection='row';}
+      if(s){s.style.display='none';s.style.width='0';}
+    } else {
+      if(b)b.style.removeProperty('display');
+      if(s){s.style.display='';s.style.width='';}
+    }
+  }
+  // Run immediately
+  showNav();
+  // Run again when DOM is ready
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',showNav);
+  } else {
+    showNav();
+  }
+  // Run again after full page load (images, fonts)
+  window.addEventListener('load',showNav);
+  // Run on resize
+  window.addEventListener('load',showNav);
+  window.addEventListener('resize',showNav);
+  // Export for goPage to call
+  window.showNav=showNav;
+})();
 
 // ── INIT ──
 document.addEventListener("DOMContentLoaded",()=>{
-  setWk();popDD();renTE();renMgrTE();renCoachTE();renSL();renSB();upK();updLk();
+  const _savedWk=localStorage.getItem("wfo_current_wk");
+  setWk();
+  if(_savedWk&&_savedWk>wk){wk=_savedWk;document.getElementById("wks").value=wk;updWB();}
+  popDD();renTE();renMgrTE();renCoachTE();renSL();renSB();upK();updLk();
   renMgrOverview();renWkHist();renCBL();renRepOv();renMimTables();renCoachOv();
   initMgrStoreDD();initCoachDD();renderCatRows();renMgrHist();renCoachHist();
   document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
@@ -2700,6 +2980,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   applyMIMToReps();
   // Load current week data from storage
   if(wk) loadWeek(wk);
+  updRepStatus();
   // Build week history selector
   buildWeekSelector();
   // Set default month to CURRENT month (matches upload defaults)
@@ -2738,7 +3019,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const abm=document.getElementById('aBsMonth');if(abm&&!abm.value)abm.value=_mn;
   // Always start on home page if no session or if session is pg-admin/pg-history
   const _stored=sessionStorage.getItem("wfo_page");
-  const _skipPages=['pg-admin','pg-history','pg-roster','pg-assign','pg-reps','pg-managers','pg-coaches'];
+  const _skipPages=['pg-admin','pg-history','pg-roster','pg-assign','pg-reps','pg-managers','pg-coaches','pg-leaderboard','pg-summary','pg-coach-payout','pg-mgr-payout','pg-chargebacks'];
   const last=(!_stored||_skipPages.includes(_stored))?'pg-home':_stored;
   // Set initial body page class
   document.body.classList.add('page-'+last);
@@ -2746,7 +3027,28 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 // ── PIN ──
-function requirePin(cb){if(_pinUnlocked){cb();return;}_pinCb=cb;_pinEntry="";updPinDots();document.getElementById("pinErr").textContent="";document.getElementById("pinOv").classList.add("open");}
+function requirePin(cb){
+  if(_pinUnlocked){cb();return;}
+  _pinCb=cb;
+  _pinEntry='';
+  updPinDots();
+  const pov=document.getElementById('pinOv');
+  if(!pov)return;
+  document.getElementById('pinErr').textContent='';
+  // Force to end of body so nothing covers it
+  document.body.appendChild(pov);
+  pov.style.display='flex';
+  pov.style.position='fixed';
+  pov.style.top='0';
+  pov.style.left='0';
+  pov.style.right='0';
+  pov.style.bottom='0';
+  pov.style.zIndex='99999';
+  pov.style.background='rgba(74,26,107,0.95)';
+  pov.style.alignItems='center';
+  pov.style.justifyContent='center';
+  pov.classList.add('open');
+}
 function pinKey(d){if(_pinEntry.length>=4)return;_pinEntry+=d;updPinDots();if(_pinEntry.length===4)setTimeout(pinSubmit,100);}
 // ── PIN KEYBOARD SUPPORT ──
 document.addEventListener('keydown', function(e){
@@ -2769,15 +3071,26 @@ document.addEventListener('keydown', function(e){
 });
 
 function pinSubmit(){
-  if(_pinEntry===PIN){_pinUnlocked=true;document.body.classList.add("admin-unlocked");document.getElementById("pinOv").classList.remove("open");_pinEntry="";updPinDots();const _ps=document.getElementById("pinStatus");if(_ps){_ps.textContent="✅ Admin Mode — Editing ON";_ps.style.background="var(--ok)";_ps.style.color="#fff";}if(_pinCb){const cb=_pinCb;_pinCb=null;cb();}clearTimeout(_renTimer);_renTimer=setTimeout(()=>{renR();if(typeof updSheetStatus==="function")updSheetStatus();},80);}
+  if(_pinEntry===PIN){_pinUnlocked=true;document.body.classList.add("admin-unlocked");const _pov2=document.getElementById("pinOv");if(_pov2){_pov2.classList.remove("open");_pov2.style.display="none";}_pinEntry="";updPinDots();const _ps=document.getElementById("pinStatus");if(_ps){_ps.textContent="✅ Admin Mode — Editing ON";_ps.style.background="var(--ok)";_ps.style.color="#fff";}
+    const _sb=document.querySelector('.bn[data-page="pg-reps"]');
+    if(_sb){_sb.querySelector('.bn-ic').textContent='👥';_sb.querySelector('.bn-lbl').textContent='Staff';}
+    if(_pinCb){const cb=_pinCb;_pinCb=null;cb();}clearTimeout(_renTimer);_renTimer=setTimeout(()=>{renR();if(typeof updSheetStatus==="function")updSheetStatus();},80);}
   else{document.getElementById("pinErr").textContent="Incorrect PIN. Try again.";document.getElementById("pinBox").classList.add("shake");setTimeout(()=>document.getElementById("pinBox").classList.remove("shake"),350);_pinEntry="";updPinDots();}
 }
 function pinClear(){_pinEntry="";updPinDots();document.getElementById("pinErr").textContent="";}
-function pinCancel(){document.getElementById("pinOv").classList.remove("open");_pinEntry="";_pinCb=null;updPinDots();}
+function pinCancel(){const _pov2=document.getElementById("pinOv");if(_pov2){_pov2.classList.remove("open");_pov2.style.display="none";}_pinEntry="";_pinCb=null;updPinDots();}
 function updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById("pd"+i);if(d)d.className="pin-dot"+(_pinEntry.length>i?" filled":"");}}
 
 // ── PAGE NAV ──
 function goPage(id,el){
+  // Staff pages require PIN on mobile (shared device protection)
+  const _staffPages=['pg-reps','pg-managers','pg-coaches','pg-leaderboard',
+    'pg-summary','pg-coach-payout','pg-mgr-payout','pg-chargebacks','pg-history',
+    'pg-roster','pg-assign'];
+  if(_staffPages.includes(id)&&!_pinUnlocked){
+    requirePin(()=>goPage(id,el));
+    return;
+  }
   // Disable browser scroll restoration and reset immediately
   if(history.scrollRestoration)history.scrollRestoration='manual';
   const _cont=document.querySelector('.content');
@@ -2793,8 +3106,8 @@ function goPage(id,el){
   if(el)el.classList.add("active");
   else{const si=document.querySelector('[data-page="'+id+'"]');if(si)si.classList.add("active");}
   sessionStorage.setItem("wfo_page",id);
-  if(id==="pg-leaderboard")renLB();
-  if(id==="pg-summary")renSum();
+  if(id==="pg-leaderboard"){if(!_lbReps){_lbReps=reps;_lbWk=wk;}initLBPage();}
+  if(id==="pg-summary"){if(!_sumReps){_sumReps=reps;_sumWk=wk;}initSumPage();}
   if(id==="pg-managers"){const _cm=document.querySelector('.content');if(_cm)_cm.scrollTop=0;renMgrOverview();requestAnimationFrame(()=>{if(_cm)_cm.scrollTop=0;});}
   if(id==="pg-coach-payout"){initCoachPayoutPage();renCoachPayout();}
   if(id==="pg-mgr-payout"){initMgrPayoutPage();renMgrPayout();}
@@ -2809,6 +3122,17 @@ function goPage(id,el){
   }
   if(id==="pg-home")initHomePage();
   if(id==="pg-roster")renRoster();
+  if(id==="pg-reps"){
+    const _ov=document.getElementById("reps-overview");
+    if(_ov&&!_ov.classList.contains("active")){
+      document.querySelectorAll("#pg-reps .sub-pane").forEach(p=>p.classList.remove("active"));
+      document.querySelectorAll("#pg-reps .sub-tab").forEach(b=>b.classList.remove("active"));
+      _ov.classList.add("active");
+      const _ot=document.querySelector("#pg-reps .sub-tab");
+      if(_ot)_ot.classList.add("active");
+    }
+    renRepOv();upK();
+  }
   if(id==="pg-employee"){initEmpView();}
   if(id==="pg-admin"){
     document.body.classList.add("admin-active");
@@ -2820,9 +3144,18 @@ function goPage(id,el){
   // Force scroll reset
   const _c=document.querySelector('.content');
   if(_c)_c.scrollTop=0;
+  // Auto-close mobile menu on navigation
+  const _mm=document.getElementById('mobileMore');
+  if(_mm&&_mm.classList.contains('open')){
+    _mm.classList.remove('open');
+    _mm.style.display='none';
+  }
+  // Ensure nav state is correct after every navigation
+  if(typeof window.showNav==='function')window.showNav();
 }
 function swSub(prefix,id,btn){
-  const pg=btn.closest(".page");
+  const pg=btn?btn.closest(".page"):document.getElementById("pg-"+prefix);
+  if(!pg)return;
   pg.querySelectorAll(".sub-pane").forEach(p=>p.classList.remove("active"));
   pg.querySelectorAll(".sub-tab").forEach(b=>b.classList.remove("active"));
   const pane=document.getElementById(prefix+"-"+id);if(pane)pane.classList.add("active");
@@ -2856,7 +3189,16 @@ function setWk(){
   wk=lastMonday.toISOString().split("T")[0];
   document.getElementById("wks").value=wk;updWB();
 }
-function onWC(){wk=document.getElementById("wks").value;updWB();renR();renSB();}
+function onWC(){
+  wk=document.getElementById("wks").value;
+  localStorage.setItem("wfo_current_wk",wk);
+  updWB();renR();renSB();
+  // If lb/sum are showing same week, update them too
+  if(!_lbWk||_lbWk===_prevWk){_lbReps=reps;_lbWk=wk;}
+  if(!_sumWk||_sumWk===_prevWk){_sumReps=reps;_sumWk=wk;}
+  _prevWk=wk;
+}
+let _prevWk='';
 function updWB(){if(!wk)return;const d=new Date(wk+"T12:00:00"),e=new Date(d);e.setDate(e.getDate()+6);document.getElementById("wkb").textContent=d.toLocaleDateString("en-US",{month:"short",day:"numeric"})+" - "+e.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
 
 // ── DROPDOWNS ──
@@ -2885,6 +3227,27 @@ function actSp(wd){const d=wd||(wk?new Date(wk+"T12:00:00"):new Date());return s
 function cSp(r){const wd=wk?new Date(wk+"T12:00:00"):new Date();let tot=0,det=[];actSp(wd).forEach(sp=>{if(sp.sc==="store"&&sp.sv&&r.s!==sp.sv)return;if(sp.sc==="coach"&&sp.sv&&r.c!==sp.sv)return;let pay=0;if(sp.ty==="flat_per_rep")pay=sp.a;else if(sp.ty==="flat_per_unit")pay=sp.a;else if(sp.ty==="pct_gross"){const g=cBx(r.ta||0)+cAc(r.ap||0)+cPU(r).t+cMI(r.ml).p;pay=g*sp.a/100;}tot+=pay;det.push({n:sp.nm,p:pay});});return{tot,det};}
 function cRp(r){const bx=cBx(r.ta||0),ac=cAc(r.ap||0),pu=cPU(r),mi=cMI(r.ml),sp=cSp(r);const gr=bx+ac+pu.t+mi.p+sp.tot,arc=arcT(r),cb=cbT(r.n),nt=gr-arc-cb;return{bx,ac,pu,mi,sp,gr,arc,cb,nt};}
 
+// ── RESTORED REP TABLE CRUD FUNCTIONS ──
+
+function apF(){const fS=document.getElementById("fSt")?.value||"",fC=document.getElementById("fCo")?.value||"",fState=document.getElementById("fState")?.value||"",srch=(document.getElementById("repSearch")?.value||"").toLowerCase().trim();renR(fS,fC,srch,fState);}
+
+function sortReps(key){if(_sortKey===key)_sortDir*=-1;else{_sortKey=key;_sortDir=-1;}if(key==="gr"||key==="nt"){reps.sort((a,b)=>{const ca=cRp(a),cb=cRp(b);return(ca[key]-cb[key])*_sortDir;});}else{reps.sort((a,b)=>{const av=typeof a[key]==="number"?a[key]:(a[key]||"").toLowerCase();const bv=typeof b[key]==="number"?b[key]:(b[key]||"").toLowerCase();return av<bv?-_sortDir:av>bv?_sortDir:0;});}renR();}
+
+function addRep(){
+  const n=document.getElementById("nNm").value.trim(),s=document.getElementById("nSt").value;
+  if(!n){tst2("Enter a rep name.","er");return;}if(!s){tst2("Select a store.","er");return;}
+  const e=SR.find(r=>r.s===s);
+  reps.push({n,ri:"",s,c:e?.c||"TBD",ta:+g("nTA")||0,na:+g("nNA")||0,ra:+g("nRA")||0,up:+g("nUP")||0,tb:+g("nTB")||0,wt:+g("nWT")||0,hs:+g("nHI")||0,af:+g("nAF")||0,hr:+g("nHR")||0,ap:+g("nAP")||0,mb:+g("nMB")||0,ml:+g("nML")||0,al:[]});
+  ["nNm","nTA","nNA","nRA","nUP","nTB","nWT","nHI","nAF","nHR","nAP","nMB","nML"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("nSt").value="";saveSession();renR();tst2('Rep "'+n+'" added.',"ok");
+}
+
+function rmR(i){const n=reps[i].n;reps.splice(i,1);CBs=CBs.filter(c=>c.rp!==n);saveSession();renR();renCBL();}
+
+function clrAll(){if(!confirm("Clear all rep data and chargebacks? Cannot be undone."))return;reps=[];CBs=[];saveSession();renR();renCBL();}
+
+function uR(i,f,v){reps[i][f]=v;saveSession();clearTimeout(_renTimer);_renTimer=setTimeout(()=>renR(),120);}
+
 // ── RENDER REPS ──
 function renR(fS,fC,srch,fState){
   if(fS===undefined)fS=document.getElementById("fSt")?.value||"";
@@ -2898,6 +3261,19 @@ function renR(fS,fC,srch,fState){
     if(srch&&!(r.n||"").toLowerCase().includes(srch)&&!(r.s||"").toLowerCase().includes(srch)&&!(r.c||"").toLowerCase().includes(srch)&&!(r.ri||"").toLowerCase().includes(srch))return false;
     return true;
   });
+  // Apply sort
+  if(_sortKey){
+    if(_sortKey==='gr'||_sortKey==='nt'){
+      fil.sort((a,b)=>{const ca=cRp(a),cb=cRp(b);return(ca[_sortKey]-cb[_sortKey])*_sortDir;});
+    } else {
+      fil.sort((a,b)=>{
+        const av=typeof a[_sortKey]==='number'?a[_sortKey]:(a[_sortKey]||'').toLowerCase();
+        const bv=typeof b[_sortKey]==='number'?b[_sortKey]:(b[_sortKey]||'').toLowerCase();
+        return av<bv?-_sortDir:av>bv?_sortDir:0;
+      });
+    }
+  }
+
   const cntEl=document.getElementById("repCountLbl");if(cntEl)cntEl.textContent=fil.length+" rep"+(fil.length!==1?"s":"")+(srch?" matching":"")+(" - "+reps.length+" total");
   let tG=0,tA=0,tC=0,tN=0,tB=0,tAc=0,tSp=0;
   document.getElementById("rb").innerHTML=fil.map((r)=>{
@@ -3193,8 +3569,6 @@ function generateCoachSlipPDF(coachName){
   </body></html>`;
   const w=window.open('','_blank','width=900,height=700');w.document.write(html);w.document.close();
 }
-function generateAllCoachSlips(){COACHES.forEach(coach=>generateCoachSlipPDF(coach));}
-function generateAllMgrSlips(){SR.forEach(store=>generateMgrSlipPDF(store.s));}
 
 
 function generateMgrSlipPDF(storeName){
@@ -3253,7 +3627,7 @@ function generateMgrSlipPDF(storeName){
 
 
 function generateAllMgrSlips(){
-  SR.forEach(store=>generateMgrSlipPDF(store.s));
+  downloadAllMgrSlipsZIP();
 }
 
 // Helper to calculate manager bonus for a store — used by slip PDF
@@ -3335,23 +3709,46 @@ function calcMgrBonus(storeName, sd){
 }
 
 function generateAllCoachSlips(){
-  COACHES.forEach(coach=>generateCoachSlipPDF(coach));
+  downloadAllCoachSlipsZIP();
 }
 
 // ── UPDATE HOME KPIS (upK) ──
 // Called after data changes to refresh home page summary stats
 function upK(){
   try{
-    // Update week display
+    // ── REP PAGE KPI STRIP ──
+    let tG=0,tA=0,tC=0,tN=0,tB=0,tAc=0,tSp=0,tTop=0;
+    reps.forEach(r=>{
+      const c=cRp(r);
+      tG+=c.gr;tA+=c.arc;tC+=c.cb;tN+=c.nt;tB+=c.bx;tAc+=c.ac;tSp+=c.sp.tot;
+      if((r.ta||0)>=25)tTop++;
+    });
+    const actSpiffs=actSp(wk?new Date(wk+'T12:00:00'):new Date());
+    const $=id=>document.getElementById(id);
+    if($('kR'))$('kR').textContent=reps.length||'—';
+    if($('kG'))$('kG').textContent=reps.length?'$'+tG.toFixed(2):'$—';
+    if($('kS'))$('kS').textContent=reps.length?'$'+tSp.toFixed(2):'$—';
+    if($('kSs'))$('kSs').textContent=actSpiffs.length+' active';
+    if($('kA'))$('kA').textContent=reps.length?'$'+tA.toFixed(2):'$—';
+    if($('kC'))$('kC').textContent=reps.length?'$'+tC.toFixed(2):'$—';
+    if($('kCs'))$('kCs').textContent=CBs.length+' this week';
+    if($('kN'))$('kN').textContent=reps.length?'$'+tN.toFixed(2):'$—';
+    if($('kT'))$('kT').textContent=reps.length?tTop+' / '+reps.length:'—';
+    // Lock badge
+    const lkBadge=document.getElementById('wkLockBadge');
+    if(lkBadge)lkBadge.style.display=wkLocked?'inline-flex':'none';
+    // ── HOME PAGE KPI ──
     const homeWkEl=document.getElementById('homeWeek');
-    const wkbEl=document.getElementById('wkb');
-    if(homeWkEl&&wkbEl)homeWkEl.textContent=wkbEl.textContent||'—';
-    // Update lock status
+    if(homeWkEl){
+      if(wk){
+        const _s=new Date(wk+'T12:00:00'),_e=new Date(_s);_e.setDate(_e.getDate()+6);
+        homeWkEl.textContent=_s.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+_e.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      } else { homeWkEl.textContent='No week loaded'; }
+    }
     const ls=document.getElementById('homeLockStatus');
     const lb=document.getElementById('homeLockBadge');
     if(ls)ls.textContent=wkLocked?'Locked — Paid':'Unlocked — Open';
     if(lb)lb.style.background=wkLocked?'rgba(0,166,81,.25)':'rgba(226,0,116,.2)';
-    // Refresh pending actions and status
     if(typeof renPendingActions==='function')renPendingActions();
     if(typeof refreshHomeStatus==='function')refreshHomeStatus();
   }catch(e){console.error('upK:',e);}
@@ -4205,8 +4602,7 @@ function generateCoachPayoutSlip(){
   <div class="footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${formatPeriod(bonusMn)}</div>
   </body></html>`;
 
-  const w=window.open('','_blank','width=1000,height=750');
-  w.document.write(html);w.document.close();
+  downloadCoachPayoutSlipPDF();
 }
 
 
@@ -4425,8 +4821,7 @@ function generateMgrPayoutSlip(){
   <div class="footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${formatPeriod(bonusMn)}</div>
   </body></html>`;
 
-  const w=window.open('','_blank','width=1000,height=750');
-  w.document.write(html);w.document.close();
+  downloadMgrPayoutSlipPDF();
 }
 
 
@@ -4815,6 +5210,446 @@ function populateCoachPayoutSel(selId){
   if(cur)sel.value=cur;
 }
 
+
+// ══════════════════════════════════════════════════════
+// PDF + ZIP DOWNLOAD SYSTEM
+// Lazy-loads JSZip + jsPDF + html2canvas from CDN
+// ══════════════════════════════════════════════════════
+
+function loadScript(src){
+  return new Promise((resolve,reject)=>{
+    if(document.querySelector(`script[src="${src}"]`)){resolve();return;}
+    const s=document.createElement('script');s.src=src;
+    s.onload=resolve;s.onerror=reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function ensurePDFLibs(){
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+}
+
+function sanitizeFilename(str){
+  return (str||'unknown').replace(/[^a-zA-Z0-9_\-]/g,'_').replace(/__+/g,'_').slice(0,50);
+}
+
+async function htmlToPDFBlob(htmlString, title){
+  // Render HTML in offscreen iframe, capture with html2canvas, export via jsPDF
+  return new Promise(async(resolve)=>{
+    const iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;left:-9999px;top:0;width:900px;height:1200px;opacity:0;pointer-events:none;';
+    document.body.appendChild(iframe);
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(htmlString);
+    iframe.contentDocument.close();
+    // Wait for fonts/images
+    await new Promise(r=>setTimeout(r,800));
+    try{
+      const canvas=await html2canvas(iframe.contentDocument.body,{
+        scale:1.5,useCORS:true,logging:false,
+        backgroundColor:'#ffffff',
+        width:900,windowWidth:900
+      });
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
+      const pageW=pdf.internal.pageSize.getWidth();
+      const pageH=pdf.internal.pageSize.getHeight();
+      const imgW=pageW;
+      const imgH=(canvas.height*pageW)/canvas.width;
+      let y=0;
+      // Multi-page if tall
+      if(imgH<=pageH){
+        pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,imgW,imgH);
+      }else{
+        let remaining=imgH;
+        let srcY=0;
+        while(remaining>0){
+          const sliceH=Math.min(pageH,remaining);
+          const sliceCanvas=document.createElement('canvas');
+          sliceCanvas.width=canvas.width;
+          sliceCanvas.height=Math.round((sliceH/imgH)*canvas.height);
+          const ctx2=sliceCanvas.getContext('2d');
+          ctx2.drawImage(canvas,0,Math.round((srcY/imgH)*canvas.height),canvas.width,sliceCanvas.height,0,0,canvas.width,sliceCanvas.height);
+          pdf.addImage(sliceCanvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,imgW,sliceH);
+          remaining-=sliceH;srcY+=sliceH;
+          if(remaining>0)pdf.addPage();
+        }
+      }
+      resolve(pdf.output('blob'));
+    }catch(e){
+      console.error('PDF render error:',e);
+      // Fallback: return HTML as text blob
+      resolve(new Blob([htmlString],{type:'text/html'}));
+    }finally{
+      document.body.removeChild(iframe);
+    }
+  });
+}
+
+// ── FULL SLIP HTML BUILDERS (self-contained, no window.open) ──
+
+function buildRepSlipFullHTML(r,c,wk2){
+  const slipDiv=buildSlipHTML(r,c,wk2);
+  return`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Nunito',sans-serif;background:#fff;padding:20px;}
+    .no-print{display:none;}
+    @media print{.no-print{display:none;}}
+  </style></head><body>${slipDiv}</body></html>`;
+}
+
+function buildCoachSlipFullHTML(coachName){
+  const srBs=getSR_BS();const ct=T.coach||DT.coach;
+  const mn=document.getElementById('coachSheetMonth')?.value||'';
+  const stores=SR.filter(s=>(srBs[s.s]?.coach||s.c)===coachName);
+  let totalAct=0,totalAcc=0,totalMim=0,totalKick=0;
+  const storeRows=stores.map(store=>{
+    const sd=coachSheetData[store.s]||{};const res=calcStoreCoachBonus(store.s,sd);
+    totalAct+=res.actBonus;totalAcc+=res.accBonus;totalKick+=res.kicker||0;
+    const accPerBox=+sd.totalBoxes>0?(+sd.accTotal/+sd.totalBoxes):0;
+    return`<tr><td>${store.s}</td><td style="text-align:center">Tier ${store.tier}</td><td style="text-align:center">${sd.actPct?sd.actPct.toFixed(1)+'%':'—'}</td><td style="text-align:center">${sd.elbRank||'—'}</td><td style="text-align:right">${sd.accTotal?'$'+(+sd.accTotal).toFixed(2):'—'}</td><td style="text-align:center">${sd.totalBoxes||'—'}</td><td style="text-align:center">${accPerBox>0?'$'+accPerBox.toFixed(2):'—'}</td><td style="text-align:right;font-weight:700;color:#6E2B8B">$${res.actBonus.toFixed(2)}</td><td style="text-align:right;font-weight:700;color:#6E2B8B">$${res.accBonus.toFixed(2)}</td><td style="text-align:right;font-weight:800;color:#E20074">$${res.total.toFixed(2)}</td></tr>${res.guardrails.length?`<tr><td colspan="10" style="font-size:10px;color:#D32F2F;padding:2px 8px">⚠ ${res.guardrails.join(' · ')}</td></tr>`:''}`;
+  }).join('');
+  const mimBans=stores.reduce((s,st)=>s+(coachSheetData[st.s]?.mimOrders||0),0)||reps.filter(r=>r.c===coachName).reduce((s,r)=>s+(r.mb||0),0);
+  totalMim=mimBans*(ct.mimRate||10);
+  const grandTotal=totalAct+totalAcc+totalMim+totalKick;
+  const period=mn?formatPeriod(mn):'—';
+  return`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Nunito',sans-serif;font-size:12px;color:#1A1A1A;padding:24px;background:#fff;}
+    .header{background:linear-gradient(135deg,#4A1A6B,#6E2B8B);color:#fff;padding:20px 24px;border-radius:10px 10px 0 0;margin-bottom:0;}
+    .header h1{font-family:'Poppins',sans-serif;font-size:18px;font-weight:900;}
+    .header h2{font-size:13px;opacity:.8;margin-top:4px;}
+    .meta{display:flex;gap:20px;flex-wrap:wrap;background:#F3E8FF;padding:12px 20px;border-bottom:2px solid #6E2B8B;margin-bottom:16px;}
+    .meta div label{font-size:9px;font-weight:700;text-transform:uppercase;color:#6E2B8B;display:block;}
+    .meta div span{font-size:14px;font-weight:700;}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px;}
+    th{background:#F3E8FF;color:#6E2B8B;font-weight:700;font-size:9px;text-transform:uppercase;padding:7px 8px;border-bottom:2px solid #6E2B8B;}
+    td{padding:6px 8px;border-bottom:1px solid #E8E8E8;}
+    tr:nth-child(even) td{background:#FAFAFA;}
+    .totals{display:flex;gap:16px;flex-wrap:wrap;background:#F3E8FF;padding:12px 20px;border-top:2px solid #6E2B8B;border-radius:0 0 10px 10px;align-items:center;}
+    .totals .tot{display:flex;flex-direction:column;}
+    .totals .tot label{font-size:9px;text-transform:uppercase;color:#6E2B8B;font-weight:700;}
+    .totals .tot span{font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;}
+    .totals .grand{margin-left:auto;background:#4A1A6B;color:#fff;padding:10px 20px;border-radius:8px;}
+    .totals .grand label{opacity:.7;}
+    .totals .grand span{font-size:22px;color:#E20074;}
+    .footer{font-size:9px;color:#999;text-align:center;margin-top:14px;border-top:1px solid #eee;padding-top:8px;}
+  </style></head><body>
+  <div class="header"><h1>EDGELINK INC — WORK FORCE OPS</h1><h2>Coach Bonus Pay Slip · ${coachName}</h2></div>
+  <div class="meta">
+    <div><label>Coach</label><span>${coachName}</span></div>
+    <div><label>Period</label><span>${period}</span></div>
+    <div><label>Stores</label><span>${stores.length}</span></div>
+    <div><label>Generated</label><span>${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></div>
+  </div>
+  <table><thead><tr><th>Store</th><th>Tier</th><th>Act %</th><th>ELB Rank</th><th>Acc $</th><th>PPD</th><th>Acc/Box</th><th>Act Bonus</th><th>Acc Bonus</th><th>Total</th></tr></thead>
+  <tbody>${storeRows}</tbody></table>
+  <div class="totals">
+    <div class="tot"><label>Act Bonus</label><span>$${totalAct.toFixed(2)}</span></div>
+    <div class="tot"><label>Acc Bonus</label><span>$${totalAcc.toFixed(2)}</span></div>
+    <div class="tot"><label>MIM (${mimBans} BANs)</label><span>$${totalMim.toFixed(2)}</span></div>
+    <div class="tot"><label>Kicker</label><span>$${totalKick.toFixed(2)}</span></div>
+    <div class="tot grand"><label>TOTAL PAYOUT</label><span>$${grandTotal.toFixed(2)}</span></div>
+  </div>
+  <div class="footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${period}</div>
+  </body></html>`;
+}
+
+function buildMgrSlipFullHTML(storeName){
+  const srBs=getSR_BS();
+  const mn=document.getElementById('mgrSheetMonthIn')?.value||'';
+  const store=SR.find(s=>s.s===storeName);if(!store)return null;
+  const sd=mgrSheetData[storeName]||{};
+  const res=calcMgrBonus(storeName,sd);
+  const period=mn?formatPeriod(mn):'—';
+  const mgrName=srBs[storeName]?.mgr||store.mgr||'—';
+  return`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Nunito',sans-serif;font-size:12px;color:#1A1A1A;padding:24px;background:#fff;}
+    .header{background:linear-gradient(135deg,#E20074,#6E2B8B);color:#fff;padding:20px 24px;border-radius:10px 10px 0 0;}
+    .header h1{font-family:'Poppins',sans-serif;font-size:18px;font-weight:900;}
+    .header h2{font-size:13px;opacity:.8;margin-top:4px;}
+    .meta{display:flex;gap:20px;flex-wrap:wrap;background:#FFF0F7;padding:12px 20px;border-bottom:2px solid #E20074;margin-bottom:16px;}
+    .meta div label{font-size:9px;font-weight:700;text-transform:uppercase;color:#E20074;display:block;}
+    .meta div span{font-size:14px;font-weight:700;}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px;}
+    th{background:#FFF0F7;color:#E20074;font-weight:700;font-size:9px;text-transform:uppercase;padding:7px 8px;border-bottom:2px solid #E20074;}
+    td{padding:6px 8px;border-bottom:1px solid #E8E8E8;}
+    tr:nth-child(even) td{background:#FAFAFA;}
+    .totals{display:flex;gap:16px;flex-wrap:wrap;background:#FFF0F7;padding:12px 20px;border-top:2px solid #E20074;border-radius:0 0 10px 10px;align-items:center;}
+    .totals .tot{display:flex;flex-direction:column;}
+    .totals .tot label{font-size:9px;text-transform:uppercase;color:#E20074;font-weight:700;}
+    .totals .tot span{font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;}
+    .totals .grand{margin-left:auto;background:#E20074;color:#fff;padding:10px 20px;border-radius:8px;}
+    .totals .grand label{opacity:.7;}
+    .totals .grand span{font-size:22px;color:#fff;}
+    .footer{font-size:9px;color:#999;text-align:center;margin-top:14px;border-top:1px solid #eee;padding-top:8px;}
+  </style></head><body>
+  <div class="header"><h1>EDGELINK INC — WORK FORCE OPS</h1><h2>Manager Bonus Pay Slip · ${storeName}</h2></div>
+  <div class="meta">
+    <div><label>Store</label><span>${storeName}</span></div>
+    <div><label>Manager</label><span>${mgrName}</span></div>
+    <div><label>Tier</label><span>Tier ${store.tier} (${store.me})</span></div>
+    <div><label>Period</label><span>${period}</span></div>
+    <div><label>ELB Rank</label><span>${sd.elb||'—'}</span></div>
+    <div><label>Protection</label><span>${sd.attach?sd.attach.toFixed(1)+'%':'—'}</span></div>
+  </div>
+  <table><thead><tr><th>Category</th><th>Target</th><th>Actual</th><th>% to Goal</th><th>Earned</th></tr></thead>
+  <tbody>${res.catRows||'<tr><td colspan="5" style="text-align:center;color:#666;padding:20px">No data loaded</td></tr>'}</tbody></table>
+  ${res.notes?`<div style="background:#FFF8E1;border:1px solid #FFB300;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:#8a6000">${res.notes}</div>`:''}
+  <div class="totals">
+    <div class="tot"><label>Acts</label><span>$${(res.actsEarned||0).toFixed(2)}</span></div>
+    <div class="tot"><label>BTS</label><span>$${(res.btsEarned||0).toFixed(2)}</span></div>
+    <div class="tot"><label>HSI</label><span>$${(res.hsiEarned||0).toFixed(2)}</span></div>
+    <div class="tot"><label>Accessories</label><span>$${(res.accEarned||0).toFixed(2)}</span></div>
+    <div class="tot grand"><label>TOTAL PAYOUT</label><span>$${(res.total||0).toFixed(2)}</span></div>
+  </div>
+  <div class="footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${period}</div>
+  </body></html>`;
+}
+
+// ── ZIP DOWNLOAD FUNCTIONS ──
+
+async function downloadAllRepSlipsZIP(){
+  const weekLabel=(document.getElementById('wkb')?.textContent||'Week').replace(/[^a-zA-Z0-9]/g,'_');
+  if(!reps.length){tst2('No rep data loaded','er');return;}
+  tst2('Building PDF slips — this may take a moment…','ok');
+  try{
+    await ensurePDFLibs();
+    const zip=new JSZip();
+    const folder=zip.folder('RepSlips_'+weekLabel);
+    for(const r of reps){
+      const c=cRp(r);
+      const wk2=document.getElementById('wkb')?.textContent||weekLabel;
+      const html=buildRepSlipFullHTML(r,c,wk2);
+      const coachSafe=sanitizeFilename(r.c||'NoCoach');
+      const repSafe=sanitizeFilename(r.n||r.ri||'Rep');
+      const fname=`${coachSafe}_${repSafe}_${weekLabel}.pdf`;
+      const blob=await htmlToPDFBlob(html,fname);
+      folder.file(fname,blob);
+    }
+    const content=await zip.generateAsync({type:'blob'});
+    const url=URL.createObjectURL(content);
+    const a=document.createElement('a');a.href=url;
+    a.download=`EdgelinkRepSlips_${weekLabel}.zip`;a.click();
+    URL.revokeObjectURL(url);
+    tst2('✅ Rep slips ZIP downloaded ('+reps.length+' slips)','ok');
+  }catch(e){
+    console.error(e);tst2('ZIP error: '+e.message,'er');
+  }
+}
+
+async function downloadAllCoachSlipsZIP(){
+  const mn=document.getElementById('coachSheetMonth')?.value||'';
+  const period=mn?mn.replace('-','_'):'NoMonth';
+  tst2('Building coach PDF slips…','ok');
+  try{
+    await ensurePDFLibs();
+    const zip=new JSZip();
+    const folder=zip.folder('CoachSlips_'+period);
+    for(const coach of COACHES){
+      const html=buildCoachSlipFullHTML(coach);
+      const coachSafe=sanitizeFilename(coach);
+      const fname=`${coachSafe}_${period}.pdf`;
+      const blob=await htmlToPDFBlob(html,fname);
+      folder.file(fname,blob);
+    }
+    const content=await zip.generateAsync({type:'blob'});
+    const url=URL.createObjectURL(content);
+    const a=document.createElement('a');a.href=url;
+    a.download=`EdgelinkCoachSlips_${period}.zip`;a.click();
+    URL.revokeObjectURL(url);
+    tst2('✅ Coach slips ZIP downloaded ('+COACHES.length+' slips)','ok');
+  }catch(e){
+    console.error(e);tst2('ZIP error: '+e.message,'er');
+  }
+}
+
+async function downloadAllMgrSlipsZIP(){
+  const mn=document.getElementById('mgrSheetMonthIn')?.value||'';
+  const period=mn?mn.replace('-','_'):'NoMonth';
+  const stores=SR.filter(s=>s.mgr&&s.mgr!=='TBD');
+  tst2('Building manager PDF slips…','ok');
+  try{
+    await ensurePDFLibs();
+    const zip=new JSZip();
+    const folder=zip.folder('MgrSlips_'+period);
+    for(const store of stores){
+      const html=buildMgrSlipFullHTML(store.s);
+      if(!html)continue;
+      const storeSafe=sanitizeFilename(store.s);
+      const mgrSafe=sanitizeFilename(store.mgr||'Mgr');
+      const fname=`${storeSafe}_${mgrSafe}_${period}.pdf`;
+      const blob=await htmlToPDFBlob(html,fname);
+      folder.file(fname,blob);
+    }
+    const content=await zip.generateAsync({type:'blob'});
+    const url=URL.createObjectURL(content);
+    const a=document.createElement('a');a.href=url;
+    a.download=`EdgelinkMgrSlips_${period}.zip`;a.click();
+    URL.revokeObjectURL(url);
+    tst2('✅ Manager slips ZIP downloaded ('+stores.length+' slips)','ok');
+  }catch(e){
+    console.error(e);tst2('ZIP error: '+e.message,'er');
+  }
+}
+
+async function downloadCoachPayoutSlipPDF(){
+  const coach=document.getElementById('cpCoachSel')?.value;
+  const bonusMn=document.getElementById('cpBonusMonth')?.value;
+  if(!coach||!bonusMn){tst2('Select a coach and month first','er');return;}
+  tst2('Building coach payout PDF…','ok');
+  try{
+    await ensurePDFLibs();
+    // Grab the already-rendered payout content from the DOM
+    const storeTable=document.getElementById('cpStoreRows')?.innerHTML||'';
+    const storeFoot=document.getElementById('cpStoreFoot')?.innerHTML||'';
+    const mimTable=document.getElementById('cpMimRows')?.innerHTML||'';
+    const mimFoot=document.getElementById('cpMimFoot')?.innerHTML||'';
+    const grand=document.getElementById('cpGrandTotal')?.textContent||'$0.00';
+    const storeTotal=document.getElementById('cpTotalBonus')?.textContent||'$0.00';
+    const mimTotal=document.getElementById('cpTotalMim')?.textContent||'$0.00';
+    const mimMn=document.getElementById('cpMimMonth')?.value||bonusMn;
+    const period=bonusMn.replace('-','_');
+    const coachSafe=sanitizeFilename(coach);
+    const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Nunito',sans-serif;font-size:12px;color:#1A1A1A;padding:24px;background:#fff;}
+      .header{background:linear-gradient(135deg,#4A1A6B,#6E2B8B);color:#fff;padding:20px 24px;border-radius:10px 10px 0 0;}
+      .header h1{font-family:'Poppins',sans-serif;font-size:18px;font-weight:900;}
+      .header h2{font-size:13px;opacity:.8;margin-top:4px;}
+      .meta{display:flex;gap:20px;flex-wrap:wrap;background:#F3E8FF;padding:12px 20px;border-bottom:2px solid #6E2B8B;margin-bottom:16px;}
+      .meta div label{font-size:9px;font-weight:700;text-transform:uppercase;color:#6E2B8B;display:block;}
+      .meta div span{font-size:14px;font-weight:700;}
+      .sh{font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#6E2B8B;margin:16px 0 8px;}
+      table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px;}
+      th{background:#F3E8FF;color:#6E2B8B;font-weight:700;font-size:9px;text-transform:uppercase;padding:7px 8px;border-bottom:2px solid #6E2B8B;text-align:left;}
+      td{padding:6px 8px;border-bottom:1px solid #E8E8E8;}
+      tr:nth-child(even) td{background:#FAFAFA;}
+      .grand{background:#4A1A6B;color:#fff;padding:16px 22px;border-radius:8px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+      .grand .item label{font-size:9px;opacity:.7;font-weight:700;text-transform:uppercase;display:block;}
+      .grand .item span{font-size:18px;font-weight:800;}
+      .grand .total{margin-left:auto;border-left:1px solid rgba(255,255,255,.3);padding-left:24px;}
+      .grand .total span{font-size:26px;color:#E20074;}
+      .footer{font-size:9px;color:#999;text-align:center;margin-top:14px;border-top:1px solid #eee;padding-top:8px;}
+    </style></head><body>
+    <div class="header"><h1>EDGELINK INC — WORK FORCE OPS</h1><h2>Coach Bonus Payout · ${coach}</h2></div>
+    <div class="meta">
+      <div><label>Coach</label><span>${coach}</span></div>
+      <div><label>Bonus Period</label><span>${formatPeriod(bonusMn)}</span></div>
+      <div><label>MIM Period</label><span>${formatPeriod(mimMn)}</span></div>
+      <div><label>Generated</label><span>${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></div>
+    </div>
+    <div class="sh">🏪 Store Bonus Breakdown</div>
+    <table><thead><tr><th>Store</th><th>Tier</th><th>Act %</th><th>Acc $</th><th>PPD</th><th>Acc/Box</th><th>Shrink</th><th>ELB</th><th>Act Bonus</th><th>Acc Bonus</th><th>Total</th></tr></thead>
+    <tbody>${storeTable}</tbody><tfoot>${storeFoot}</tfoot></table>
+    <div class="sh">📱 MIM Spiff</div>
+    <table><thead><tr><th>Store</th><th>Manager</th><th>BANs</th><th>Rate</th><th>MIM Payout</th></tr></thead>
+    <tbody>${mimTable}</tbody><tfoot>${mimFoot}</tfoot></table>
+    <div class="grand">
+      <div class="item"><label>Store Bonus</label><span>${storeTotal}</span></div>
+      <div class="item"><label>MIM Spiff</label><span>${mimTotal}</span></div>
+      <div class="item total"><label>Total Payout</label><span>${grand}</span></div>
+    </div>
+    <div class="footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${formatPeriod(bonusMn)}</div>
+    </body></html>`;
+    const fname=`${coachSafe}_PayoutSlip_${period}.pdf`;
+    const blob=await htmlToPDFBlob(html,fname);
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=fname;a.click();
+    URL.revokeObjectURL(url);
+    tst2('✅ Coach payout PDF downloaded','ok');
+  }catch(e){
+    console.error(e);tst2('PDF error: '+e.message,'er');
+  }
+}
+
+async function downloadMgrPayoutSlipPDF(){
+  const mgr=document.getElementById('mpMgrSel')?.value;
+  const bonusMn=document.getElementById('mpBonusMonth')?.value;
+  if(!mgr||!bonusMn){tst2('Select a manager and month first','er');return;}
+  tst2('Building manager payout PDF…','ok');
+  try{
+    await ensurePDFLibs();
+    const storeTable=document.getElementById('mpStoreRows')?.innerHTML||'';
+    const storeFoot=document.getElementById('mpStoreFoot')?.innerHTML||'';
+    const mimTable=document.getElementById('mpMimRows')?.innerHTML||'';
+    const mimFoot=document.getElementById('mpMimFoot')?.innerHTML||'';
+    const grand=document.getElementById('mpGrandTotal')?.textContent||'$0.00';
+    const storeTotal=document.getElementById('mpTotalBonus')?.textContent||'$0.00';
+    const mimTotal=document.getElementById('mpTotalMim')?.textContent||'$0.00';
+    const mimMn=document.getElementById('mpMimMonth')?.value||bonusMn;
+    const period=bonusMn.replace('-','_');
+    const mgrSafe=sanitizeFilename(mgr);
+    const html=`<!DOCTYPE html><html><head><meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Nunito',sans-serif;font-size:12px;color:#1A1A1A;padding:24px;background:#fff;}
+      .header{background:linear-gradient(135deg,#E20074,#6E2B8B);color:#fff;padding:20px 24px;border-radius:10px 10px 0 0;}
+      .header h1{font-family:'Poppins',sans-serif;font-size:18px;font-weight:900;}
+      .header h2{font-size:13px;opacity:.8;margin-top:4px;}
+      .meta{display:flex;gap:20px;flex-wrap:wrap;background:#FFF0F7;padding:12px 20px;border-bottom:2px solid #E20074;margin-bottom:16px;}
+      .meta div label{font-size:9px;font-weight:700;text-transform:uppercase;color:#E20074;display:block;}
+      .meta div span{font-size:14px;font-weight:700;}
+      .sh{font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#E20074;margin:16px 0 8px;}
+      table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:11px;}
+      th{background:#FFF0F7;color:#E20074;font-weight:700;font-size:9px;text-transform:uppercase;padding:7px 8px;border-bottom:2px solid #E20074;text-align:left;}
+      td{padding:6px 8px;border-bottom:1px solid #E8E8E8;}
+      tr:nth-child(even) td{background:#FAFAFA;}
+      .grand{background:#6E2B8B;color:#fff;padding:16px 22px;border-radius:8px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+      .grand .item label{font-size:9px;opacity:.7;font-weight:700;text-transform:uppercase;display:block;}
+      .grand .item span{font-size:18px;font-weight:800;}
+      .grand .total{margin-left:auto;border-left:1px solid rgba(255,255,255,.3);padding-left:24px;}
+      .grand .total span{font-size:26px;color:#E20074;}
+      .footer{font-size:9px;color:#999;text-align:center;margin-top:14px;border-top:1px solid #eee;padding-top:8px;}
+    </style></head><body>
+    <div class="header"><h1>EDGELINK INC — WORK FORCE OPS</h1><h2>Manager Bonus Payout · ${mgr}</h2></div>
+    <div class="meta">
+      <div><label>Manager</label><span>${mgr}</span></div>
+      <div><label>Bonus Period</label><span>${formatPeriod(bonusMn)}</span></div>
+      <div><label>MIM Period</label><span>${formatPeriod(mimMn)}</span></div>
+      <div><label>Generated</label><span>${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></div>
+    </div>
+    <div class="sh">🏪 Store Bonus Breakdown</div>
+    <table><thead><tr><th>Store</th><th>Tier</th><th>ELB Rank</th><th>Attach %</th><th>Acts</th><th>BTS</th><th>HSI</th><th>Acc $</th><th>Bonus</th><th>Notes</th></tr></thead>
+    <tbody>${storeTable}</tbody><tfoot>${storeFoot}</tfoot></table>
+    <div class="sh">📱 MIM Spiff</div>
+    <table><thead><tr><th>Store</th><th>BANs</th><th>Rate</th><th>MIM Payout</th><th>Status</th></tr></thead>
+    <tbody>${mimTable}</tbody><tfoot>${mimFoot}</tfoot></table>
+    <div class="grand">
+      <div class="item"><label>Store Bonus</label><span>${storeTotal}</span></div>
+      <div class="item"><label>MIM Spiff</label><span>${mimTotal}</span></div>
+      <div class="item total"><label>Total Payout</label><span>${grand}</span></div>
+    </div>
+    <div class="footer">CONFIDENTIAL — Edgelink Inc Internal Use Only · Work Force Ops · ${formatPeriod(bonusMn)}</div>
+    </body></html>`;
+    const fname=`${mgrSafe}_PayoutSlip_${period}.pdf`;
+    const blob=await htmlToPDFBlob(html,fname);
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=fname;a.click();
+    URL.revokeObjectURL(url);
+    tst2('✅ Manager payout PDF downloaded','ok');
+  }catch(e){
+    console.error(e);tst2('PDF error: '+e.message,'er');
+  }
+}
+
+
+function updRepStatus(){
+  const el=document.getElementById('repStatusBadge');if(!el)return;
+  if(!reps.length){el.innerHTML='';return;}
+  const wkLabel=document.getElementById('wkb')?.textContent||wk||'';
+  el.innerHTML=`<span style="color:var(--ok);font-weight:700">✅ Loaded — ${reps.length} reps · ${wkLabel}</span>
+    <button class="btn bd xs" style="margin-left:6px;padding:2px 6px;font-size:10px" onclick="requirePin(()=>{reps=[];CBs=[];saveSession();renR();updRepStatus();tst2('Rep data cleared','ok')})">Clear</button>`;
+}
+
 // ── CSV UPLOAD ──
 function handleAdminDrop(e,src,dzId){
   e.preventDefault();
@@ -4869,7 +5704,7 @@ function pC(txt,src,fn){
       ad++;
     }
   }
-  setDZ(true);saveSession();renR();document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
+  setDZ(true);saveSession();renR();updRepStatus();document.getElementById("lu").textContent="Updated: "+new Date().toLocaleString();
   applyRosterToAll();
   // Auto-add any new NTIDs to roster
   if(src==='rtbdi'||src==='metro'){const newCount=checkAndAutoAddNewReps(reps);}
@@ -4936,67 +5771,108 @@ function doMimExp(role){
 }
 function dlC(data,fn){const csv=data.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");const b=new Blob([csv],{type:"text/csv"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);}
 
-// ── WEEK LOCK ──
-function lockWk(){
-  if(!reps.length){tst2("No rep data.","er");return;}
-  if(!confirm("Lock week of "+document.getElementById("wkb").textContent+" and mark as paid?"))return;
-  const wk2=document.getElementById("wkb").textContent;
-  let tG=0,tN=0;reps.forEach(r=>{const c=cRp(r);tG+=c.gr;tN+=c.nt;});
-  const rec={id:Date.now(),week:wk2,wkStart:wk,at:new Date().toLocaleString(),repCount:reps.length,tG,tN,data:JSON.parse(JSON.stringify(reps)),cbs:JSON.parse(JSON.stringify(CBs))};
-  const hist=JSON.parse(localStorage.getItem("wfo_wk_hist")||"[]");
-  hist.unshift(rec);if(hist.length>52)hist.pop();
-  localStorage.setItem("wfo_wk_hist",JSON.stringify(hist));
-  wkLocked=true;updLk();renR();renWkHist();tst2("Week locked and paid.","ok");
-}
-function unlockWk(){if(!confirm("Unlock week for corrections?"))return;wkLocked=false;updLk();renR();tst2("Week unlocked.","ok");}
+// ── WEEK LOCK ──function unlockWk(){if(!confirm("Unlock week for corrections?"))return;wkLocked=false;updLk();renR();tst2("Week unlocked.","ok");}
 function updLk(){
   const dot=document.getElementById("lkDot"),lbl=document.getElementById("lkLbl"),meta=document.getElementById("lkMeta"),btn=document.getElementById("lkBtn");if(!dot)return;
   if(wkLocked){dot.className="lk-dot locked";lbl.className="lk-lbl locked";lbl.textContent="Locked - Paid";meta.textContent="Unlock to correct";btn.textContent="Unlock";btn.className="btn bd sm";btn.onclick=()=>requirePin(unlockWk);}
-  else{dot.className="lk-dot open";lbl.className="lk-lbl open";lbl.textContent="Unlocked";meta.textContent="Ready";btn.textContent="Lock & Mark Paid";btn.className="btn bok sm";btn.onclick=()=>requirePin(lockWk);}
-}
-function renWkHist(){
-  const el=document.getElementById("histList");if(!el)return;
-  const hist=JSON.parse(localStorage.getItem("wfo_wk_hist")||"[]");
-  if(!hist.length){el.innerHTML="<p style='font-size:13px;color:var(--mu)'>No paid weeks yet.</p>";return;}
-  el.innerHTML=hist.map((rec,i)=>`<div class="hist-item"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><div><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;color:var(--se)">Week of ${rec.week}</div><div style="font-size:11px;color:var(--mu)">Locked ${rec.at} - ${rec.repCount} reps</div></div><div style="display:flex;align-items:center;gap:14px"><div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Gross</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--pr)">$${rec.tG.toFixed(2)}</div></div><div><div style="font-size:9px;color:var(--mu);text-transform:uppercase">Net Owed</div><div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--ok)">$${rec.tN.toFixed(2)}</div></div><button class="btn bo xs" onclick="expHistCSV(${i})">CSV</button></div></div></div>`).join("");
-}
-function expHistCSV(i){const hist=JSON.parse(localStorage.getItem("wfo_wk_hist")||"[]");const rec=hist[i];if(!rec)return;const hd=["NTID","Rep","Store","Coach","Week","Gross $","Net $"];const rows=rec.data.map(r=>{const bx=cBx(r.ta||0),ac=cAc(r.ap||0),pu=cPU(r),mi=cMI(r.ml);const arc=(r.al||[]).reduce((s,t)=>s+(t.a||0),0);const cb=rec.cbs.filter(c=>c.rp===r.n).reduce((s,c)=>s+(c.a||0),0);const gr=bx+ac+pu.t+mi.p;return[r.ri||"",r.n,r.s,r.c,rec.week,gr.toFixed(2),(gr-arc-cb).toFixed(2)];});dlC([hd,...rows],"WFO_Week_"+rec.wkStart+".csv");}
-
-// ── LEADERBOARD ──
-function swLB(mode,btn){lbMode=mode;document.querySelectorAll(".lb-tab").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");renLB();}
-function renLB(){
-  const grid=document.getElementById("lbGrid");if(!grid)return;
-  if(!reps.length){grid.innerHTML="<div style='grid-column:1/-1;text-align:center;padding:32px;color:var(--mu)'>Load rep data to see leaderboard.</div>";return;}
-  let groups=[];
-  if(lbMode==="company"){groups=[...reps].map(r=>({key:r.n,sub:r.s+" - "+r.c,gross:cRp(r).gr,ta:r.ta||0,r})).sort((a,b)=>b.gross-a.gross).slice(0,5).map((g,i)=>({...g,rank:i+1}));}
-  else if(lbMode==="store"){const bS={};reps.forEach(r=>{const c=cRp(r);if(!bS[r.s])bS[r.s]={key:r.s,gross:0,count:0,topR:r,topG:0};bS[r.s].gross+=c.gr;bS[r.s].count++;if(c.gr>bS[r.s].topG){bS[r.s].topG=c.gr;bS[r.s].topR=r;}});groups=Object.values(bS).sort((a,b)=>b.gross-a.gross).slice(0,5).map((g,i)=>({...g,sub:g.count+" reps - Top: "+g.topR.n,rank:i+1,ta:g.topR.ta||0,r:g.topR}));}
-  else{const bC={};reps.forEach(r=>{const c=cRp(r);if(!bC[r.c])bC[r.c]={key:r.c,gross:0,count:0,topR:r,topG:0};bC[r.c].gross+=c.gr;bC[r.c].count++;if(c.gr>bC[r.c].topG){bC[r.c].topG=c.gr;bC[r.c].topR=r;}});groups=Object.values(bC).sort((a,b)=>b.gross-a.gross).slice(0,5).map((g,i)=>({...g,sub:g.count+" reps - Top: "+g.topR.n,rank:i+1,ta:g.topR.ta||0,r:g.topR}));}
-  const rkCls=["r1","r2","r3","ro","ro"],rkEm=["1st","2nd","3rd","4th","5th"];
-  grid.innerHTML=groups.map((g,i)=>`<div class="lb-card ${rkCls[i]}"><div class="lb-rank ${rkCls[i]}">${rkEm[i]}</div><div class="lb-name">${X(g.key)}</div><div class="lb-store">${X(g.sub)}</div><div class="lb-gross">$${g.gross.toFixed(2)}</div><div style="font-size:10px;color:var(--mu);margin-top:2px">${lbMode==="company"?"PPD: "+g.ta+" - "+bBd(g.ta).l:"Total payout"}</div>${g.ta>=25&&lbMode==="company"?'<div style="margin-top:5px"><span class="bdg btop">TOP EARNER</span></div>':""}</div>`).join("");
+  else{dot.className="lk-dot open";lbl.className="lk-lbl open";lbl.textContent="Unlocked";meta.textContent="Ready";btn.textContent="Lock & Mark Paid";btn.className="btn bok sm";btn.onclick=()=>lockWk();}
 }
 
-// ── SUMMARY ──
-function swSum(mode,btn){sumMode=mode;document.querySelectorAll(".sum-tab").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");renSum();}
-function renSum(){
-  const hd=document.getElementById("sumHd"),bd=document.getElementById("sumBd");if(!hd||!bd)return;
-  if(sumMode==="store"){
-    hd.innerHTML=`<tr><th>Store</th><th>Coach</th><th>Reps</th><th>Total PPD</th><th>Avg PPD</th><th>Top Zone</th><th>Gross $</th><th>Arcade $</th><th>CB $</th><th>Net $</th></tr>`;
-    const bS={};reps.forEach(r=>{const c=cRp(r);if(!bS[r.s])bS[r.s]={s:r.s,co:r.c,n:0,ppd:0,top:0,gr:0,arc:0,cb:0,nt:0};const sg=bS[r.s];sg.n++;sg.ppd+=r.ta||0;sg.gr+=c.gr;sg.arc+=c.arc;sg.cb+=c.cb;sg.nt+=c.nt;if((r.ta||0)>=25)sg.top++;});
-    const rows=Object.values(bS).sort((a,b)=>b.gr-a.gr);
-    bd.innerHTML=rows.length?rows.map(sg=>`<tr><td style="font-weight:700;color:var(--se)">${X(sg.s)}</td><td style="font-size:11px;color:var(--mu)">${X(sg.co)}</td><td style="text-align:center;font-weight:700">${sg.n}</td><td style="text-align:center;font-weight:700;color:var(--se)">${sg.ppd}</td><td style="text-align:center;color:var(--mu)">${sg.n?Math.round(sg.ppd/sg.n):0}</td><td><div style="display:flex;align-items:center;gap:6px"><span style="font-weight:700;color:${sg.top>0?"var(--pr)":"var(--mu)"}">${sg.top}</span><div class="z-bar" style="flex:1;min-width:40px"><div class="z-fill" style="width:${sg.n?Math.min((sg.top/sg.n)*100,100):0}%"></div></div></div></td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${sg.gr.toFixed(2)}</td><td style="color:var(--ok)">-$${sg.arc.toFixed(2)}</td><td style="color:var(--da)">-$${sg.cb.toFixed(2)}</td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:${sg.nt<0?"var(--da)":"var(--dk)"}">$${sg.nt.toFixed(2)}</td></tr>`).join(""):`<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--mu)">No data yet</td></tr>`;
-  }else{
-    hd.innerHTML=`<tr><th>Coach</th><th>Stores</th><th>Reps</th><th>Total PPD</th><th>Avg PPD</th><th>Top Zone</th><th>Gross $</th><th>Net $</th></tr>`;
-    const bC={};reps.forEach(r=>{const c=cRp(r);if(!bC[r.c])bC[r.c]={co:r.c,stores:new Set(),n:0,ppd:0,top:0,gr:0,nt:0};const cg=bC[r.c];cg.stores.add(r.s);cg.n++;cg.ppd+=r.ta||0;cg.gr+=c.gr;cg.nt+=c.nt;if((r.ta||0)>=25)cg.top++;});
-    const rows=Object.values(bC).sort((a,b)=>b.gr-a.gr);
-    bd.innerHTML=rows.length?rows.map(cg=>`<tr><td style="font-weight:700;color:var(--se)">${X(cg.co)}</td><td style="text-align:center;color:var(--mu)">${cg.stores.size}</td><td style="text-align:center;font-weight:700">${cg.n}</td><td style="text-align:center;font-weight:700;color:var(--se)">${cg.ppd}</td><td style="text-align:center;color:var(--mu)">${cg.n?Math.round(cg.ppd/cg.n):0}</td><td><div style="display:flex;align-items:center;gap:6px"><span style="font-weight:700;color:${cg.top>0?"var(--pr)":"var(--mu)"}">${cg.top}</span><div class="z-bar" style="flex:1;min-width:40px"><div class="z-fill" style="width:${cg.n?Math.min((cg.top/cg.n)*100,100):0}%"></div></div></div></td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${cg.gr.toFixed(2)}</td><td style="font-family:'Poppins',sans-serif;font-weight:800;color:${cg.nt<0?"var(--da)":"var(--dk)"}">$${cg.nt.toFixed(2)}</td></tr>`).join(""):`<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--mu)">No data yet</td></tr>`;
-  }
-}
-
-// ── BACKSHEET SYSTEM ──
-// Storage: wfo_bs_{YYYY-MM} = {month, locked, qualifiers, categories, targets}
 // qualifiers: {elbCutoff, attachCutoff, attachPenalty}
 // categories: [{id, name, t1base, t1up, t2base, t2up, t3base, t3up, baseThresh, upThresh}]
 // targets: {storeId: {catId: targetValue}}
+
+
+function expHistCSV(i){
+  const hist=JSON.parse(localStorage.getItem("wfo_wk_hist")||"[]");const rec=hist[i];if(!rec)return;
+  const hd=["NTID","Rep Name","Store","Coach","Week","Gross $","Net Owed $"];
+  const rows=rec.data.map(r=>{const bx=cBx(r.ta||0),ac=cAc(r.ap||0),pu=cPU(r),mi=cMI(r.ml);const arc=(r.al||[]).reduce((s,t)=>s+(t.a||0),0);const cb=rec.cbs.filter(c=>c.rp===r.n).reduce((s,c)=>s+(c.a||0),0);const gr=bx+ac+pu.t+mi.p;const nt=gr-arc-cb;return[r.ri||"",r.n,r.s,r.c,rec.week,gr.toFixed(2),nt.toFixed(2)];});
+  dlC([hd,...rows],"WFO_PaidWeek_"+rec.wkStart+".csv");
+}
+
+function swLB(mode,btn){
+  lbMode=mode;
+  document.querySelectorAll('.lb-tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renLB();
+}
+function swSum(mode,btn){
+  sumMode=mode;
+  document.querySelectorAll('.sum-tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renSum();
+}
+
+function renSum(){
+  const head=document.getElementById('sumHd')||document.getElementById('sumHead');
+  const body=document.getElementById('sumBd')||document.getElementById('sumBody');
+  if(!head||!body)return;
+
+  if(sumMode==='store'){
+    head.innerHTML=`<tr>
+      <th>Store</th><th>Coach</th><th>Reps</th>
+      <th>Total PPD</th><th>Avg PPD</th>
+      <th>Top Earner Zone</th><th>Total Gross</th>
+      <th>Arcade Credit</th><th>Chargebacks</th><th>Net Owed</th>
+    </tr>`;
+    const byStore={};
+    reps.forEach(r=>{
+      const c=cRp(r);
+      if(!byStore[r.s])byStore[r.s]={store:r.s,coach:r.c,reps:0,totPPD:0,topZone:0,gross:0,arcade:0,cb:0,net:0};
+      const sg=byStore[r.s];sg.reps++;sg.totPPD+=r.ta||0;sg.gross+=c.gr;sg.arcade+=c.ar;sg.cb+=c.cb;sg.net+=c.nt;
+      if((r.ta||0)>=25)sg.topZone++;
+    });
+    const sorted=Object.values(byStore).sort((a,b)=>b.gross-a.gross);
+    body.innerHTML=sorted.map(sg=>`<tr>
+      <td><div class="sum-name">${X(sg.store)}</div></td>
+      <td><div class="sum-sub">${X(sg.coach)}</div></td>
+      <td style="text-align:center;font-weight:700">${sg.reps}</td>
+      <td style="text-align:center;font-weight:700;color:var(--se)">${sg.totPPD}</td>
+      <td style="text-align:center;color:var(--mu)">${sg.reps?Math.round(sg.totPPD/sg.reps):0}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-weight:700;color:${sg.topZone>0?'var(--pr)':'var(--mu)'}">${sg.topZone}</span>
+          <div class="zone-bar" style="flex:1;min-width:50px"><div class="zone-fill" style="width:${sg.reps?Math.min((sg.topZone/sg.reps)*100,100):0}%"></div></div>
+        </div>
+      </td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${sg.gross.toFixed(2)}</td>
+      <td style="color:var(--ok)">\u2212$${sg.arcade.toFixed(2)}</td>
+      <td style="color:var(--da)">\u2212$${sg.cb.toFixed(2)}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:${sg.net<0?'var(--da)':'var(--dk)'}">$${sg.net.toFixed(2)}</td>
+    </tr>`).join('');
+    if(!sorted.length)body.innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--mu)">No data yet</td></tr>';
+  } else {
+    head.innerHTML=`<tr>
+      <th>Coach</th><th>Stores</th><th>Reps</th>
+      <th>Total PPD</th><th>Avg PPD / Rep</th>
+      <th>Top Earner Zone</th><th>Total Gross</th><th>Net Owed</th>
+    </tr>`;
+    const byCoach={};
+    reps.forEach(r=>{
+      const c=cRp(r);
+      if(!byCoach[r.c])byCoach[r.c]={coach:r.c,stores:new Set(),reps:0,totPPD:0,topZone:0,gross:0,net:0};
+      const cg=byCoach[r.c];cg.reps++;cg.stores.add(r.s);cg.totPPD+=r.ta||0;cg.gross+=c.gr;cg.net+=c.nt;
+      if((r.ta||0)>=25)cg.topZone++;
+    });
+    const sorted=Object.values(byCoach).sort((a,b)=>b.gross-a.gross);
+    body.innerHTML=sorted.map(cg=>`<tr>
+      <td><div class="sum-name">${X(cg.coach)}</div></td>
+      <td style="text-align:center;color:var(--mu)">${cg.stores.size}</td>
+      <td style="text-align:center;font-weight:700">${cg.reps}</td>
+      <td style="text-align:center;font-weight:700;color:var(--se)">${cg.totPPD}</td>
+      <td style="text-align:center;color:var(--mu)">${cg.reps?Math.round(cg.totPPD/cg.reps):0}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-weight:700;color:${cg.topZone>0?'var(--pr)':'var(--mu)'}">${cg.topZone}</span>
+          <div class="zone-bar" style="flex:1;min-width:50px"><div class="zone-fill" style="width:${cg.reps?Math.min((cg.topZone/cg.reps)*100,100):0}%"></div></div>
+        </div>
+      </td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${cg.gross.toFixed(2)}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:${cg.net<0?'var(--da)':'var(--dk)'}">$${cg.net.toFixed(2)}</td>
+    </tr>`).join('');
+    if(!sorted.length)body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--mu)">No data yet</td></tr>';
+  }
+}
 
 function getBs(month){
   if(!month)return null;
@@ -5590,7 +6466,6 @@ function lSp(){try{return JSON.parse(localStorage.getItem("wfo_sp")||"[]");}catc
 // ── PERSISTENCE ──
 function lReps(){try{return JSON.parse(localStorage.getItem("wfo_reps")||"[]");}catch{return[];}}
 function lCBs(){try{return JSON.parse(localStorage.getItem("wfo_cbs")||"[]");}catch{return[];}}
-function saveSession(){localStorage.setItem("wfo_reps",JSON.stringify(reps));localStorage.setItem("wfo_cbs",JSON.stringify(CBs));}
 
 // ── PDF SLIPS ──
 function slipStyle(){return ``;}
@@ -5601,7 +6476,7 @@ function buildSlipHTML(r,c,wk2){
 ${c.nt<0?`<div style="background:#FFEBEE;border:2px solid #D32F2F;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;gap:10px"><div style="font-size:22px">⚠️</div><div><div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;color:#D32F2F;margin-bottom:2px">Negative Balance - Carry Forward</div><div style="font-size:12px;color:#C62828">$${c.nt.toFixed(2)} carries to next week and will be deducted before payout.</div></div></div>`:""}
 <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#6E2B8B;margin-bottom:9px;display:flex;align-items:center;gap:8px">Earnings Breakdown<div style="flex:1;height:2px;background:linear-gradient(90deg,#E20074,transparent)"></div></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
-${[["Box Level Ups",bT.l,c.bx,(r.ta||0)+" PPD x tier","#E20074"],["Accessory Payout",aT.l,c.ac,aT.p+"% of $"+(r.ap||0).toFixed(2),"#6E2B8B"],["Power Ups","Affirm+HSI",c.pu.t,"Af $"+c.pu.a.toFixed(0)+" HSI $"+c.pu.h.toFixed(0),"#00897B"],["MIM Incentive","Arcade Paid",c.mi.p,(r.ml||0)+" MIM lines","#00A651"]].map(([lbl,badge,amt,det,clr])=>`<div style="border:1px solid #E8E8E8;border-radius:10px;padding:13px 15px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:${clr}"></div><div style="display:inline-block;background:#FFF0F7;color:#E20074;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;margin-bottom:5px">${badge}</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:4px">${lbl}</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;color:#1A1A1A;margin-bottom:3px">$${amt.toFixed(2)}</div><div style="font-size:10px;color:#999">${det}</div></div>`).join("")}
+${[["Box Level Ups",bT.l,c.bx,(r.ta||0)+" PPD x tier","#E20074"],["Accessory Payout",aT.l,c.ac,aT.p+"% of $"+(r.ap||0).toFixed(2),"#6E2B8B"],["Power Ups","Affirm+HSI",c.pu.t,"Af $"+c.pu.a.toFixed(0)+" HSI $"+c.pu.h.toFixed(0),"#00897B"],["MIM Incentive","Arcade Paid",c.mi.p,(r.ml||0)+" MIM lines","#00A651"]].map(([lbl,badge,amt,det,clr])=>`<div style="border:1px solid #E8E8E8;border-radius:10px;padding:13px 15px;position:relative;overflow:hidden"><div style="posit"></div><div style="display:inline-block;background:#FFF0F7;color:#E20074;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;margin-bottom:5px">${badge}</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:4px">${lbl}</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;color:#1A1A1A;margin-bottom:3px">$${amt.toFixed(2)}</div><div style="font-size:10px;color:#999">${det}</div></div>`).join("")}
 ${c.sp.tot>0?`<div style="grid-column:1/-1;border:1px solid #E8E8E8;border-radius:10px;padding:13px 15px;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:#FF69B4"></div><div style="display:inline-block;background:#FFF0F7;color:#E20074;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;margin-bottom:5px">Active Spiff</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:4px">Spiff Bonuses</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px;color:#1A1A1A">$${c.sp.tot.toFixed(2)}</div></div>`:""}
 </div>
 <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#6E2B8B;margin-bottom:9px;display:flex;align-items:center;gap:8px">Payout Summary<div style="flex:1;height:2px;background:linear-gradient(90deg,#E20074,transparent)"></div></div>
@@ -5619,28 +6494,6 @@ function openPF(body,title){const html=slipStyle()+`<div class="pbar"><div class
 function closePF(){const f=document.getElementById("pf");f.style.display="none";f.innerHTML="";document.body.style.overflow="";}
 
 // ── MANAGER PDF ──
-function exportMgrPDF(){
-  const sv=document.getElementById("mgrStore")?.value,mn=document.getElementById("mgrMonth")?.value,nm=document.getElementById("mgrName")?.value;
-  const entry=SR.find(r=>r.s===sv),tier=entry?.tier||2;
-  const calc=mgrCalcs[sv]||{totalBonus:0,dqs:[]};
-  const mgr=T.mgr||DT.mgr,tc=mgr[tier]?.cats||DT.mgr[tier].cats;
-  const tierMax=mgr[tier]?.upMax||DT.mgr[tier].upMax;
-  const pctMax=tierMax>0?((calc.totalBonus/tierMax)*100).toFixed(1):0;
-  const CN={acts:"New Voice Activations",hsi:"HSI Sales",bts:"Tablet (BTS) Sales",acc:"Accessories Target"};
-  let rows="";
-  MGR_CATS.forEach(cat=>{
-    const tgt=+document.getElementById("tgt_"+cat.k)?.value||0,act=+document.getElementById("act_"+cat.k)?.value||0;
-    const pct=tgt>0?(act/tgt)*100:0;const catT=tc[cat.k]||{base:0,up:0};
-    let bonus=pct>=125?catT.up:pct>=100?catT.base:0;
-    if(calc.dqs.some(d=>d.includes("disqualifier")))bonus=0;else if(calc.dqs.some(d=>d.includes("25%")))bonus*=0.75;
-    const clr=pct>=100?"#00A651":pct>=85?"#FFB300":"#D32F2F";
-    rows+=`<tr><td style="padding:10px 14px;border-bottom:1px solid #F0F0F0;font-weight:600">${CN[cat.k]}</td><td style="padding:10px 14px;border-bottom:1px solid #F0F0F0;text-align:center">${tgt||"—"}</td><td style="padding:10px 14px;border-bottom:1px solid #F0F0F0;text-align:center">${act||"—"}</td><td style="padding:10px 14px;border-bottom:1px solid #F0F0F0;text-align:center;font-weight:700;color:${clr}">${tgt>0?pct.toFixed(1)+"%":"—"}</td><td style="padding:10px 14px;border-bottom:1px solid #F0F0F0;text-align:right;font-family:'Poppins',sans-serif;font-weight:800;color:#E20074;font-size:14px">$${bonus.toFixed(2)}</td></tr>`;
-  });
-  const body=`<div style="max-width:720px;margin:0 auto;padding:0 24px 40px"><div style="background:linear-gradient(135deg,#E20074,#6E2B8B,#4A1A6B);border-radius:14px;padding:24px 28px;color:#fff;margin-bottom:20px"><div style="display:flex;align-items:flex-end;justify-content:space-between"><div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:24px">${nm||"Manager"}</div><div style="font-size:12px;opacity:.75;margin-top:4px">${sv||"Store"} - ${entry?.me||""} Tier ${tier} - ${mn||""}</div></div><div style="text-align:right"><div style="font-size:10px;opacity:.6;text-transform:uppercase;margin-bottom:3px">Bonus Earned</div><div style="font-family:'Poppins',sans-serif;font-weight:900;font-size:38px;line-height:1">$${calc.totalBonus.toFixed(2)}</div><div style="font-size:10px;opacity:.7;margin-top:3px">${pctMax}% of max</div></div></div><div style="height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden;margin-top:14px"><div style="height:100%;width:${Math.min(+pctMax,100)}%;background:#fff;border-radius:3px"></div></div></div>${calc.dqs.length?`<div style="background:#FFEBEE;border:2px solid #D32F2F;border-radius:10px;padding:12px 16px;margin-bottom:16px">${calc.dqs.map(d=>`<div style="color:#C62828;font-size:12px;margin-bottom:2px">- ${d}</div>`).join("")}</div>`:""}<table style="width:100%;border-collapse:collapse;border:1px solid #E8E8E8;border-radius:12px;overflow:hidden;margin-bottom:20px"><thead><tr style="background:#FFF0F7"><th style="padding:9px 14px;text-align:left;font-size:10px;font-family:'Poppins',sans-serif;font-weight:700;color:#E20074;text-transform:uppercase;border-bottom:2px solid #E20074">Category</th><th style="padding:9px 14px;text-align:center;font-size:10px;font-family:'Poppins',sans-serif;font-weight:700;color:#E20074;text-transform:uppercase;border-bottom:2px solid #E20074">Target</th><th style="padding:9px 14px;text-align:center;font-size:10px;font-family:'Poppins',sans-serif;font-weight:700;color:#E20074;text-transform:uppercase;border-bottom:2px solid #E20074">Actual</th><th style="padding:9px 14px;text-align:center;font-size:10px;font-family:'Poppins',sans-serif;font-weight:700;color:#E20074;text-transform:uppercase;border-bottom:2px solid #E20074">% to Goal</th><th style="padding:9px 14px;text-align:right;font-size:10px;font-family:'Poppins',sans-serif;font-weight:700;color:#E20074;text-transform:uppercase;border-bottom:2px solid #E20074">Earned</th></tr></thead><tbody>${rows}</tbody><tr style="background:linear-gradient(135deg,#4A1A6B,#6E2B8B)"><td colspan="4" style="padding:12px 14px;font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:#fff">TOTAL MANAGER BONUS</td><td style="padding:12px 14px;font-family:'Poppins',sans-serif;font-weight:900;font-size:18px;color:#fff;text-align:right">$${calc.totalBonus.toFixed(2)}</td></tr></table><div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;padding-top:18px;border-top:1px solid #E8E8E8;margin-bottom:12px"><div><div style="border-top:2px solid #1A1A1A;margin-top:44px;padding-top:6px;display:flex;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:#555">Manager Signature</span><span style="font-size:11px;color:#999">Date</span></div></div><div><div style="border-top:2px solid #1A1A1A;margin-top:44px;padding-top:6px;display:flex;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:#555">HR / Owner Approval</span><span style="font-size:11px;color:#999">Date</span></div></div></div><div style="font-size:9px;color:#ccc;text-align:center;text-transform:uppercase">Confidential - Edgelink Inc - ${mn||""} - ${new Date().toLocaleString()}</div></div>`;
-  openPF(body,"Manager Bonus - "+(sv||"Store"));
-}
-
-// ── COACH PDF ──
 function exportCoachPDF(){
   const coach=document.getElementById("coachSel").value;if(!coach||!coachCalcs[coach]){tst2("Run calculation first.","er");return;}
   const c=coachCalcs[coach],period=document.getElementById("coachMonth").value;
@@ -6109,46 +6962,6 @@ function setCoachSheet(coach,field,val){
     if(mn)saveCoachSheetForPeriod(mn);
   },500);
 }
-function saveCoachSheet(){
-  const mn=document.getElementById('coachSheetMonth')?.value;
-  if(!mn){tst2('Select a period.','er');return;}
-  const ct=T.coach||DT.coach;
-  const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
-  const existing=JSON.parse(localStorage.getItem('wfo_coach_recs')||'[]');
-  COACHES.forEach(coach=>{
-    const sd=coachSheetData[coach];if(!sd)return;
-    const stores=SR.filter(s=>s.c===coach);
-    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
-    const mimSpiff=mimBans*ct.mimRate;
-    const doors=+sd.doors||stores.length;
-    const actPct=+sd.actPct||0,accTotal=+sd.accTotal||0,totalBoxes=+sd.totalBoxes||0,accPerBox=totalBoxes>0?(accTotal/totalBoxes):0,shrinkPct=+sd.shrinkPct||0,elbRank=+sd.elbRank||0;
-    const elbBottom40=elbPctile>60;
-    let actBonus=0,accBonus=0,kicker=0;const guardrails=[];
-    if(actPct>=100){let rate=actPct>=125?ct.at125:actPct>=115?ct.at115:ct.at100;if(elbBottom40){rate*=(1-ct.atPen/100);guardrails.push('ELB −'+ct.atPen+'%');}actBonus=rate*doors;}
-    if(accPerBox>=50&&totalBoxes>0){let accRate=accPerBox>=70?ct.ac70:accPerBox>=60?ct.ac60:ct.ac50;if(elbBottom40){const drop=ct.acElbDrop||1;const tiers=[ct.ac50,ct.ac60,ct.ac70];const ci=accPerBox>=70?2:accPerBox>=60?1:0;accRate=tiers[Math.max(0,ci-drop)];guardrails.push('ELB drop');}let sm=1;if(shrinkPct>5)sm=0;else if(shrinkPct>3)sm=1-ct.sh2/100;else if(shrinkPct>2)sm=1-ct.sh1/100;accBonus=accRate*totalBoxes*sm;}
-    if(coAcc>=350000)kicker=ct.kick2;else if(coAcc>=300000)kicker=ct.kick1;
-    const total=actBonus+accBonus+mimSpiff+kicker;
-    const rec={id:Date.now(),coach,period:mn,actPct,accPerBox,shrinkPct,elbPctile,doors,totalBoxes,coAcc,actBonus,accBonus,mimSpiff,kicker,total,guardrails,savedAt:new Date().toLocaleString()};
-    const idx=existing.findIndex(r=>r.coach===coach&&r.period===mn);
-    if(idx>=0)existing[idx]=rec;else existing.unshift(rec);
-  });
-  localStorage.setItem('wfo_coach_recs',JSON.stringify(existing));
-  renCoachOv();tst2('All coach data saved!','ok');
-}
-function expCoachSheet(){
-  const mn=document.getElementById('coachSheetMonth')?.value||'';
-  const ct=T.coach||DT.coach;
-  const coAcc=+document.getElementById('coachSheetCoAcc')?.value||0;
-  const hd=['Coach','Doors','Act%','Acc/Box$','Shrink%','ELB Pctile','Boxes','Act Bonus$','Acc Bonus$','MIM$','Kicker$','Total$','Guardrails'];
-  const rows=COACHES.map(coach=>{
-    const sd=coachSheetData[coach]||{};
-    const stores=SR.filter(s=>s.c===coach);
-    const mimBans=reps.filter(r=>r.c===coach).reduce((s,r)=>s+(r.mb||0),0);
-    const mimSpiff=mimBans*ct.mimRate;
-    return[coach,sd.doors||stores.length,sd.actPct||'',sd.accPerBox||'',sd.shrinkPct||'',sd.elbPctile||'',sd.totalBoxes||'','','','','','',''];
-  });
-  dlC([hd,...rows],'WFO_CoachActuals_'+mn+'.csv');tst2('Exported.','ok');
-}
 function printCoachSheet(){tst2('Use browser print — Ctrl+P','wn');}
 
 // ── REP ROSTER FUNCTIONS ──
@@ -6163,13 +6976,18 @@ function getMergedRoster(){
   // Start from REP_ROSTER as base
   const merged=Object.entries(REP_ROSTER).map(([ntid,r])=>{
     const ov=overrides[ntid]||null;
+    const ovObj=ov&&typeof ov==='object'?ov:{last:typeof ov==='string'?ov:null};
     const asgn=assigns[ntid]||null;
     const uploadedRep=reps.find(x=>x.ri===ntid);
+    const ovFirst=typeof ovObj.first==='string'?ovObj.first:null;
+    const ovLast=typeof ovObj.last==='string'?ovObj.last:null;
+    const first=ovFirst||r.first||'';
+    const last=ovLast||r.last||'';
     return{
       ntid,
-      first:r.first,
-      last:ov||r.last,
-      full:ov?(r.first+' '+ov).trim():r.full,
+      first,
+      last,
+      full:(first+' '+last).trim()||r.full,
       state:r.state,
       coach:asgn?.c||r.coach,
       store:asgn?.s||uploadedRep?.s||'',
@@ -6186,7 +7004,7 @@ function getMergedRoster(){
     merged.push({
       ntid:r.ri||'',
       first:r.firstName||r.n||'',
-      last:ov||r.lastName||'',
+      last:(typeof ov==='string'?ov:(typeof ov==='object'&&ov?.last?ov.last:''))||r.lastName||'',
       full:r.fullName||r.n||'',
       state:r.state||'',
       coach:r.c||'TBD',
@@ -6200,43 +7018,46 @@ function getMergedRoster(){
   return merged;
 }
 
+function mergeRoster(){
+  // Combine REP_ROSTER (hardcoded) with name overrides and rep CSV data
+  const nameOverrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
+  const assigns=JSON.parse(localStorage.getItem('wfo_assign')||'{}');
+  const allNtids=new Set([...Object.keys(REP_ROSTER),...reps.map(r=>r.ri).filter(Boolean)]);
+  return [...allNtids].map(ntid=>{
+    const base=REP_ROSTER[ntid]||{};
+    const ov=nameOverrides[ntid]||{};
+    const asgn=assigns[ntid]||{};
+    const rep=reps.find(r=>r.ri===ntid);
+    const _rawFirst=ov.first||base.first||rep?.firstName||'';
+    const _rawLast=ov.last||base.last||rep?.lastName||'';
+    const first=typeof _rawFirst==='string'?_rawFirst:String(_rawFirst||'').replace('[object Object]','');
+    const last=typeof _rawLast==='string'?_rawLast:String(_rawLast||'').replace('[object Object]','');
+    return{
+      ntid,
+      full:(first+' '+last).trim()||base.full||rep?.n||ntid,
+      first,last,
+      coach:asgn.c||rep?.c||base.coach||'TBD',
+      store:asgn.s||rep?.s||'',
+      state:base.state||rep?.state||'',
+      inCSV:!!rep,
+      ppd:rep?.ta||0,
+      gross:rep?cRp(rep).gr:0,
+      source:rep?'csv':'roster',
+    };
+  }).sort((a,b)=>(a.last||a.full).localeCompare(b.last||b.full));
+}
+
+
 function renRoster(){
   if(!_pinUnlocked){
     const body=document.getElementById('rosterBody');
-    if(body)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:8px">🔒</div><div style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--se);margin-bottom:6px">Admin Access Required</div><div style="font-size:13px;color:var(--mu);margin-bottom:14px">Enter your PIN to view the rep roster</div><button class="btn bp" onclick="requirePin(renRoster)">Enter PIN</button></td></tr>`;
+    if(body)body.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--mu)">🔒 PIN required</td></tr>`;
     return;
   }
-  const srch=(document.getElementById('rosterSearch')?.value||'').toLowerCase();
-  const fState=document.getElementById('rosterFState')?.value||'';
-  const fCoach=document.getElementById('rosterFCoach')?.value||'';
-  const all=getMergedRoster();
-
-  // Update summary counts
-  const coachCounts={};
-  all.forEach(r=>{const c=r.coach||'TBD';coachCounts[c]=(coachCounts[c]||0)+1;});
-  const upd=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  upd('rosterTotal',all.length);
-  upd('rosterRP',coachCounts['Rose Perez']||0);
-  upd('rosterMW',coachCounts['Mr. Watts']||0);
-  upd('rosterAS',coachCounts['Ambulai Sheku']||0);
-  upd('rosterJM',coachCounts['Joel Montero']||0);
-  upd('rosterMN',coachCounts['Manny']||0);
-  upd('rosterCH',coachCounts['Cheryl']||0);
-  upd('rosterTBD',coachCounts['TBD']||0);
-
-  const fil=all.filter(r=>{
-    if(fState&&r.state!==fState)return false;
-    if(fCoach&&r.coach!==fCoach)return false;
-    if(srch&&!(r.full||'').toLowerCase().includes(srch)&&!(r.ntid||'').toLowerCase().includes(srch)&&!(r.coach||'').toLowerCase().includes(srch)&&!(r.state||'').toLowerCase().includes(srch))return false;
-    return true;
-  });
-
-  const lbl=document.getElementById('rosterCountLbl');
-  if(lbl)lbl.textContent=fil.length+' reps'+(srch||fState||fCoach?' (filtered)':'');
-
+  
   const body=document.getElementById('rosterBody');if(!body)return;
+  const fil=mergeRoster();
   body.innerHTML=fil.map((r,i)=>{
-    const coachColors={'Rose Perez':'bt1','Mr. Watts':'bt3','Ambulai Sheku':'bt2','Joel Montero':'bt4','Manny':'bok2','Cheryl':'btop','TBD':'bno'};
     const cc=coachColors[r.coach]||'bno';
     return`<tr style="border-bottom:1px solid var(--bo);background:${i%2===0?'#fff':'#FAFAFA'}">
       <td style="padding:7px 10px;color:var(--mu);font-size:11px">${i+1}</td>
@@ -6289,10 +7110,9 @@ function updRosterStore(ntid,store){
   saveSession();renAdminRoster();renR();tst2('Store updated.','ok');
 }
 function updRosterName(ntid,field,val){
-  val=val.trim();
+  val=String(val||'').trim(); // always string
   const overrides=JSON.parse(localStorage.getItem('wfo_name_overrides')||'{}');
-  if(!overrides[ntid])overrides[ntid]={};
-  if(typeof overrides[ntid]==='string')overrides[ntid]={last:overrides[ntid]};
+  if(!overrides[ntid]||typeof overrides[ntid]!=='object')overrides[ntid]={};
   overrides[ntid][field]=val;
   localStorage.setItem('wfo_name_overrides',JSON.stringify(overrides));
   // Update rep in memory
@@ -6300,7 +7120,10 @@ function updRosterName(ntid,field,val){
   if(rep){
     if(field==='first')rep.firstName=val;
     if(field==='last')rep.lastName=val;
-    rep.fullName=((rep.firstName||rep.n||'')+' '+(rep.lastName||'')).trim();
+    // Always string coerce
+    rep.firstName=String(rep.firstName||'');
+    rep.lastName=String(rep.lastName||'');
+    rep.fullName=(rep.firstName+' '+rep.lastName).trim()||rep.n||'';
   }
   saveSession();renRoster();renR();tst2('Name updated.','ok');
 }
@@ -6361,6 +7184,9 @@ function adminPinSubmit(){
   if(_adminPinEntry===PIN){
     _pinUnlocked=true;
     document.body.classList.add('admin-unlocked');
+    // Update staff button in bottom nav
+    const _sb2=document.querySelector('.bn[data-page="pg-reps"]');
+    if(_sb2){_sb2.querySelector('.bn-ic').textContent='👥';_sb2.querySelector('.bn-lbl').textContent='Staff';}
     document.getElementById('adminGate').style.display='none';
     document.getElementById('adminContent').style.display='block';
     _adminPinEntry='';updAdminPinDots();
@@ -6383,8 +7209,14 @@ function updAdminPinDots(){
 function toggleMobileMenu(){
   const m=document.getElementById('mobileMore');
   if(!m)return;
-  m.classList.toggle('open');
-  m.style.display=m.classList.contains('open')?'flex':'none';
+  const isOpen=m.classList.contains('open');
+  if(isOpen){
+    m.classList.remove('open');
+    m.style.display='none';
+  } else {
+    m.classList.add('open');
+    m.style.display='flex';
+  }
 }
 
 function adminLockOut(){
@@ -6403,13 +7235,17 @@ function swAdmin(tab,btn){
   document.querySelectorAll('#adminContent .sub-tab').forEach(b=>b.classList.remove('active'));
   const p=document.getElementById('admin-'+tab);if(p)p.classList.add('active');
   if(btn)btn.classList.add('active');
+  if(tab==='bonuses'){renAdminSysInfo();}
+  if(tab==='lock'){initAdminCenter();updAdminLockUI();}
+  if(tab==='stores'){renStoreRoster();}
   if(tab==='roster')renAdminRoster();
-  if(tab==='assignments')renAdminAssign();
+  if(tab==='assignments'){renAdminAssign();renAdminRoster();}
   if(tab==='tiers')initAdminTiers();
   if(tab==='spiffs')renAdminSpiffs();
-  if(tab==='data')renAdminSysInfo();
+  if(tab==='data'){renAdminSysInfo();updRepStatus();updELBStatus();updRTBDIStatus();}
   if(tab==='datastatus'){refreshDataStatus();initDataStatus();}
   if(tab==='history'){renWkHist();}
+  if(tab==='actions'){renPendingActions();refreshHomeStatus();}
   if(tab==='backsheet'){loadELBMapToUI();const mn=document.getElementById('aBsMonth');if(mn&&!mn.value){const n=new Date();mn.value=n.getFullYear()+'-'+(String(n.getMonth()+1).padStart(2,'0'));}loadAdminBsMonth();}
 }
 
@@ -7579,6 +8415,7 @@ function loadWeek(date){
 // ── SAVE CURRENT WEEK ──
 function saveCurrentWeek(){
   if(!wk) return;
+  localStorage.setItem("wfo_current_wk",wk);
   let tG=0; reps.forEach(r=>{const c=cRp(r);tG+=c.gr;});
   saveWeekData(wk, {
     reps: JSON.parse(JSON.stringify(reps)),
@@ -7628,6 +8465,7 @@ function switchWeek(newDate){
   if(wk && reps.length > 0) saveCurrentWeek();
   // Switch
   wk = wkKey(newDate);
+  localStorage.setItem("wfo_current_wk",wk);
   document.getElementById('wks').value = wk;
   updWB();
   // Load new week
@@ -7644,12 +8482,6 @@ function switchWeek(newDate){
 }
 
 // ── OVERRIDE onWC to use switchWeek ──
-function onWC(){
-  const newDate = document.getElementById('wks').value;
-  if(!newDate) return;
-  switchWeek(newDate);
-}
-
 // ── OVERRIDE lockWk to save week data ──
 function lockWk(){
   if(!reps.length){tst2('No rep data to lock.','er');return;}
@@ -7835,15 +8667,12 @@ function toggleSG(id){
 function checkSidebarMobile(){
   const sb=document.getElementById('sidebar');
   const bn=document.getElementById('bnav');
-  if(!sb)return;
-  const w=window.innerWidth||document.documentElement.clientWidth;
-  if(w<=900){
-    sb.style.display='none';
-    sb.style.width='0';
-    if(bn)bn.style.display='flex';
+  const w=window.innerWidth||document.documentElement.clientWidth||375;
+  if(w<=1024){
+    if(sb){sb.style.display='none';sb.style.width='0';}
+    if(bn){bn.style.display='flex';bn.style.flexDirection='row';}
   } else {
-    sb.style.display='';
-    sb.style.width='';
+    if(sb){sb.style.display='';sb.style.width='';}
     if(bn)bn.style.display='none';
   }
 }
@@ -8457,10 +9286,16 @@ function printEmpBonus(){
 function initHomePage(){
   try{
     const el=document.getElementById('homeDateTime');
-    if(el){const n=new Date();el.textContent=n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+' · '+n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+    const _updDT=()=>{const n=new Date();if(el)el.textContent=n.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+' · '+n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});};
+    _updDT();
+    if(!window._homeDTInterval){window._homeDTInterval=setInterval(_updDT,60000);}
     const homeWkEl=document.getElementById('homeWeek');
-    const wkbEl=document.getElementById('wkb');
-    if(homeWkEl&&wkbEl)homeWkEl.textContent=wkbEl.textContent||'—';
+    if(homeWkEl){
+      if(wk){
+        const _hs=new Date(wk+'T12:00:00'),_he=new Date(_hs);_he.setDate(_he.getDate()+6);
+        homeWkEl.textContent=_hs.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+_he.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      } else { homeWkEl.textContent='No week loaded'; }
+    }
     const ls=document.getElementById('homeLockStatus');
     const lb=document.getElementById('homeLockBadge');
     if(ls)ls.textContent=wkLocked?'Locked — Paid':'Unlocked — Open';
@@ -8469,7 +9304,10 @@ function initHomePage(){
     renAnnouncements();
     renImportantDates();
     renContacts();
-    renPendingActions();
+    // Render rep bonus structure
+    const _hrf=document.getElementById('homeRepFlyer');
+    if(_hrf)renRepFlyerTo(_hrf);
+
   }catch(e){console.error('initHomePage:',e);}
 }
 
@@ -8480,13 +9318,18 @@ function refreshHomeStatus(){
   const newReps=Object.values(REP_ROSTER).filter(r=>r.isNew).length;
   const cbQueue=getCBQueue?.().filter(c=>!c.appliedTo).length||0;
   const weekIdx=getWeekIndex?.()?.length||0;
+  const elb=getELBData();const rtbdi=getRTBDIStoreData();const mim=getMIMData();
+  const elbOk=elb&&elb.matched>0;const rtbdiOk=rtbdi&&rtbdi.matched>0;const mimOk=mim&&mim.data&&Object.keys(mim.data).length>0;
   const items=[
-    {icon:'👤',label:'Reps loaded this week',val:reps.length||'None',ok:reps.length>0,action:reps.length?null:'Upload RTPOS CSV'},
-    {icon:'🏪',label:'Unassigned reps',val:unassigned||'All assigned',ok:unassigned===0,action:unassigned?'Go to Store Assignments':null},
-    {icon:'🆕',label:'New reps pending assignment',val:newReps||'None',ok:newReps===0,action:newReps?'Go to Rep Roster':null},
-    {icon:'⚡',label:'Chargebacks in queue',val:cbQueue||'None pending',ok:cbQueue===0,action:cbQueue?'Go to Chargebacks':null},
-    {icon:'📋',label:'Weeks in history',val:weekIdx,ok:true,action:null},
-    {icon:'🔒',label:'Current week',val:wkLocked?'Locked & Paid':'Open — not paid',ok:!wkLocked,action:null},
+    {icon:'👤',label:'Reps loaded this week',val:reps.length?reps.length+' reps':'None',ok:reps.length>0,action:reps.length?null:'Upload RTPOS CSV'},
+    {icon:'🏪',label:'Unassigned reps',val:unassigned?unassigned+' unassigned':'All assigned',ok:unassigned===0,action:unassigned?'Go to Store Assignments':null},
+    {icon:'🆕',label:'New reps pending assignment',val:newReps?newReps+' pending':'None',ok:newReps===0,action:newReps?'Go to Rep Roster':null},
+    {icon:'📊',label:'ELB Report',val:elbOk?elb.matched+' stores matched — '+elb.period:'Not loaded',ok:elbOk,action:elbOk?null:'Upload ELB CSV'},
+    {icon:'📈',label:'RTBDI Store Report',val:rtbdiOk?rtbdi.matched+' stores — '+rtbdi.period:'Not loaded',ok:rtbdiOk,action:rtbdiOk?null:'Upload RTBDI Report'},
+    {icon:'📱',label:'MIM Report',val:mimOk?'Loaded — '+mim.period:'Not loaded',ok:mimOk,action:mimOk?null:'Upload MIM Report'},
+    {icon:'⚡',label:'Chargebacks in queue',val:cbQueue?cbQueue+' queued':'None pending',ok:cbQueue===0,action:cbQueue?'Go to Chargebacks':null},
+    {icon:'📋',label:'Weeks saved in history',val:weekIdx,ok:true,action:null},
+    {icon:'🔒',label:'Current week status',val:wkLocked?'Locked & Paid':'Open — not yet paid',ok:wkLocked,action:null},
   ];
   el.innerHTML=items.map(item=>`
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bo)">
@@ -8870,30 +9713,234 @@ function getStoreMgrGuaranteePayout(storeName){
   const tier=store.tier||2,mgr=T.mgr||DT.mgr,td=mgr[tier]||DT.mgr[tier];
   return Object.values(td.cats).reduce((sum,cat)=>sum+(cat.base||0),0);
 }
+
+function onAdminMimToggle(tier,type,val){
+  const key='t'+tier+(type==='enabled'?'MimEnabled':'MimRate');
+  const bs=getBacksheetSetup();
+  if(!bs)return;
+  bs[key]=type==='enabled'?val:+val;
+  saveBacksheetSetup(bs);
+  checkSidebarMobile();
+}function renSum(){
+  const head=document.getElementById('sumHd');
+  const body=document.getElementById('sumBd');
+  const foot=document.getElementById('sumFt');
+  if(!head||!body)return;
+
+  // Week label
+  const wkLabel=document.getElementById('sumWkLabel');
+  if(wkLabel){
+    const wkSrc=_sumWk||wk;
+    if(wkSrc){
+      const s=new Date(wkSrc+'T12:00:00'),e=new Date(s);e.setDate(e.getDate()+6);
+      wkLabel.textContent=s.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    } else { wkLabel.textContent='No week selected'; }
+  }
+
+  const srcReps=_sumReps||reps;
+  const coachFil=document.getElementById('sumCoachFil')?.value||'';
+  const filtered=srcReps.filter(r=>!coachFil||r.c===coachFil);
+
+  if(!filtered.length){
+    head.innerHTML='';
+    body.innerHTML='<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--mu)">No rep data — load RTPOS CSV first.</td></tr>';
+    if(foot)foot.innerHTML='';
+    return;
+  }
+
+  if(sumMode==='store'){
+    head.innerHTML=`<tr>
+      <th>Store</th><th>Coach</th><th>Reps</th>
+      <th>Total PPD</th><th>Avg PPD</th><th>⭐ Top Earners</th>
+      <th>Gross Payout</th><th>Arcade Credit</th><th>Chargebacks</th><th>Net Owed</th>
+    </tr>`;
+    const byStore={};
+    filtered.forEach(r=>{
+      const c=cRp(r);
+      if(!byStore[r.s])byStore[r.s]={store:r.s,coach:r.c,reps:0,totPPD:0,topZone:0,gross:0,arcade:0,cb:0,net:0};
+      const sg=byStore[r.s];sg.reps++;sg.totPPD+=r.ta||0;sg.gross+=c.gr;sg.arcade+=c.arc;sg.cb+=c.cb;sg.net+=c.nt;
+      if(c.gr>=200)sg.topZone++;
+    });
+    const sorted=Object.values(byStore).sort((a,b)=>b.gross-a.gross);
+    // Totals
+    const tot={reps:0,totPPD:0,topZone:0,gross:0,arcade:0,cb:0,net:0};
+    sorted.forEach(sg=>{tot.reps+=sg.reps;tot.totPPD+=sg.totPPD;tot.topZone+=sg.topZone;tot.gross+=sg.gross;tot.arcade+=sg.arcade;tot.cb+=sg.cb;tot.net+=sg.net;});
+    body.innerHTML=sorted.map(sg=>`<tr>
+      <td><div style="font-weight:700;color:var(--se);font-size:12px">${X(sg.store)}</div></td>
+      <td><div style="font-size:11px;color:var(--mu)">${X(sg.coach)}</div></td>
+      <td style="text-align:center;font-weight:700">${sg.reps}</td>
+      <td style="text-align:center;font-weight:700;color:var(--se)">${sg.totPPD}</td>
+      <td style="text-align:center;color:var(--mu)">${sg.reps?Math.round(sg.totPPD/sg.reps):0}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-weight:700;color:${sg.topZone>0?'var(--pr)':'var(--mu)'}">${sg.topZone}</span>
+          <div class="zone-bar" style="flex:1;min-width:50px"><div class="zone-fill" style="width:${sg.reps?Math.min((sg.topZone/sg.reps)*100,100):0}%"></div></div>
+        </div>
+      </td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${sg.gross.toFixed(2)}</td>
+      <td style="color:var(--ok)">−$${sg.arcade.toFixed(2)}</td>
+      <td style="color:var(--da)">−$${sg.cb.toFixed(2)}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:${sg.net<0?'var(--da)':'var(--dk)'}">$${sg.net.toFixed(2)}</td>
+    </tr>`).join('');
+    if(foot)foot.innerHTML=`<tr style="background:var(--thb);font-weight:700">
+      <td colspan="2" style="padding:8px 11px;color:var(--tht);font-family:'Poppins',sans-serif">TOTALS — ${sorted.length} stores</td>
+      <td style="text-align:center;padding:8px 11px">${tot.reps}</td>
+      <td style="text-align:center;padding:8px 11px;color:var(--se)">${tot.totPPD}</td>
+      <td style="text-align:center;padding:8px 11px;color:var(--mu)">${tot.reps?Math.round(tot.totPPD/tot.reps):0}</td>
+      <td style="padding:8px 11px;font-weight:700;color:var(--pr)">${tot.topZone}</td>
+      <td style="padding:8px 11px;font-family:'Poppins',sans-serif;font-weight:900;color:var(--pr)">$${tot.gross.toFixed(2)}</td>
+      <td style="padding:8px 11px;color:var(--ok)">−$${tot.arcade.toFixed(2)}</td>
+      <td style="padding:8px 11px;color:var(--da)">−$${tot.cb.toFixed(2)}</td>
+      <td style="padding:8px 11px;font-family:'Poppins',sans-serif;font-weight:900;color:${tot.net<0?'var(--da)':'var(--dk)'}">$${tot.net.toFixed(2)}</td>
+    </tr>`;
+    if(!sorted.length)body.innerHTML='<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--mu)">No data yet</td></tr>';
+  } else {
+    head.innerHTML=`<tr>
+      <th>Coach</th><th>Stores</th><th>Reps</th>
+      <th>Total PPD</th><th>Avg PPD/Rep</th><th>⭐ Top Earners</th>
+      <th>Gross Payout</th><th>Net Owed</th>
+    </tr>`;
+    const byCoach={};
+    filtered.forEach(r=>{
+      const c=cRp(r);
+      if(!byCoach[r.c])byCoach[r.c]={coach:r.c,stores:new Set(),reps:0,totPPD:0,topZone:0,gross:0,net:0};
+      const cg=byCoach[r.c];cg.reps++;cg.stores.add(r.s);cg.totPPD+=r.ta||0;cg.gross+=c.gr;cg.net+=c.nt;
+      if(c.gr>=200)cg.topZone++;
+    });
+    const sorted=Object.values(byCoach).sort((a,b)=>b.gross-a.gross);
+    const tot={stores:new Set(),reps:0,totPPD:0,topZone:0,gross:0,net:0};
+    sorted.forEach(cg=>{cg.stores.forEach(s=>tot.stores.add(s));tot.reps+=cg.reps;tot.totPPD+=cg.totPPD;tot.topZone+=cg.topZone;tot.gross+=cg.gross;tot.net+=cg.net;});
+    body.innerHTML=sorted.map(cg=>`<tr>
+      <td><div style="font-weight:700;color:var(--se);font-size:12px">${X(cg.coach||'Unassigned')}</div></td>
+      <td style="text-align:center;color:var(--mu)">${cg.stores.size}</td>
+      <td style="text-align:center;font-weight:700">${cg.reps}</td>
+      <td style="text-align:center;font-weight:700;color:var(--se)">${cg.totPPD}</td>
+      <td style="text-align:center;color:var(--mu)">${cg.reps?Math.round(cg.totPPD/cg.reps):0}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-weight:700;color:${cg.topZone>0?'var(--pr)':'var(--mu)'}">${cg.topZone}</span>
+          <div class="zone-bar" style="flex:1;min-width:50px"><div class="zone-fill" style="width:${cg.reps?Math.min((cg.topZone/cg.reps)*100,100):0}%"></div></div>
+        </div>
+      </td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:var(--pr)">$${cg.gross.toFixed(2)}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:800;color:${cg.net<0?'var(--da)':'var(--dk)'}">$${cg.net.toFixed(2)}</td>
+    </tr>`).join('');
+    if(foot)foot.innerHTML=`<tr style="background:var(--thb);font-weight:700">
+      <td style="padding:8px 11px;color:var(--tht);font-family:'Poppins',sans-serif">TOTALS — ${sorted.length} coaches</td>
+      <td style="text-align:center;padding:8px 11px">${tot.stores.size}</td>
+      <td style="text-align:center;padding:8px 11px">${tot.reps}</td>
+      <td style="text-align:center;padding:8px 11px;color:var(--se)">${tot.totPPD}</td>
+      <td style="text-align:center;padding:8px 11px;color:var(--mu)">${tot.reps?Math.round(tot.totPPD/tot.reps):0}</td>
+      <td style="padding:8px 11px;font-weight:700;color:var(--pr)">${tot.topZone}</td>
+      <td style="padding:8px 11px;font-family:'Poppins',sans-serif;font-weight:900;color:var(--pr)">$${tot.gross.toFixed(2)}</td>
+      <td style="padding:8px 11px;font-family:'Poppins',sans-serif;font-weight:900;color:${tot.net<0?'var(--da)':'var(--dk)'}">$${tot.net.toFixed(2)}</td>
+    </tr>`;
+    if(!sorted.length)body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--mu)">No data yet</td></tr>';
+  }
+}
+
+function renLB(){
+  const grid=document.getElementById('lbGrid');
+  if(!grid)return;
+
+  // Get reps for this page's week context (may differ from main wk)
+  const srcReps=_lbReps||reps;
+
+  // Update week label
+  const wkLabel=document.getElementById('lbWkLabel');
+  if(wkLabel){
+    const wkSrc=_lbWk||wk;
+    if(wkSrc){
+      const s=new Date(wkSrc+'T12:00:00'),e=new Date(s);e.setDate(e.getDate()+6);
+      wkLabel.textContent=s.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    } else { wkLabel.textContent='No week selected'; }
+  }
+
+  if(!srcReps.length){
+    grid.innerHTML="<div style='grid-column:1/-1;text-align:center;padding:40px;color:var(--mu)'>No rep data — load RTPOS CSV to see leaderboard.</div>";
+    return;
+  }
+
+  // Filters
+  const coachFil=document.getElementById('lbCoachFil')?.value||'';
+  const stateFil=document.getElementById('lbStateFil')?.value||'';
+  let filtered=srcReps.filter(r=>{
+    if(coachFil&&r.c!==coachFil)return false;
+    if(stateFil&&r.state!==stateFil)return false;
+    return true;
+  });
+
+  let groups=[];
+  if(lbMode==='company'){
+    const sorted=[...filtered].map(r=>({...r,_c:cRp(r)})).sort((a,b)=>b._c.gr-a._c.gr).slice(0,10);
+    groups=sorted.map((r,i)=>{
+      const storeLbl=r.s&&r.s!=='TBD'?r.s:'';
+      const coachLbl=r.c&&r.c!=='TBD'?r.c:'';
+      const sub=[storeLbl,coachLbl].filter(Boolean).join(' · ')||'Unassigned';
+      return{rank:i+1,label:dispName(r),sub,r};
+    });
+  } else if(lbMode==='store'){
+    const byStore={};
+    filtered.forEach(r=>{const c=cRp(r);if(!byStore[r.s])byStore[r.s]={store:r.s,gross:0,reps:[]};byStore[r.s].gross+=c.gr;byStore[r.s].reps.push({...r,_c:c});});
+    groups=Object.values(byStore).sort((a,b)=>b.gross-a.gross).slice(0,10).map((sg,i)=>{
+      const topRep=sg.reps.sort((a,b)=>b._c.gr-a._c.gr)[0];
+      return{rank:i+1,label:sg.store,sub:sg.reps.length+' rep'+(sg.reps.length!==1?'s':'')+' · Top: '+dispName(topRep),totalGross:sg.gross,r:topRep};
+    });
+  } else {
+    const byCoach={};
+    filtered.forEach(r=>{const c=cRp(r);if(!byCoach[r.c])byCoach[r.c]={coach:r.c,gross:0,reps:[]};byCoach[r.c].gross+=c.gr;byCoach[r.c].reps.push({...r,_c:c});});
+    groups=Object.values(byCoach).sort((a,b)=>b.gross-a.gross).slice(0,10).map((cg,i)=>{
+      const topRep=cg.reps.sort((a,b)=>b._c.gr-a._c.gr)[0];
+      return{rank:i+1,label:cg.coach||'Unassigned',sub:cg.reps.length+' rep'+(cg.reps.length!==1?'s':'')+' · Top: '+dispName(topRep),totalGross:cg.gross,r:topRep};
+    });
+  }
+
+  if(!groups.length){
+    grid.innerHTML="<div style='grid-column:1/-1;text-align:center;padding:40px;color:var(--mu)'>No results match the current filters.</div>";
+    return;
+  }
+
+  const medals=['🥇','🥈','🥉'];
+  const rankCls=['rank1','rank2','rank3','rank-other','rank-other','rank-other','rank-other','rank-other','rank-other','rank-other'];
+  const rankLbl=['r1','r2','r3','','','','','','',''];
+
+  grid.innerHTML=groups.map((g,i)=>{
+    const c=g.r?cRp(g.r):{gr:0,bx:0,ac:0,pu:{t:0},mi:{p:0},sp:{tot:0},arc:0,cb:0,nt:0};
+    const aT=aBd(g.r?.ap||0);
+    const gross=g.totalGross!==undefined?g.totalGross:c.gr;
+    const ta=g.r?.ta||0;
+    const isTop=gross>=200;
+    const tier=bBd(ta);
+    return`<div class="lb-card ${rankCls[i]}" style="position:relative;padding:16px 14px 12px">
+      <div class="lb-rank ${rankLbl[i]}" style="position:absolute;top:10px;right:12px;font-size:${i<3?'22px':'14px'};font-weight:800;color:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--mu)'}">${i<3?medals[i]:i+1}</div>
+      <div class="lb-name" style="font-family:'Poppins',sans-serif;font-weight:800;font-size:13px;color:var(--dk);padding-right:32px;margin-bottom:2px">${X(g.label)}</div>
+      <div class="lb-store" style="font-size:10px;color:var(--mu);margin-bottom:8px">${X(g.sub)}</div>
+      <div class="lb-gross" style="font-family:'Poppins',sans-serif;font-weight:900;font-size:22px;color:var(--pr);margin-bottom:4px">$${gross.toFixed(2)}</div>
+      ${lbMode==='company'?`
+        <div style="font-size:10px;color:var(--mu);margin-bottom:2px">PPD: <strong style="color:var(--se)">${ta}</strong> · ${tier.l}</div>
+        <div style="font-size:10px;color:var(--mu);margin-bottom:8px">Acc: <strong style="color:var(--se)">$${(g.r?.ap||0).toFixed(0)}</strong> · ${aT.l}
+      </div>`:''}
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${isTop&&lbMode==='company'?'<span class="bdg btop">⭐ Top Earner</span>':''}
+        ${lbMode==='company'&&aT.c!=='bno'?'<span class="bdg '+aT.c+'">Acc '+aT.l+'</span>':''}
+        ${lbMode==='company'&&c.mi&&c.mi.p>0?'<span class="bdg bok2">MIM $'+c.mi.p.toFixed(0)+'</span>':''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function selCB(el){
+  document.querySelectorAll('.cpp').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const t=el.dataset.t;
+  const customInput=document.getElementById('cbCT');
+  if(t==='Custom'){
+    if(customInput)customInput.style.display='block';
+  } else {
+    if(customInput){customInput.style.display='none';customInput.value='';}
+  }
+}
+
+
 </script>
-
-
-
-<!-- MOBILE BOTTOM NAV -->
-  <nav class="bnav" id="bnav">
-    <button class="bn" onclick="goPage('pg-home',this)" data-page="pg-home"><span class="bn-ic">🏠</span><span class="bn-lbl">Home</span></button>
-    <button class="bn" onclick="goPage('pg-reps',this)" data-page="pg-reps"><span class="bn-ic">👤</span><span class="bn-lbl">Reps</span></button>
-    <button class="bn" onclick="goPage('pg-managers',this)" data-page="pg-managers"><span class="bn-ic">🏢</span><span class="bn-lbl">Mgrs</span></button>
-    <button class="bn" onclick="goPage('pg-coaches',this)" data-page="pg-coaches"><span class="bn-ic">🎯</span><span class="bn-lbl">Coaches</span></button>
-    <button class="bn" onclick="goPage('pg-employee',this)" data-page="pg-employee"><span class="bn-ic">💵</span><span class="bn-lbl">Retail Sales Rep</span></button>
-class="bn" onclick="goPage('pg-coach-payout',this)" data-page="pg-coach-payout"><span class="bn-ic">💵</span><span class="bn-lbl">Coach Payout</span></button>
-    <button class="bn" onclick="toggleMobileMenu()" id="moreBtn"><span class="bn-ic">☰</span><span class="bn-lbl">More</span></button>
-  </nav>
-  <!-- MOBILE MORE MENU -->
-  <div class="mobile-more" id="mobileMore" style="display:none">
-    <div class="mm-hdr"><span>Work Force Ops</span><button onclick="toggleMobileMenu()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">✕</button></div>
-    <div class="mm-items">
-      <button class="mm-item" onclick="goPage('pg-summary',null);toggleMobileMenu()">📊 Summary</button>
-      <button class="mm-item" onclick="goPage('pg-admin',null);toggleMobileMenu()">🔐 Admin Center</button>
-      <button class="mm-item" onclick="requirePin(()=>{goPage('pg-chargebacks',this);});toggleMobileMenu()">⚡ Chargebacks (Admin)</button>
-      <button class="mm-item" onclick="goPage('pg-leaderboard',this);toggleMobileMenu()">🏆 Leaderboard</button>
-      <button class="mm-item" onclick="goPage('pg-summary',this);toggleMobileMenu()">📊 Summary</button>
-    </div>
-  </div>
 </body>
 </html>
